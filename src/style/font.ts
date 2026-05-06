@@ -1,30 +1,28 @@
-import { css } from "@emotion/react";
+import { css } from "styled-components";
 
-const fontGenerator = (weight: number, size: number) => css`
-  font-family: "Pretendard";
-  font-weight: ${weight};
+type LeferiFamily = "point" | "base";
+
+const FONT_FAMILY: Record<LeferiFamily, string> = {
+  point: `"Leferi Point Type", sans-serif`, // White
+  base: `"Leferi Base Type", sans-serif`, // Regular
+};
+
+const fontGenerator = (family: LeferiFamily, size: number) => css`
+  font-family: ${FONT_FAMILY[family]};
   font-size: ${size}px;
-  line-height: auto;
+  line-height: normal;
 `;
 
 const font = {
-  D1: fontGenerator(400, 34),
-  D2: fontGenerator(700, 28),
-  D3: fontGenerator(600, 22),
+  "title-lg": fontGenerator("point", 48),
+  "title-md": fontGenerator("point", 36),
+  "title-sm": fontGenerator("point", 24),
 
-  H1: fontGenerator(600, 20),
-  H2: fontGenerator(500, 18),
-  H3: fontGenerator(500, 16),
-  H4: fontGenerator(600, 14),
-
-  P1: fontGenerator(400, 16),
-  P2: fontGenerator(400, 14),
-  P3: fontGenerator(400, 12),
-  P4: fontGenerator(400, 10),
-
-  Btn1: fontGenerator(700, 16),
-  Btn2: fontGenerator(700, 14),
-  Btn3: fontGenerator(700, 12),
+  "text-lg": fontGenerator("point", 18),
+  "text-md": fontGenerator("point", 16),
+  "text-sm": fontGenerator("base", 14),
+  
+  caption: fontGenerator("base", 12),
 };
 
 export default font;
