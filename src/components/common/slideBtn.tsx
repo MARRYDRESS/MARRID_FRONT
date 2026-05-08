@@ -5,7 +5,6 @@ import styled from "styled-components";
 type Props = {
   direction: "left" | "right";
   variant: "light" | "dark";
-  disabled?: boolean;
   onClick?: () => void;
 };
 
@@ -14,7 +13,7 @@ const ICON_SRC = {
   dark: { left: "/icon/blackBack.svg", right: "/icon/blackFront.svg" },
 } as const;
 
-export default function SlideButton({ direction, variant, disabled, onClick }: Props) {
+export default function SlideButton({ direction, variant, onClick }: Props) {
   function ArrowLeft() {
     const isLight = variant === "light";
     return (
@@ -45,18 +44,15 @@ export default function SlideButton({ direction, variant, disabled, onClick }: P
     <Button
       type="button"
       $variant={variant}
-      $disabled={Boolean(disabled)}
-      disabled={disabled}
-      onClick={disabled ? undefined : onClick}
+      onClick={onClick}
       aria-label={direction === "left" ? "이전" : "다음"}
-      aria-disabled={disabled}
     >
       {direction === "left" ? <ArrowLeft /> : <ArrowRight />}
     </Button>
   );
 }
 
-const Button = styled.button<{ $variant: Props["variant"]; $disabled: boolean }>`
+const Button = styled.button<{ $variant: Props["variant"] }>`
   box-sizing: border-box;
   width: 52px;
   height: 52px;
@@ -67,13 +63,12 @@ const Button = styled.button<{ $variant: Props["variant"]; $disabled: boolean }>
   border-radius: 100px;
   border: 1px solid ${({ $variant }) => ($variant === "light" ? "#ffffff" : "#111827")};
   background: transparent;
-  cursor: ${({ $disabled }) => ($disabled ? "default" : "pointer")};
+  cursor: pointer;
   flex-shrink: 0;
   transition: opacity 0.25s ease;
   overflow: hidden;
-  opacity: ${({ $disabled }) => ($disabled ? 0.2 : 1)};
 
-  &:hover:not(:disabled) {
+  &:hover {
     opacity: 0.88;
   }
 
