@@ -5,34 +5,35 @@ import styled from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
 import SlideButton from "@/src/components/common/slideBtn";
+import type { SelectMockItem } from "@/src/mock/mock";
 
 type SelectSectionProps = {
   id?: string;
   title: string;
-  images: string[];
+  items: SelectMockItem[];
 };
 
-export default function SelectComponent({ id, title, images }: SelectSectionProps) {
+export default function SelectComponent({ id, title, items }: SelectSectionProps) {
   const VISIBLE_COUNT = 3;
   const [trackIndex, setTrackIndex] = useState(1);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
 
   const pages = useMemo(() => {
-    if (images.length === 0) {
+    if (items.length === 0) {
       return [];
     }
 
-    const pageCount = Math.ceil(images.length / VISIBLE_COUNT);
+    const pageCount = Math.ceil(items.length / VISIBLE_COUNT);
 
     return Array.from({ length: pageCount }, (_, pageIndex) => {
       const start = pageIndex * VISIBLE_COUNT;
       return Array.from({ length: VISIBLE_COUNT }, (_, offset) => {
-        const index = (start + offset) % images.length;
-        return images[index];
+        const index = (start + offset) % items.length;
+        return items[index];
       });
     });
-  }, [images]);
+  }, [items]);
 
   const loopedPages = useMemo(() => {
     if (pages.length === 0) {
@@ -48,7 +49,7 @@ export default function SelectComponent({ id, title, images }: SelectSectionProp
     setTrackIndex(1);
     setIsTransitionEnabled(true);
     setIsAnimating(false);
-  }, [images.length]);
+  }, [items.length]);
 
   const handlePrev = () => {
     if (pages.length === 0 || isAnimating) {
@@ -127,12 +128,15 @@ export default function SelectComponent({ id, title, images }: SelectSectionProp
           >
             {loopedPages.map((page, pageIndex) => (
               <Page key={`page-${pageIndex}`}>
-                {page.map((src, cardIndex) => (
-                  <Card key={`${src}-${pageIndex}-${cardIndex}`}>
+                {page.map((item, cardIndex) => (
+                  <Card key={`${item.image}-${pageIndex}-${cardIndex}`}>
                     <CardImageWrap>
-                      <CardImage src={src} alt={`드레스 추천 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`} />
+                      <CardImage
+                        src={item.image}
+                        alt={`${item.label} 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`}
+                      />
                     </CardImageWrap>
-                    <CardLabel>미카도 실크</CardLabel>
+                    <CardLabel>{item.label}</CardLabel>
                   </Card>
                 ))}
               </Page>
