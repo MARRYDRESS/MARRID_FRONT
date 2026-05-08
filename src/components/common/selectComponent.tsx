@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
@@ -14,31 +14,97 @@ type SelectSectionProps = {
 
 export default function SelectComponent({ id, title, images }: SelectSectionProps) {
   const VISIBLE_COUNT = 3;
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [trackIndex, setTrackIndex] = useState(1);
+  const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const maxIndex = useMemo(() => {
-    if (images.length <= VISIBLE_COUNT) {
-      return 0;
+  const pages = useMemo(() => {
+    if (images.length === 0) {
+      return [];
     }
 
-    return images.length - VISIBLE_COUNT;
+    const pageCount = Math.ceil(images.length / VISIBLE_COUNT);
+
+    return Array.from({ length: pageCount }, (_, pageIndex) => {
+      const start = pageIndex * VISIBLE_COUNT;
+      return Array.from({ length: VISIBLE_COUNT }, (_, offset) => {
+        const index = (start + offset) % images.length;
+        return images[index];
+      });
+    });
+  }, [images]);
+
+  const loopedPages = useMemo(() => {
+    if (pages.length === 0) {
+      return [];
+    }
+    if (pages.length === 1) {
+      return [pages[0], pages[0], pages[0]];
+    }
+    return [pages[pages.length - 1], ...pages, pages[0]];
+  }, [pages]);
+
+  useEffect(() => {
+    setTrackIndex(1);
+    setIsTransitionEnabled(true);
+    setIsAnimating(false);
   }, [images.length]);
 
-  const canGoPrev = currentIndex > 0;
-  const canGoNext = currentIndex < maxIndex;
-
   const handlePrev = () => {
-    if (!canGoPrev) {
+    if (pages.length === 0 || isAnimating) {
       return;
     }
-    setCurrentIndex((prev) => prev - 1);
+    setIsTransitionEnabled(true);
+    setIsAnimating(true);
+    setTrackIndex((prev) => prev - 1);
   };
 
   const handleNext = () => {
-    if (!canGoNext) {
+    if (pages.length === 0 || isAnimating) {
       return;
     }
-    setCurrentIndex((prev) => prev + 1);
+    setIsTransitionEnabled(true);
+    setIsAnimating(true);
+    setTrackIndex((prev) => prev + 1);
+  };
+
+  const handleTrackTransitionEnd = () => {
+    if (pages.length === 0) {
+      setIsAnimating(false);
+      return;
+    }
+
+    if (pages.length === 1) {
+      setIsTransitionEnabled(false);
+      setTrackIndex(1);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setIsTransitionEnabled(true));
+      });
+      setIsAnimating(false);
+      return;
+    }
+
+    if (trackIndex === 0) {
+      setIsTransitionEnabled(false);
+      setTrackIndex(pages.length);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setIsTransitionEnabled(true));
+      });
+      setIsAnimating(false);
+      return;
+    }
+
+    if (trackIndex === pages.length + 1) {
+      setIsTransitionEnabled(false);
+      setTrackIndex(1);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setIsTransitionEnabled(true));
+      });
+      setIsAnimating(false);
+      return;
+    }
+
+    setIsAnimating(false);
   };
 
   return (
@@ -46,24 +112,32 @@ export default function SelectComponent({ id, title, images }: SelectSectionProp
       <Title>{title}</Title>
       <SliderFrame>
         <SlideBtnWrap $position="left">
-          <SlideButton direction="left" variant="dark" onClick={handlePrev} disabled={!canGoPrev} />
+          <SlideButton direction="left" variant="light" onClick={handlePrev} />
         </SlideBtnWrap>
 
         <SlideBtnWrap $position="right">
-          <SlideButton direction="right" variant="dark" onClick={handleNext} disabled={!canGoNext} />
+          <SlideButton direction="right" variant="light" onClick={handleNext} />
         </SlideBtnWrap>
 
         <Viewport>
-        <Track $currentIndex={currentIndex}>
-          {images.map((src, index) => (
-            <Card key={`${src}-${index}`}>
-              <CardImageWrap>
-                <CardImage src={src} alt={`드레스 추천 이미지 ${index + 1}`} />
-              </CardImageWrap>
-              <CardLabel>미카도 실크</CardLabel>
-            </Card>
-          ))}
-        </Track>
+          <Track
+            $trackIndex={trackIndex}
+            $isTransitionEnabled={isTransitionEnabled}
+            onTransitionEnd={handleTrackTransitionEnd}
+          >
+            {loopedPages.map((page, pageIndex) => (
+              <Page key={`page-${pageIndex}`}>
+                {page.map((src, cardIndex) => (
+                  <Card key={`${src}-${pageIndex}-${cardIndex}`}>
+                    <CardImageWrap>
+                      <CardImage src={src} alt={`드레스 추천 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`} />
+                    </CardImageWrap>
+                    <CardLabel>미카도 실크</CardLabel>
+                  </Card>
+                ))}
+              </Page>
+            ))}
+          </Track>
         </Viewport>
       </SliderFrame>
     </Section>
@@ -100,11 +174,18 @@ const SlideBtnWrap = styled.div<{ $position: "left" | "right" }>`
   ${({ $position }) => ($position === "left" ? "left: 24px;" : "right: 24px;")}
 `;
 
-const Track = styled.div<{ $currentIndex: number }>`
+const Track = styled.div<{ $trackIndex: number; $isTransitionEnabled: boolean }>`
+  display: flex;
+  transform: translate3d(-${({ $trackIndex }) => $trackIndex * 100}%, 0, 0);
+  transition: ${({ $isTransitionEnabled }) =>
+    $isTransitionEnabled ? "transform 0.85s cubic-bezier(0.22, 1, 0.36, 1)" : "none"};
+  will-change: transform;
+`;
+
+const Page = styled.div`
+  flex: 0 0 100%;
   display: flex;
   gap: 40px;
-  transform: translateX(calc((100% + 40px) / 3 * -${({ $currentIndex }) => $currentIndex}));
-  transition: transform 0.32s ease;
 `;
 
 const Card = styled.article`
