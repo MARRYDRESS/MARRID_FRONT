@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import font from "@/src/style/font";
+import color from "@/src/style/color";
 
 type SelectSectionProps = {
   id?: string;
@@ -13,7 +15,9 @@ export default function SelectComponent({ id, title, images }: SelectSectionProp
       <Grid>
         {images.map((src, index) => (
           <Card key={src}>
-            <CardImage src={src} alt={`드레스 추천 이미지 ${index + 1}`} />
+            <CardImageWrap>
+              <CardImage src={src} alt={`드레스 추천 이미지 ${index + 1}`} />
+            </CardImageWrap>
             <CardLabel>미카도 실크</CardLabel>
           </Card>
         ))}
@@ -44,13 +48,22 @@ const Grid = styled.div`
 `;
 
 const Card = styled.article`
+  min-width: 0;
   overflow: hidden;
   background: transparent;
 `;
 
-const CardImage = styled.img`
-  height: 710px;
+const CardImageWrap = styled.div`
   width: 100%;
+  aspect-ratio: 607 / 710;
+  overflow: hidden;
+  flex-shrink: 0;
+`;
+
+const CardImage = styled.img`
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
 `;
@@ -58,7 +71,6 @@ const CardImage = styled.img`
 const CardLabel = styled.p`
   padding: 12px 0;
   text-align: center;
-  font-size: 29px;
-  font-weight: 300;
-  color: #666;
+  font-size: ${font["title-sm"]};
+  color: ${color.black};
 `;
