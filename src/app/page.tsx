@@ -4,7 +4,14 @@ import styled from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
 
-const selectMockImages = ["/mock/main1.png", "/mock/main2.png", "/mock/main3.png"];
+const selectMockImages = [
+  "/mock/main1.png",
+  "/mock/main2.png",
+  "/mock/main3.png",
+  "/mock/main4.png",
+  "/mock/main5.jpg",
+  "/mock/main6.jpg",
+];
 
 export default function Home() {
   return (
