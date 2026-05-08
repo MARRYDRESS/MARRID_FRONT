@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import styled from "styled-components";
+import color from "@/src/style/color";
 
 const navItems = [
   { label: "아바타 만들기", href: "#top" },
@@ -48,7 +49,7 @@ const HoverTrigger = styled.div`
 const HeaderBar = styled.header`
   transform: translateY(-100%);
   border-bottom: 1px solid #cfcfcf;
-  background: rgba(239, 239, 239, 0.95);
+  background: ${color.white};
   transition: transform 0.45s ease;
   backdrop-filter: blur(6px);
 `;

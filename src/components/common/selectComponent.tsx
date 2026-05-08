@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
+import SlideButton from "@/src/components/common/slideBtn";
 
 type SelectSectionProps = {
   id?: string;
@@ -22,6 +23,8 @@ export default function SelectComponent({ id, title, images }: SelectSectionProp
           </Card>
         ))}
       </Grid>
+      <SlideButton direction="left" variant="light" />
+      <SlideButton direction="right" variant="light" />
     </Section>
   );
 }
@@ -35,10 +38,8 @@ const Section = styled.section`
 const Title = styled.h2`
   padding: 48px 0;
   text-align: center;
-  font-size: 45px;
-  font-weight: 300;
-  letter-spacing: -0.01em;
-  color: #5c5c5c;
+  font-size: ${font["title-md"]};
+  color: ${color.gray900};
 `;
 
 const Grid = styled.div`

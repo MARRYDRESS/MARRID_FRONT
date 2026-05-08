@@ -44,7 +44,7 @@ export default function Home() {
 
 const Main = styled.main`
   min-height: 100vh;
-  background: #efefef;
+  background: ${color.white};
   color: #18181b;
 `;
 
@@ -73,9 +73,8 @@ const HeroTitle = styled.h1`
   position: absolute;
   left: 189px;
   top: 492px;
-  color: #fff;
-  font-size: 59px;
-  font-weight: 300;
+  color: ${color.white};
+  font-size: ${font["title-lg"]};
   line-height: 1.25;
   letter-spacing: -0.01em;
 `;
