@@ -7,6 +7,10 @@ import SelectComponent from "@/src/components/common/selectComponent";
 import color from "@/src/style/color";
 import { hallSelectItems } from "@/src/mock/mock";
 
+/**
+ * 피그마 「홀 선택」(90:185)과 동일한 단일 화면: `SelectComponent`만 사용하고
+ * 뒤로가기 버튼만 프레임 좌표(1440×1024 기준)로 겹칩니다.
+ */
 export default function SelectHallPage() {
   useEffect(() => {
     const html = document.documentElement;
@@ -22,90 +26,40 @@ export default function SelectHallPage() {
   }, []);
 
   return (
-      <RightPane>
-        <RightInner>
-          <SelectMain>
-            <SelectComponent
-              id="hall-select"
-              title="내 결혼식장 스타일을 선택해 보세요."
-              titleVariant="sm"
-              items={hallSelectItems}
-              showPaginationDots
-            />
-          </SelectMain>
-
-          <BottomBlock>
-            <BackRow>
-              <BackLink href="/avatarSetting" aria-label="이전 단계">
-                <BackIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />
-              </BackLink>
-            </BackRow>
-          </BottomBlock>
-        </RightInner>
-      </RightPane>
-    
+    <Shell>
+      <SelectComponent
+        id="hall-select"
+        title="내 결혼식장 스타일을 선택해 보세요."
+        titleVariant="sm"
+        layout="hall"
+        items={hallSelectItems}
+        showPaginationDots
+      />
+      <BackLink href="/avatarSetting" aria-label="이전 단계">
+        <BackIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />
+      </BackLink>
+    </Shell>
   );
 }
 
 const Shell = styled.div`
-  display: flex;
+  position: relative;
   box-sizing: border-box;
   width: 100%;
-  max-width: none;
-  height: 100dvh;
+  min-height: 100dvh;
   max-height: 100dvh;
-  min-height: 0;
-  overflow: hidden;
   margin: 0;
+  overflow-x: clip;
+  overflow-y: hidden;
   background: ${color.white};
   color: ${color.black};
 `;
 
-const RightPane = styled.div`
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  overflow: hidden;
-`;
-
-const RightInner = styled.div`
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  padding: clamp(28px, 8vh, 111px) clamp(20px, 4vw, 46px) clamp(16px, 4vh, 48px)
-    clamp(24px, 6.1vw, 88px);
-  box-sizing: border-box;
-`;
-
-const SelectMain = styled.div`
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  overflow: hidden;
-`;
-
-const BottomBlock = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  margin-top: auto;
-  padding-top: clamp(8px, 1.5vh, 24px);
-`;
-
-const BackRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-`;
-
 const BackLink = styled(Link)`
+  position: absolute;
+  z-index: 4;
+  right: max(24px, calc((100vw - 1440px) * 0.5 + 62px));
+  top: min(927px, calc(100dvh - 80px));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -116,6 +70,8 @@ const BackLink = styled(Link)`
   border: 1px solid ${color.gray900};
   background: ${color.white};
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
   transition: background 0.2s ease, border-color 0.2s ease;
   &:hover {
     background: ${color.gray100};
@@ -123,6 +79,10 @@ const BackLink = styled(Link)`
   &:focus-visible {
     outline: 2px solid ${color.primary};
     outline-offset: 2px;
+  }
+  @media (max-height: 900px) {
+    top: auto;
+    bottom: 24px;
   }
 `;
 

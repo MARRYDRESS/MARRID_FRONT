@@ -6,6 +6,7 @@ type Props = {
   direction: "left" | "right";
   variant: "light" | "dark";
   onClick?: () => void;
+  disabled?: boolean;
 };
 
 const ICON_SRC = {
@@ -13,7 +14,7 @@ const ICON_SRC = {
   dark: { left: "/icon/blackBack.svg", right: "/icon/blackFront.svg" },
 } as const;
 
-export default function SlideButton({ direction, variant, onClick }: Props) {
+export default function SlideButton({ direction, variant, onClick, disabled }: Props) {
   const isLight = variant === "light";
   const iconSrc = ICON_SRC[variant][direction];
   const iconWidth = isLight ? 14 : 17;
@@ -24,7 +25,8 @@ export default function SlideButton({ direction, variant, onClick }: Props) {
       type="button"
       $variant={variant}
       onClick={onClick}
-      aria-label={direction === "left" ? "이전" : "다음"}
+      disabled={disabled}
+      aria-label={disabled ? undefined : direction === "left" ? "이전" : "다음"}
     >
       <IconImg
         src={iconSrc}
@@ -53,8 +55,12 @@ const Button = styled.button<{ $variant: Props["variant"] }>`
   transition: opacity 0.25s ease;
   overflow: hidden;
 
-  &:hover {
+  &:hover:not(:disabled) {
     opacity: 0.88;
+  }
+
+  &:disabled {
+    cursor: default;
   }
 
   &:focus-visible {
