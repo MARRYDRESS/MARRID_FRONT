@@ -10,4 +10,5 @@ export const selectMockItems: SelectMockItem[] = [
   { image: "/mock/main4.png", label: "벨라인 레이스" },
   { image: "/mock/main5.jpg", label: "프린세스 실루엣" },
   { image: "/mock/main6.jpg", label: "브이넥 클래식" },
+  { image: "/mock/main7.jpg", label: "브이넥 클래식" },
 ];
