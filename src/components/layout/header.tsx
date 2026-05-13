@@ -5,7 +5,7 @@ import styled from "styled-components";
 import color from "@/src/style/color";
 
 const navItems = [
-  { label: "아바타 만들기", href: "#top" },
+  { label: "아바타 만들기", href: "/avatarSetting" },
   { label: "드레스 보기", href: "#select-1" },
   { label: "마이페이지", href: "#select-2" },
   { label: "로그인", href: "#top" },
@@ -17,7 +17,7 @@ export default function Header() {
       <HoverTrigger />
       <HeaderBar>
         <HeaderInner>
-          <BrandLink href="#top">merrid</BrandLink>
+          <Logo href="#top">merrid</Logo>
           <Nav>
           {navItems.map((item) => (
               <NavLink key={item.label} href={item.href}>
@@ -73,7 +73,7 @@ const HeaderInner = styled.div`
   padding: 0 16px;
 `;
 
-const BrandLink = styled(Link)`
+const Logo = styled(Link)`
   font-size: 37px;
   font-weight: 300;
   letter-spacing: -0.02em;
