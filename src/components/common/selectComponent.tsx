@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import styled from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
@@ -13,7 +13,11 @@ type SelectSectionProps = {
   items: SelectMockItem[];
 };
 
-export default function SelectComponent({ id, title, items }: SelectSectionProps) {
+export default function SelectComponent(props: SelectSectionProps) {
+  return <SelectComponentInner key={props.items.length} {...props} />;
+}
+
+function SelectComponentInner({ id, title, items }: SelectSectionProps) {
   const VISIBLE_COUNT = 3;
   const [trackIndex, setTrackIndex] = useState(1);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
@@ -44,12 +48,6 @@ export default function SelectComponent({ id, title, items }: SelectSectionProps
     }
     return [pages[pages.length - 1], ...pages, pages[0]];
   }, [pages]);
-
-  useEffect(() => {
-    setTrackIndex(1);
-    setIsTransitionEnabled(true);
-    setIsAnimating(false);
-  }, [items.length]);
 
   const handlePrev = () => {
     if (pages.length === 0 || isAnimating) {
@@ -112,13 +110,16 @@ export default function SelectComponent({ id, title, items }: SelectSectionProps
     <Section id={id}>
       <Title>{title}</Title>
       <SliderFrame>
-        <SlideBtnWrap $position="left">
-          <SlideButton direction="left" variant="light" onClick={handlePrev} />
-        </SlideBtnWrap>
-
-        <SlideBtnWrap $position="right">
-          <SlideButton direction="right" variant="light" onClick={handleNext} />
-        </SlideBtnWrap>
+      {pages.length > 1 && (
+          <>
+            <SlideBtnWrap $position="left">
+              <SlideButton direction="left" variant="light" onClick={handlePrev} />
+            </SlideBtnWrap>
+            <SlideBtnWrap $position="right">
+              <SlideButton direction="right" variant="light" onClick={handleNext} />
+            </SlideBtnWrap>
+          </>
+        )}
 
         <Viewport>
           <Track

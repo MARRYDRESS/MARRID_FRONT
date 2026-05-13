@@ -39,6 +39,14 @@ const HeaderContainer = styled.div`
   &:hover header {
     transform: translateY(0);
   }
+    &:focus-within header {
+    transform: translateY(0);
+  }
+  @media (hover: none) {
+    header {
+      transform: translateY(0);
+    }
+  }
 `;
 
 const HoverTrigger = styled.div`

@@ -14,31 +14,10 @@ const ICON_SRC = {
 } as const;
 
 export default function SlideButton({ direction, variant, onClick }: Props) {
-  function ArrowLeft() {
-    const isLight = variant === "light";
-    return (
-      <IconImg
-        src={ICON_SRC[variant].left}
-        alt=""
-        width={isLight ? 14 : 17}
-        height={isLight ? 26 : 32}
-        draggable={false}
-      />
-    );
-  }
-
-  function ArrowRight() {
-    const isLight = variant === "light";
-    return (
-      <IconImg
-        src={ICON_SRC[variant].right}
-        alt=""
-        width={isLight ? 14 : 17}
-        height={isLight ? 26 : 32}
-        draggable={false}
-      />
-    );
-  }
+  const isLight = variant === "light";
+  const iconSrc = ICON_SRC[variant][direction];
+  const iconWidth = isLight ? 14 : 17;
+  const iconHeight = isLight ? 26 : 32;
 
   return (
     <Button
@@ -47,7 +26,13 @@ export default function SlideButton({ direction, variant, onClick }: Props) {
       onClick={onClick}
       aria-label={direction === "left" ? "이전" : "다음"}
     >
-      {direction === "left" ? <ArrowLeft /> : <ArrowRight />}
+      <IconImg
+        src={iconSrc}
+        alt=""
+        width={iconWidth}
+        height={iconHeight}
+        draggable={false}
+      />
     </Button>
   );
 }
