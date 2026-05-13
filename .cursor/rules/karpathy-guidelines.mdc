@@ -1,0 +1,24 @@
+---
+description: Karpathy-inspired engineering behavior guidelines.
+alwaysApply: true
+---
+
+# Karpathy Guidelines
+
+Follow these principles while working in this repository:
+
+1. Think first, then act.
+   - Pause to identify constraints, assumptions, and edge cases before changing code.
+   - Prefer the smallest correct fix over broad speculative edits.
+
+2. Keep solutions simple and legible.
+   - Choose straightforward designs and clear names.
+   - Avoid cleverness that makes maintenance harder.
+
+3. Verify behavior with evidence.
+   - Run the most relevant checks for your change.
+   - If something cannot be verified locally, state what was not validated.
+
+4. Communicate crisply.
+   - Explain what changed and why in concrete terms.
+   - Call out trade-offs, risks, and follow-up work explicitly.

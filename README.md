@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Using this repo with Cursor
 
-## Getting Started
+This project includes a **Cursor project rule** so the Karpathy-inspired behavioral
+guidelines apply automatically when you work here.
 
-First, run the development server:
+## In this repository
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Open the folder in Cursor.
+2. The rule [`.cursor/rules/karpathy-guidelines.mdc`](.cursor/rules/karpathy-guidelines.mdc)
+   is committed with `alwaysApply: true`, so you do not need extra installation
+   steps.
+3. In Cursor, you can confirm it under **Settings -> Rules** (or the project rules
+   UI), where `karpathy-guidelines` should appear.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Use the same guidelines in another project
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Cursor (recommended):** Copy `.cursor/rules/karpathy-guidelines.mdc` into that
+project's `.cursor/rules/` directory (create the folders if needed). Adjust or
+merge with existing rules as you like.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Other tools:** If a stack only supports a root instruction file, copy
+[`CLAUDE.md`](CLAUDE.md) into that project instead (or merge its contents into your
+existing instructions).
 
-## Learn More
+## Optional: personal Agent Skills
 
-To learn more about Next.js, take a look at the following resources:
+If you want the same content as a reusable skill under `~/.cursor/skills`, use
+[`skills/karpathy-guidelines/SKILL.md`](skills/karpathy-guidelines/SKILL.md). You
+can copy or symlink it into your personal skills directory; use whatever layout
+you use for other skills.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Claude Code vs Cursor
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Claude Code:** Install via the plugin marketplace and [`README.md`](README.md)
+  instructions; the plugin exposes the skill from this repo. Per-project use can
+  also rely on `CLAUDE.md`.
+- **Cursor:** Use the committed `.cursor/rules/` file as described above. Cursor
+  does not read `.claude-plugin/` or `CLAUDE.md` by default.
 
-## Deploy on Vercel
+## For contributors
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+When you change the four principles, keep [`CLAUDE.md`](CLAUDE.md) and
+[`.cursor/rules/karpathy-guidelines.mdc`](.cursor/rules/karpathy-guidelines.mdc) in
+sync. If the published skill/plugin text should match, update
+[`skills/karpathy-guidelines/SKILL.md`](skills/karpathy-guidelines/SKILL.md) as
+well.
