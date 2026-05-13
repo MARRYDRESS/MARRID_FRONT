@@ -397,7 +397,7 @@ const Dot = styled.span<{ $active: boolean }>`
 const DotsRowHall = styled.div`
   position: absolute;
   left: 50%;
-  top: 948px;
+  bottom: clamp(20px, 3vh, 40px);
   transform: translateX(-50%);
   display: flex;
   align-items: center;
