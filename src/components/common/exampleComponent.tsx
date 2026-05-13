@@ -41,12 +41,15 @@ const Root = styled.div`
   gap: 5px;
   width: 223px;
   max-width: 100%;
+  min-height: 0;
+  height: 100%;
 `;
 
 const Frame = styled.div`
   position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
   width: 100%;
-  aspect-ratio: 223 / 333;
   overflow: hidden;
   border-radius: 4px;
   background: ${color.gray100};
@@ -62,8 +65,9 @@ const Img = styled.img`
 
 const Label = styled.p`
   margin: 0;
+  flex-shrink: 0;
   width: 100%;
   text-align: center;
   ${font["text-sm"]}
-  color: ${color.gray700};
+  color: ${color.black};
 `;

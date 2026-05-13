@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import ExampleComponent from "@/src/components/common/exampleComponent";
 import SideBanner from "@/src/components/common/sideBanner";
@@ -12,6 +12,19 @@ const BANNER = "/images/avatar_setting_banner.jpg";
 export default function AvatarSettingPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+    };
+  }, []);
 
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -45,7 +58,7 @@ export default function AvatarSettingPage() {
 
       <RightPane>
         <RightInner>
-          <Headline>내 아바타를 만들어 어울리는 드레스를 찾아보세요</Headline>
+          <Headline>아바타를 만들어 어울리는 드레스를 찾아보세요</Headline>
 
           <UploadZone
             htmlFor="avatar-upload-input"
@@ -99,10 +112,14 @@ export default function AvatarSettingPage() {
 
 const Shell = styled.div`
   display: flex;
-  min-height: 100vh;
+  box-sizing: border-box;
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
+  max-width: none;
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  margin: 0;
   background: ${color.white};
   color: ${color.black};
 `;
@@ -118,7 +135,9 @@ const RightPane = styled.div`
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 100vh;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 `;
 
 const RightInner = styled.div`
@@ -126,15 +145,19 @@ const RightInner = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding: 111px 46px 48px clamp(24px, 6.1vw, 88px);
+  min-height: 0;
+  overflow: hidden;
+  padding: clamp(28px, 8vh, 111px) clamp(20px, 4vw, 46px) clamp(16px, 4vh, 48px)
+    clamp(24px, 6.1vw, 88px);
   box-sizing: border-box;
 `;
 
 const Headline = styled.p`
-  margin: 0 0 36px;
+  margin: 0 0 clamp(12px, 2.5vh, 36px);
   max-width: 560px;
   ${font["title-sm"]}
   color: ${color.black};
+  flex-shrink: 0;
 `;
 
 const UploadZone = styled.label<{ $active: boolean }>`
@@ -144,9 +167,10 @@ const UploadZone = styled.label<{ $active: boolean }>`
   justify-content: center;
   width: 100%;
   max-width: 469px;
-  min-height: 238px;
-  padding: 24px 16px;
-  margin: 0 0 24px;
+  min-height: clamp(140px, 22vh, 238px);
+  flex-shrink: 1;
+  padding: clamp(12px, 2vh, 24px) 16px;
+  margin: 0 0 clamp(12px, 2vh, 24px);
   border-radius: 12px;
   border: 1px dashed ${color.gray300};
   background: ${(p) =>
@@ -205,17 +229,23 @@ const UploadHint = styled.p`
 `;
 
 const ExamplesRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 23px;
-  margin-bottom: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 223px));
+  grid-template-rows: minmax(0, 1fr);
+  gap: clamp(12px, 2vw, 23px);
+  flex: 1 1 auto;
+  min-height: 0;
+  justify-content: start;
+  align-content: stretch;
 `;
 
 const BottomBlock = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding-top: 48px;
+  gap: clamp(12px, 2vh, 24px);
+  padding-top: clamp(12px, 2.5vh, 48px);
+  flex-shrink: 0;
+  margin-top: auto;
 `;
 
 const Footnote = styled.p`
