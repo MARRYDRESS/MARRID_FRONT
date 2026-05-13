@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import styled from "styled-components";
 import ExampleComponent from "@/src/components/common/exampleComponent";
+import SideBanner from "@/src/components/common/sideBanner";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
 
@@ -41,12 +41,7 @@ export default function AvatarSettingPage() {
 
   return (
     <Shell>
-      <LeftPane>
-        <BannerImage src={BANNER} alt="" role="presentation" />
-        <CloseLink href="/" aria-label="닫기">
-          <IconImg src="/icon/close.svg" alt="" width={24} height={24} />
-        </CloseLink>
-      </LeftPane>
+      <SideBanner bannerSrc={BANNER} closeHref="/" />
 
       <RightPane>
         <RightInner>
@@ -110,40 +105,6 @@ const Shell = styled.div`
   margin: 0 auto;
   background: ${color.white};
   color: ${color.black};
-`;
-
-const LeftPane = styled.div`
-  position: relative;
-  flex: 0 0 clamp(260px, 55.28vw, 796px);
-  min-height: 100vh;
-  overflow: hidden;
-  background: ${color.gray100};
-`;
-
-const BannerImage = styled.img`
-  position: absolute;
-  inset: 0;
-  width: 104.22%;
-  height: 100%;
-  max-width: none;
-  left: -2.11%;
-  object-fit: cover;
-  object-position: center;
-  pointer-events: none;
-`;
-
-const CloseLink = styled(Link)`
-  position: absolute;
-  left: 46px;
-  top: 43px;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  color: inherit;
-  text-decoration: none;
 `;
 
 const IconImg = styled.img`
