@@ -89,15 +89,16 @@ export default function AvatarSettingPage() {
             </UploadInner>
           </UploadZone>
 
+          <Footnote>
+            얼굴과 몸매가 잘 드러나는 사진을 업로드 해주세요
+          </Footnote>
+
           <ExamplesRow>
             <ExampleComponent variant="face" />
             <ExampleComponent variant="body" />
           </ExamplesRow>
 
           <BottomBlock>
-            <Footnote>
-              얼굴과 몸매가 잘 드러나는 사진을 업로드 해주세요
-            </Footnote>
             <NextRow>
               <NextButton type="button" aria-label="다음 단계">
                 <IconImg src="/icon/blackFront.svg" alt="" width={17} height={32} />
@@ -170,7 +171,7 @@ const UploadZone = styled.label<{ $active: boolean }>`
   min-height: clamp(140px, 22vh, 238px);
   flex-shrink: 1;
   padding: clamp(12px, 2vh, 24px) 16px;
-  margin: 0 0 clamp(12px, 2vh, 24px);
+  margin: 0;
   border-radius: 12px;
   border: 1px dashed ${color.gray300};
   background: ${(p) =>
@@ -242,19 +243,20 @@ const ExamplesRow = styled.div`
 const BottomBlock = styled.div`
   display: flex;
   flex-direction: column;
-  gap: clamp(12px, 2vh, 24px);
-  padding-top: clamp(12px, 2.5vh, 48px);
   flex-shrink: 0;
   margin-top: auto;
+  padding-top: clamp(8px, 1.5vh, 24px);
 `;
 
 const Footnote = styled.p`
-  margin: 0 auto;
+  margin: clamp(16px, 2.5vh, 39px) 0 clamp(12px, 2vh, 44px);
   width: 100%;
-  max-width: 560px;
+  max-width: 469px;
+  align-self: flex-start;
   ${font["text-md"]}
-  text-align: center;
+  text-align: left;
   color: ${color.black};
+  flex-shrink: 0;
 `;
 
 const NextRow = styled.div`
