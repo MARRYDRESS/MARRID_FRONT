@@ -6,6 +6,11 @@ type Props = {
   direction: "left" | "right";
   variant: "light" | "dark";
   onClick?: () => void;
+  disabled?: boolean;
+};
+
+type StyledButtonProps = {
+  $variant: Props["variant"];
 };
 
 const ICON_SRC = {
@@ -13,18 +18,24 @@ const ICON_SRC = {
   dark: { left: "/icon/blackBack.svg", right: "/icon/blackFront.svg" },
 } as const;
 
-export default function SlideButton({ direction, variant, onClick }: Props) {
+export default function SlideButton({ direction, variant, onClick, disabled }: Props) {
   const isLight = variant === "light";
   const iconSrc = ICON_SRC[variant][direction];
   const iconWidth = isLight ? 14 : 17;
   const iconHeight = isLight ? 26 : 32;
 
+  const a11y =
+    disabled === true
+      ? {}
+      : { "aria-label": direction === "left" ? ("이전" as const) : ("다음" as const) };
+
   return (
-    <Button
+    <StyledButton
       type="button"
       $variant={variant}
       onClick={onClick}
-      aria-label={direction === "left" ? "이전" : "다음"}
+      disabled={disabled}
+      {...a11y}
     >
       <IconImg
         src={iconSrc}
@@ -33,11 +44,11 @@ export default function SlideButton({ direction, variant, onClick }: Props) {
         height={iconHeight}
         draggable={false}
       />
-    </Button>
+    </StyledButton>
   );
 }
 
-const Button = styled.button<{ $variant: Props["variant"] }>`
+const StyledButton = styled.button<StyledButtonProps>`
   box-sizing: border-box;
   width: 52px;
   height: 52px;
@@ -53,8 +64,12 @@ const Button = styled.button<{ $variant: Props["variant"] }>`
   transition: opacity 0.25s ease;
   overflow: hidden;
 
-  &:hover {
+  &:hover:not(:disabled) {
     opacity: 0.88;
+  }
+
+  &:disabled {
+    cursor: default;
   }
 
   &:focus-visible {
