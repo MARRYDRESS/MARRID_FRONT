@@ -7,10 +7,6 @@ import SelectComponent from "@/src/components/common/selectComponent";
 import color from "@/src/style/color";
 import { hallSelectItems } from "@/src/mock/mock";
 
-/**
- * 피그마 「홀 선택」(90:185)과 동일한 단일 화면: `SelectComponent`만 사용하고
- * 뒤로가기 버튼만 프레임 좌표(1440×1024 기준)로 겹칩니다.
- */
 export default function SelectHallPage() {
   useEffect(() => {
     const html = document.documentElement;
@@ -35,9 +31,12 @@ export default function SelectHallPage() {
         items={hallSelectItems}
         showPaginationDots
       />
-      <BackLink href="/avatarSetting" aria-label="이전 단계">
-        <BackIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />
-      </BackLink>
+      <NextLink
+        href="/avatarSetting/selectHall/selectStyle"
+        aria-label="다음 단계"
+      >
+        <NextIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />
+      </NextLink>
     </Shell>
   );
 }
@@ -55,7 +54,7 @@ const Shell = styled.div`
   color: ${color.black};
 `;
 
-const BackLink = styled(Link)`
+const NextLink = styled(Link)`
   position: absolute;
   z-index: 4;
   right: max(24px, calc((100vw - 1440px) * 0.5 + 62px));
@@ -86,9 +85,8 @@ const BackLink = styled(Link)`
   }
 `;
 
-const BackIcon = styled.img`
+const NextIcon = styled.img`
   display: block;
   max-width: 100%;
   height: auto;
-  transform: rotate(180deg);
 `;

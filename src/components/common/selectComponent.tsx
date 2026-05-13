@@ -11,13 +11,8 @@ type SelectSectionProps = {
   id?: string;
   title: string;
   items: SelectMockItem[];
-  /** 피그마 홀 선택 화면과 같이 슬라이드 페이지 인디케이터를 표시합니다. */
   showPaginationDots?: boolean;
-  /** 제목 타이포그래피 (기본 `md` = 홈 드레스 선택 섹션과 동일) */
   titleVariant?: "md" | "sm";
-  /**
-   * `hall`: 피그마 「홀 선택」(node 90:185) 레이아웃 — 절대 배치 제목, 1671×754 캐러셀, 슬라이드 버튼 좌표, 6개 도트.
-   */
   layout?: "default" | "hall";
 };
 
@@ -150,24 +145,20 @@ function SelectComponentInner({
 
       {isHall ? (
         <HallSliderBody>
-          <HallStrip>
+          <SliderFrame>
             {pages.length > 1 ? (
               <>
-                <HallSlideBtnWrap $role="left">
+                <SlideBtnWrap $position="left">
                   <SlideButton direction="left" variant="light" onClick={handlePrev} />
-                </HallSlideBtnWrap>
-                <HallSlideBtnWrap $role="ghost" aria-hidden>
-                  <SlideButton direction="left" variant="light" disabled />
-                </HallSlideBtnWrap>
-                <HallSlideBtnWrap $role="right">
+                </SlideBtnWrap>
+                <SlideBtnWrap $position="right">
                   <SlideButton direction="right" variant="light" onClick={handleNext} />
-                </HallSlideBtnWrap>
+                </SlideBtnWrap>
               </>
             ) : null}
 
-            <Viewport $layout={layout}>
+            <Viewport>
               <Track
-                $layout={layout}
                 $trackIndex={trackIndex}
                 $isTransitionEnabled={isTransitionEnabled}
                 onTransitionEnd={handleTrackTransitionEnd}
@@ -189,7 +180,7 @@ function SelectComponentInner({
                 ))}
               </Track>
             </Viewport>
-          </HallStrip>
+          </SliderFrame>
         </HallSliderBody>
       ) : (
         <SliderFrame>
@@ -204,9 +195,8 @@ function SelectComponentInner({
             </>
           ) : null}
 
-          <Viewport $layout={layout}>
+          <Viewport>
             <Track
-              $layout={layout}
               $trackIndex={trackIndex}
               $isTransitionEnabled={isTransitionEnabled}
               onTransitionEnd={handleTrackTransitionEnd}
@@ -260,14 +250,11 @@ function SelectComponentInner({
   );
 }
 
-/** 피그마 홀 선택 캐러셀 래퍼 가로 (node 90:164) — 슬라이드 버튼 좌표 기준 */
-const HALL_STRIP_W = 1671;
-
 const Section = styled.section<{ $layout: "default" | "hall" }>`
   box-sizing: border-box;
   margin: 0 auto;
   width: 100%;
-  max-width: ${({ $layout }) => ($layout === "hall" ? "none" : "1440px")};
+  max-width: 1440px;
   position: ${({ $layout }) => ($layout === "hall" ? "relative" : "static")};
   min-height: ${({ $layout }) => ($layout === "hall" ? "min(100dvh, 1024px)" : "0")};
 `;
@@ -301,49 +288,9 @@ const HallSliderBody = styled.div`
   padding-top: 152px;
 `;
 
-const HallStrip = styled.div`
-  position: relative;
-  width: min(100%, ${HALL_STRIP_W}px);
-  height: 754px;
-  margin: 0 auto;
-  box-sizing: border-box;
-`;
-
-const HallSlideBtnWrap = styled.div<{ $role: "left" | "right" | "ghost" }>`
-  position: absolute;
-  z-index: 2;
-  top: 329px;
-  width: 52px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  ${({ $role }) =>
-    $role === "left"
-      ? css`
-          left: ${(253 / HALL_STRIP_W) * 100}%;
-        `
-      : $role === "ghost"
-        ? css`
-            left: ${(1187 / HALL_STRIP_W) * 100}%;
-            opacity: 0.2;
-            pointer-events: none;
-          `
-        : css`
-            left: ${(1596 / HALL_STRIP_W) * 100}%;
-          `}
-`;
-
-const Viewport = styled.div<{ $layout: "default" | "hall" }>`
+const Viewport = styled.div`
   width: 100%;
   overflow: hidden;
-  ${({ $layout }) =>
-    $layout === "hall"
-      ? css`
-          position: absolute;
-          inset: 0;
-        `
-      : ""}
 `;
 
 const SliderFrame = styled.div`
@@ -359,7 +306,6 @@ const SlideBtnWrap = styled.div<{ $position: "left" | "right" }>`
 `;
 
 const Track = styled.div<{
-  $layout: "default" | "hall";
   $trackIndex: number;
   $isTransitionEnabled: boolean;
 }>`
@@ -368,13 +314,6 @@ const Track = styled.div<{
   transition: ${({ $isTransitionEnabled }) =>
     $isTransitionEnabled ? "transform 0.85s cubic-bezier(0.22, 1, 0.36, 1)" : "none"};
   will-change: transform;
-  ${({ $layout }) =>
-    $layout === "hall"
-      ? css`
-          height: 100%;
-          min-height: 100%;
-        `
-      : ""}
 `;
 
 const Page = styled.div<{ $layout: "default" | "hall" }>`
@@ -384,7 +323,6 @@ const Page = styled.div<{ $layout: "default" | "hall" }>`
   ${({ $layout }) =>
     $layout === "hall"
       ? css`
-          height: 100%;
           align-items: flex-start;
         `
       : ""}
