@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import styled from "styled-components";
+import ExampleComponent from "@/src/components/common/exampleComponent";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
 
@@ -83,18 +84,16 @@ export default function AvatarSettingPage() {
           </UploadZone>
 
           <ExamplesRow>
-            <ExampleBlock>
-              <ExampleFrame>
-                <ExampleImg src={FACE_EXAMPLE} alt="얼굴 사진 예시" />
-              </ExampleFrame>
-              <ExampleLabel>얼굴 예시</ExampleLabel>
-            </ExampleBlock>
-            <ExampleBlock>
-              <ExampleFrame>
-                <ExampleImg src={BODY_EXAMPLE} alt="전신 사진 예시" />
-              </ExampleFrame>
-              <ExampleLabel>전신 예시</ExampleLabel>
-            </ExampleBlock>
+            <ExampleComponent
+              imageSrc={FACE_EXAMPLE}
+              imageAlt="얼굴 사진 예시"
+              label="얼굴 예시"
+            />
+            <ExampleComponent
+              imageSrc={BODY_EXAMPLE}
+              imageAlt="전신 사진 예시"
+              label="전신 예시"
+            />
           </ExamplesRow>
 
           <BottomBlock>
@@ -259,43 +258,6 @@ const ExamplesRow = styled.div`
   flex-wrap: wrap;
   gap: 23px;
   margin-bottom: auto;
-`;
-
-const ExampleBlock = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  width: 223px;
-  max-width: 100%;
-`;
-
-const ExampleFrame = styled.div`
-  position: relative;
-  width: 100%;
-  aspect-ratio: 223 / 333;
-  overflow: hidden;
-  border-radius: 4px;
-  background: ${color.gray100};
-`;
-
-const ExampleImg = styled.img`
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-
-const ExampleLabel = styled.p`
-  margin: 0;
-  width: 100%;
-  text-align: center;
-  font-family: "Leferi Point Type", sans-serif;
-  font-size: 13px;
-  font-weight: 300;
-  line-height: normal;
-  color: ${color.black};
 `;
 
 const BottomBlock = styled.div`
