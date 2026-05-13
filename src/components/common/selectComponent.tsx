@@ -14,7 +14,12 @@ type SelectSectionProps = {
 };
 
 export default function SelectComponent(props: SelectSectionProps) {
-  return <SelectComponentInner key={props.id ?? props.title} {...props} />;
+  return (
+    <SelectComponentInner
+      key={`${props.id ?? props.title}-${props.items.length}`}
+      {...props}
+    />
+  );
 }
 
 function SelectComponentInner({ id, title, items }: SelectSectionProps) {
