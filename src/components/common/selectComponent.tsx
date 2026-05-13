@@ -11,6 +11,10 @@ type SelectSectionProps = {
   id?: string;
   title: string;
   items: SelectMockItem[];
+  /** 피그마 홀 선택 화면과 같이 슬라이드 페이지 인디케이터를 표시합니다. */
+  showPaginationDots?: boolean;
+  /** 제목 타이포그래피 (기본 `md` = 홈 드레스 선택 섹션과 동일) */
+  titleVariant?: "md" | "sm";
 };
 
 export default function SelectComponent(props: SelectSectionProps) {
@@ -22,7 +26,13 @@ export default function SelectComponent(props: SelectSectionProps) {
   );
 }
 
-function SelectComponentInner({ id, title, items }: SelectSectionProps) {
+function SelectComponentInner({
+  id,
+  title,
+  items,
+  showPaginationDots = false,
+  titleVariant = "md",
+}: SelectSectionProps) {
   const VISIBLE_COUNT = 3;
   const [trackIndex, setTrackIndex] = useState(1);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
@@ -111,9 +121,23 @@ function SelectComponentInner({ id, title, items }: SelectSectionProps) {
     setIsAnimating(false);
   };
 
+  const activeDotIndex = useMemo(() => {
+    const n = pages.length;
+    if (n <= 1) {
+      return 0;
+    }
+    if (trackIndex === 0) {
+      return n - 1;
+    }
+    if (trackIndex === n + 1) {
+      return 0;
+    }
+    return trackIndex - 1;
+  }, [pages.length, trackIndex]);
+
   return (
     <Section id={id}>
-      <Title>{title}</Title>
+      <Title $variant={titleVariant}>{title}</Title>
       <SliderFrame>
       {pages.length > 1 && (
           <>
@@ -150,6 +174,13 @@ function SelectComponentInner({ id, title, items }: SelectSectionProps) {
           </Track>
         </Viewport>
       </SliderFrame>
+      {showPaginationDots && pages.length > 1 ? (
+        <DotsRow aria-hidden>
+          {pages.map((_, i) => (
+            <Dot key={i} $active={i === activeDotIndex} />
+          ))}
+        </DotsRow>
+      ) : null}
     </Section>
   );
 }
@@ -160,10 +191,11 @@ const Section = styled.section`
   max-width: 1440px;
 `;
 
-const Title = styled.h2`
-  padding: 48px 0;
+const Title = styled.h2<{ $variant: "md" | "sm" }>`
+  padding: ${({ $variant }) =>
+    $variant === "sm" ? "clamp(20px, 4vh, 48px) 0 clamp(12px, 2vh, 32px)" : "48px 0"};
   text-align: center;
-  font-size: ${font["title-md"]};
+  ${({ $variant }) => ($variant === "sm" ? font["title-sm"] : font["title-md"])};
   color: ${color.gray900};
 `;
 
@@ -224,5 +256,23 @@ const CardLabel = styled.p`
   text-align: center;
   font-size: ${font["title-sm"]};
   color: ${color.black};
+`;
+
+const DotsRow = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0 0;
+`;
+
+const Dot = styled.span<{ $active: boolean }>`
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid ${color.gray900};
+  background: ${({ $active }) => ($active ? color.gray900 : "transparent")};
+  flex-shrink: 0;
 `;
 

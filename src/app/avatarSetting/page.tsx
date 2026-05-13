@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import ExampleComponent from "@/src/components/common/exampleComponent";
@@ -100,9 +101,9 @@ export default function AvatarSettingPage() {
 
           <BottomBlock>
             <NextRow>
-              <NextButton type="button" aria-label="다음 단계">
+              <NextLink href="/avatarSetting/selectHall" aria-label="다음 단계">
                 <IconImg src="/icon/blackFront.svg" alt="" width={17} height={32} />
-              </NextButton>
+              </NextLink>
             </NextRow>
           </BottomBlock>
         </RightInner>
@@ -264,7 +265,7 @@ const NextRow = styled.div`
   justify-content: flex-end;
 `;
 
-const NextButton = styled.button`
+const NextLink = styled(Link)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,6 +277,8 @@ const NextButton = styled.button`
   background: ${color.white};
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
+  text-decoration: none;
+  color: inherit;
   &:hover {
     background: ${color.gray100};
   }

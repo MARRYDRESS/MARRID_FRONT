@@ -12,3 +12,11 @@ export const selectMockItems: SelectMockItem[] = [
   { image: "/mock/main6.jpg", label: "브이넥 클래식" },
   { image: "/mock/main7.jpg", label: "브이넥 클래식" },
 ];
+
+export const hallSelectItems: SelectMockItem[] = [
+  { image: "/images/outsideHall.jpg", label: "야외 웨딩" },
+  { image: "/images/lightHall.jpg", label: "밝은 홀" },
+  { image: "/images/darkHall.jpg", label: "어두운 홀" },
+  { image: "/images/chapelHall.jpg", label: "채플 웨딩" },
+  { image: "/images/houseHall.jpg", label: "하우스 웨딩" },
+];
