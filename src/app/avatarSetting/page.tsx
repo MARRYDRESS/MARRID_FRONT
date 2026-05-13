@@ -8,8 +8,6 @@ import color from "@/src/style/color";
 import font from "@/src/style/font";
 
 const BANNER = "/images/avatar_setting_banner.jpg";
-const FACE_EXAMPLE = "/images/face_example.jpg";
-const BODY_EXAMPLE = "/images/body_example.jpg";
 
 export default function AvatarSettingPage() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -84,16 +82,8 @@ export default function AvatarSettingPage() {
           </UploadZone>
 
           <ExamplesRow>
-            <ExampleComponent
-              imageSrc={FACE_EXAMPLE}
-              imageAlt="얼굴 사진 예시"
-              label="얼굴 예시"
-            />
-            <ExampleComponent
-              imageSrc={BODY_EXAMPLE}
-              imageAlt="전신 사진 예시"
-              label="전신 예시"
-            />
+            <ExampleComponent variant="face" />
+            <ExampleComponent variant="body" />
           </ExamplesRow>
 
           <BottomBlock>
