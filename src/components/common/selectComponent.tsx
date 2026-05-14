@@ -11,10 +11,14 @@ import type { SelectMockItem } from "@/src/mock/mock";
 type SelectSectionProps = {
   id?: string;
   title: string;
+  /** `layout="style"` 등 두 줄 헤더용 보조 문구 */
+  subtitle?: string;
   items: SelectMockItem[];
   showPaginationDots?: boolean;
   titleVariant?: "md" | "sm";
-  layout?: "default" | "hall";
+  layout?: "default" | "hall" | "style";
+  /** 한 화면에 보이는 카드 수 (기본 3, 스타일 선택은 4) */
+  visibleCount?: number;
 };
 
 export default function SelectComponent(props: SelectSectionProps) {
@@ -29,12 +33,14 @@ export default function SelectComponent(props: SelectSectionProps) {
 function SelectComponentInner({
   id,
   title,
+  subtitle,
   items,
   showPaginationDots = false,
   titleVariant = "md",
   layout = "default",
+  visibleCount: visibleCountProp,
 }: SelectSectionProps) {
-  const VISIBLE_COUNT = 3;
+  const VISIBLE_COUNT = visibleCountProp ?? 3;
   const [trackIndex, setTrackIndex] = useState(1);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -53,7 +59,7 @@ function SelectComponentInner({
         return items[index];
       });
     });
-  }, [items]);
+  }, [items, VISIBLE_COUNT]);
 
   const loopedPages = useMemo(() => {
     if (pages.length === 0) {
@@ -137,15 +143,24 @@ function SelectComponentInner({
   }, [pages.length, trackIndex]);
 
   const isHall = layout === "hall";
+  const isStyle = layout === "style";
+  const isAvatarFlowSlider = isHall || isStyle;
 
   return (
     <Section id={id} $layout={layout}>
-      <Title $variant={titleVariant} $layout={layout}>
-        {title}
-      </Title>
+      {isStyle ? (
+        <TitleStack>
+          <TitleMain>{title}</TitleMain>
+          {subtitle ? <TitleSub>{subtitle}</TitleSub> : null}
+        </TitleStack>
+      ) : (
+        <Title $variant={titleVariant} $layout={layout}>
+          {title}
+        </Title>
+      )}
 
-      {isHall ? (
-        <HallSliderBody>
+      {isAvatarFlowSlider ? (
+        <AvatarFlowSliderShell $layout={isHall ? "hall" : "style"}>
           <SliderFrame>
             {pages.length > 1 ? (
               <>
@@ -168,7 +183,7 @@ function SelectComponentInner({
                   <Page key={`page-${pageIndex}`} $layout={layout}>
                     {page.map((item, cardIndex) => (
                       <Card key={`${item.image}-${pageIndex}-${cardIndex}`} $layout={layout}>
-                        <CardImageWrap>
+                        <CardImageWrap $layout={layout}>
                           <CardImage
                             src={item.image}
                             alt={`${item.label} 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`}
@@ -182,7 +197,7 @@ function SelectComponentInner({
               </Track>
             </Viewport>
           </SliderFrame>
-        </HallSliderBody>
+        </AvatarFlowSliderShell>
       ) : (
         <SliderFrame>
           {pages.length > 1 ? (
@@ -206,7 +221,7 @@ function SelectComponentInner({
                 <Page key={`page-${pageIndex}`} $layout={layout}>
                   {page.map((item, cardIndex) => (
                     <Card key={`${item.image}-${pageIndex}-${cardIndex}`} $layout={layout}>
-                      <CardImageWrap>
+                      <CardImageWrap $layout={layout}>
                         <CardImage
                           src={item.image}
                           alt={`${item.label} 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`}
@@ -226,24 +241,25 @@ function SelectComponentInner({
         <SliderPaginationDots
           totalPages={pages.length}
           activeIndex={activeDotIndex}
-          placement={isHall ? "floatingAvatarFlow" : "below"}
+          placement={isAvatarFlowSlider ? "floatingAvatarFlow" : "below"}
         />
       ) : null}
     </Section>
   );
 }
 
-const Section = styled.section<{ $layout: "default" | "hall" }>`
+const Section = styled.section<{ $layout: "default" | "hall" | "style" }>`
   box-sizing: border-box;
   margin: 0 auto;
   width: 100%;
   max-width: 1440px;
   padding: 0 clamp(16px, 3vw, 32px);
-  position: ${({ $layout }) => ($layout === "hall" ? "relative" : "static")};
-  min-height: ${({ $layout }) => ($layout === "hall" ? "min(100dvh, 1024px)" : "0")};
+  position: ${({ $layout }) => ($layout === "hall" || $layout === "style" ? "relative" : "static")};
+  min-height: ${({ $layout }) =>
+    $layout === "hall" || $layout === "style" ? "min(100dvh, 1024px)" : "0"};
 `;
 
-const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" }>`
+const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" | "style" }>`
   color: ${color.gray900};
   ${({ $layout, $variant }) =>
     $layout === "hall"
@@ -267,9 +283,38 @@ const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" }>`
         `}
 `;
 
-const HallSliderBody = styled.div`
+const TitleStack = styled.div`
+  position: absolute;
+  left: 50%;
+  top: 178px;
+  z-index: 3;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  max-width: min(320px, calc(100vw - 48px));
+`;
+
+const TitleMain = styled.h2`
+  margin: 0;
+  padding: 0;
+  color: ${color.black};
+  font-weight: inherit;
+  ${font["text-lg"]};
+`;
+
+const TitleSub = styled.p`
+  margin: 0;
+  padding: 0;
+  color: ${color.black};
+  ${font["text-md"]};
+`;
+
+const AvatarFlowSliderShell = styled.div<{ $layout: "hall" | "style" }>`
   box-sizing: border-box;
-  padding-top: 160px;
+  padding-top: ${({ $layout }) => ($layout === "hall" ? "160px" : "236px")};
 `;
 
 const Viewport = styled.div`
@@ -300,39 +345,39 @@ const Track = styled.div<{
   will-change: transform;
 `;
 
-const Page = styled.div<{ $layout: "default" | "hall" }>`
+const Page = styled.div<{ $layout: "default" | "hall" | "style" }>`
   flex: 0 0 100%;
   display: flex;
   justify-content: center;
   align-items: stretch;
-  gap: 32px;
+  gap: ${({ $layout }) => ($layout === "style" ? "16px" : "32px")};
   ${({ $layout }) =>
-    $layout === "hall"
+    $layout === "hall" || $layout === "style"
       ? css`
           align-items: flex-start;
         `
       : ""}
 `;
 
-const Card = styled.article<{ $layout: "default" | "hall" }>`
+const Card = styled.article<{ $layout: "default" | "hall" | "style" }>`
   overflow: hidden;
   background: transparent;
   flex: 1 1 0;
   min-width: 0;
   ${({ $layout }) =>
-    $layout === "hall"
+    $layout === "hall" || $layout === "style"
       ? css`
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 8px;
+          gap: ${$layout === "style" ? "4px" : "8px"};
         `
       : ""}
 `;
 
-const CardImageWrap = styled.div`
+const CardImageWrap = styled.div<{ $layout: "default" | "hall" | "style" }>`
   width: 100%;
-  aspect-ratio: 607 / 710;
+  aspect-ratio: ${({ $layout }) => ($layout === "style" ? "311 / 411" : "607 / 710")};
   overflow: hidden;
   flex-shrink: 0;
 `;
@@ -345,12 +390,12 @@ const CardImage = styled.img`
   object-position: center;
 `;
 
-const CardLabel = styled.p<{ $layout: "default" | "hall" }>`
+const CardLabel = styled.p<{ $layout: "default" | "hall" | "style" }>`
   text-align: center;
-  ${font["text-lg"]};
+  ${({ $layout }) => ($layout === "style" ? font["text-md"] : font["text-lg"])};
   color: ${color.black};
   ${({ $layout }) =>
-    $layout === "hall"
+    $layout === "hall" || $layout === "style"
       ? css`
           margin: 0;
           padding: 0;
