@@ -5,6 +5,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
+import Header from "@/src/components/layout/header";
 
 const LEFT_HERO = "/mock/avatarResult.jpg";
 
@@ -23,6 +24,7 @@ const PICKS_ROW2 = [
 export default function ResultPage() {
   return (
     <Shell>
+      <Header />
       <LeftPane>
         <LeftTopBar>
           <BackLink href="/" aria-label="홈으로">

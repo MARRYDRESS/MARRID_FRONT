@@ -10,9 +10,9 @@ const STORAGE_KEY = "marrid_home_header_intro_dismissed";
 
 const navItems = [
   { label: "아바타 만들기", href: "/avatarSetting" },
-  { label: "드레스 보기", href: "#select-1" },
-  { label: "마이페이지", href: "#select-2" },
-  { label: "로그인", href: "#top" },
+  { label: "드레스 보기", href: "/dress" },
+  { label: "마이페이지", href: "/mypage" },
+  { label: "로그인", href: "/login" },
 ];
 
 function readIntroDismissed(): boolean {
