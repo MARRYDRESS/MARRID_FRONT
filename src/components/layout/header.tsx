@@ -3,6 +3,7 @@
 import Link from "next/link";
 import styled from "styled-components";
 import color from "@/src/style/color";
+import font from "@/src/style/font";
 
 const navItems = [
   { label: "아바타 만들기", href: "/avatarSetting" },
@@ -17,7 +18,7 @@ export default function Header() {
       <HoverStrip aria-hidden />
       <HeaderBar>
         <HeaderInner>
-          <Logo href="#top">merrid</Logo>
+          <Logo href="#top">MERRID</Logo>
           <Nav>
             {navItems.map((item) => (
               <NavLink key={item.label} href={item.href}>
@@ -84,11 +85,8 @@ const HeaderInner = styled.div`
 `;
 
 const Logo = styled(Link)`
-  font-size: 37px;
-  font-weight: 300;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  color: #303030;
+  ${font["title-md"]};
+  color: ${color.gray900};
   text-decoration: none;
 `;
 
