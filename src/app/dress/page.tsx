@@ -6,28 +6,60 @@ import styled from "styled-components";
 import StyleHashTag from "@/src/components/common/styleHashTag";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
+import Header from "@/src/components/layout/header";
 import {
   dressFilterTagOptions,
   dressGalleryItems,
   type DressFilterTag,
 } from "@/src/mock/mock";
 
-export default function DressPage() {
-  const [selectedTag, setSelectedTag] = useState<DressFilterTag | null>(null);
+/** 필터 UI 전용 — 목록 데이터에는 없음 */
+const DRESS_ALL_TAG = "#전체";
 
-  const toggleFilter = useCallback((tag: DressFilterTag) => {
-    setSelectedTag((prev) => (prev === tag ? null : tag));
+const dressFilterChips = [DRESS_ALL_TAG, ...dressFilterTagOptions] as const;
+
+function isDressFilterTag(tag: string): tag is DressFilterTag {
+  return (dressFilterTagOptions as readonly string[]).includes(tag);
+}
+
+export default function DressPage() {
+  const [selectedTags, setSelectedTags] = useState<string[]>([
+    DRESS_ALL_TAG,
+  ]);
+
+  const toggleFilter = useCallback((tag: string) => {
+    if (tag === DRESS_ALL_TAG) {
+      setSelectedTags((prev) =>
+        prev.includes(DRESS_ALL_TAG) ? [] : [DRESS_ALL_TAG],
+      );
+      return;
+    }
+
+    setSelectedTags((prev) => {
+      const withoutAll = prev.filter((t) => t !== DRESS_ALL_TAG);
+      if (withoutAll.includes(tag)) {
+        return withoutAll.filter((t) => t !== tag);
+      }
+      return [...withoutAll, tag];
+    });
   }, []);
 
   const visibleItems = useMemo(() => {
-    if (!selectedTag) return dressGalleryItems;
+    const showAll =
+      selectedTags.length === 0 || selectedTags.includes(DRESS_ALL_TAG);
+    if (showAll) return dressGalleryItems;
+
+    const activeFilters = selectedTags.filter(isDressFilterTag);
+    if (activeFilters.length === 0) return dressGalleryItems;
+
     return dressGalleryItems.filter((item) =>
-      item.filterTags.includes(selectedTag),
+      activeFilters.some((t) => item.filterTags.includes(t)),
     );
-  }, [selectedTag]);
+  }, [selectedTags]);
 
   return (
     <Shell>
+      <Header />
       <Inner>
         <Headline>
           <TitleLine>세상의 모든 드레스,</TitleLine>
@@ -35,13 +67,13 @@ export default function DressPage() {
         </Headline>
 
         <FilterRow aria-label="스타일 필터">
-          {dressFilterTagOptions.map((tag) => (
+          {dressFilterChips.map((tag) => (
             <FilterHit
               key={tag}
               type="button"
-              $active={selectedTag === tag}
+              $active={selectedTags.includes(tag)}
               onClick={() => toggleFilter(tag)}
-              aria-pressed={selectedTag === tag}
+              aria-pressed={selectedTags.includes(tag)}
             >
               <StyleHashTag variant="filter" label={tag} />
             </FilterHit>
@@ -109,13 +141,13 @@ const Headline = styled.div`
 const TitleLine = styled.p`
   margin: 0;
   width: 100%;
-  ${font["title-md"]};
+  ${font["title-sm"]};
 `;
 
 const TitleAccent = styled.p`
   margin: 0;
   width: 100%;
-  ${font["title-lg"]};
+  ${font["title-md"]};
 `;
 
 const FilterRow = styled.div`
@@ -123,10 +155,11 @@ const FilterRow = styled.div`
   flex-wrap: nowrap;
   align-items: center;
   gap: 16px;
-  margin-bottom: 40px;
+  margin-bottom: 16px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 2px;
   scrollbar-width: thin;
+  margin-top: 32px;
 
   &::-webkit-scrollbar {
     height: 6px;
@@ -138,15 +171,14 @@ const FilterHit = styled.button<{ $active: boolean }>`
   margin: 0;
   padding: 0;
   border: none;
-  background: transparent;
   cursor: pointer;
   border-radius: 22px;
-  box-shadow: ${(p) =>
-    p.$active ? `0 0 0 2px ${color.primary}` : "none"};
-  transition: box-shadow 0.15s ease;
+  background: ${(p) =>
+    p.$active ? "rgba(17, 24, 39, 0.2)" : "transparent"};
+  transition: background 0.15s ease;
 
   &:focus-visible {
-    outline: 2px solid ${color.primary};
+    outline: 2px solid ${color.gray400};
     outline-offset: 2px;
   }
 `;
