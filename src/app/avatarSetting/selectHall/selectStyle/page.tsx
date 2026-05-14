@@ -135,7 +135,7 @@ const NextLink = styled(Link)`
   position: fixed;
   z-index: 4;
   right: max(24px, calc((100vw - 1440px) * 0.5 + 62px));
-  bottom: max(24px, calc(100dvh - 80px));
+  bottom: max(24px, env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -157,10 +157,6 @@ const NextLink = styled(Link)`
   &:focus-visible {
     outline: 2px solid ${color.primary};
     outline-offset: 2px;
-  }
-
-  @media (max-height: 900px) {
-    bottom: 24px;
   }
 `;
 
