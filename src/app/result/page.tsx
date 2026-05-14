@@ -81,7 +81,7 @@ export default function ResultPage() {
           </RecommendBlock>
 
           <MoreRow>
-            <MoreLink href="/#select-1">더 많은 드레스 보러가기</MoreLink>
+            <MoreLink href="/dress">더 많은 드레스 보러가기</MoreLink>
             <MoreIconWrap aria-hidden>
               <MoreIcon src="/icon/blackFront.svg" alt="" width={15} height={28} />
             </MoreIconWrap>

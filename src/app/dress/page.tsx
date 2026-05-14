@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import StyleHashTag from "@/src/components/common/styleHashTag";
@@ -94,7 +95,9 @@ export default function DressPage() {
                       <StyleHashTag key={tag} label={tag} />
                     ))}
                   </TagCluster>
-                  <FittingCta type="button">AI 피팅하기</FittingCta>
+                  <FittingCta href="/fitting" aria-label="AI 피팅하기 페이지로">
+                    AI 피팅하기
+                  </FittingCta>
                 </HoverLayer>
               </DressCard>
             ))}
@@ -249,7 +252,7 @@ const TagCluster = styled.div`
   pointer-events: none;
 `;
 
-const FittingCta = styled.button`
+const FittingCta = styled(Link)`
   position: absolute;
   z-index: 1;
   right: 16px;
@@ -266,6 +269,7 @@ const FittingCta = styled.button`
   cursor: pointer;
   text-align: right;
   white-space: nowrap;
+  text-decoration: none;
 
   &:focus-visible {
     outline: 2px solid ${color.white};
