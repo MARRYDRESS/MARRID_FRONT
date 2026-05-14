@@ -3,15 +3,11 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-const BANNER_SRCS = [
-  "/images/banner1.jpg",
-  "/images/banner2.jpg",
-  "/images/banner3.jpg",
-  "/images/banner4.jpg",
-  "/images/banner.png",
-] as const;
-
 const ROTATE_MS = 5000;
+
+export type HeroRotatingBannerProps = {
+  bannerSrcs: readonly string[];
+};
 
 const Root = styled.div`
   position: absolute;
@@ -33,19 +29,21 @@ const Slide = styled.img<{ $active: boolean }>`
   image-rendering: high-quality;
 `;
 
-export default function HeroRotatingBanner() {
+export default function HeroRotatingBanner({ bannerSrcs }: HeroRotatingBannerProps) {
   const [index, setIndex] = useState(0);
+  const count = bannerSrcs.length;
 
   useEffect(() => {
+    if (count <= 1) return;
     const id = window.setInterval(() => {
-      setIndex((i) => (i + 1) % BANNER_SRCS.length);
+      setIndex((i) => (i + 1) % count);
     }, ROTATE_MS);
     return () => window.clearInterval(id);
-  }, []);
+  }, [count]);
 
   return (
     <Root>
-      {BANNER_SRCS.map((src, i) => (
+      {bannerSrcs.map((src, i) => (
         <Slide
           key={src}
           src={src}

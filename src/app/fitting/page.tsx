@@ -5,6 +5,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
+import Header from "@/src/components/layout/header";
 
 const LEFT_HERO = "/mock/avatarResult.jpg";
 
@@ -18,6 +19,7 @@ const FITTING_PICKS = [
 export default function FittingPage() {
   return (
     <Shell>
+      <Header />
       <LeftPane>
         <LeftTopBar>
           <BackLink href="/dress" aria-label="드레스 목록으로">
@@ -54,7 +56,12 @@ export default function FittingPage() {
                     style={{ objectFit: "cover" }}
                   />
                 </PickImageWrap>
-                <FitingButton type="button">AI 피팅하기</FitingButton>
+                <FitingLink
+                  href="/randering?intent=fitting"
+                  aria-label="AI 피팅 로딩으로"
+                >
+                  AI 피팅하기
+                </FitingLink>
               </PickCard>
             ))}
           </PickGrid>
@@ -255,12 +262,15 @@ const PickImageWrap = styled.div`
   inset: 0;
 `;
 
-const FitingButton = styled.button`
+const FitingLink = styled(Link)`
   position: absolute;
   right: 16px;
   bottom: 16px;
   z-index: 1;
   box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: 32px;
   min-width: 97px;
   padding: 0 12px;
@@ -269,6 +279,7 @@ const FitingButton = styled.button`
   background: transparent;
   color: ${color.white};
   cursor: pointer;
+  text-decoration: none;
   ${font["text-sm"]};
 
   &:hover {

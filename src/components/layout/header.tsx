@@ -59,7 +59,6 @@ export default function Header() {
           dismiss();
         }
       } catch {
-        /* ignore invalid href */
       }
     };
 
@@ -80,7 +79,7 @@ export default function Header() {
       <HoverStrip aria-hidden />
       <HeaderBar $peekOnly={peekOnly}>
         <HeaderInner>
-          <Logo href="#top">MERRID</Logo>
+          <Logo href="/">MERRID</Logo>
           <Nav>
             {navItems.map((item) => (
               <NavLink key={item.label} href={item.href}>

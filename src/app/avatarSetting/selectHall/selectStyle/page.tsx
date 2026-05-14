@@ -31,7 +31,7 @@ export default function SelectStylePage() {
         showPaginationDots
         keepOverlayUntilNext
       />
-      <AvatarFlowNextLink href="/randering" aria-label="다음 단계">
+      <AvatarFlowNextLink href="/randering?intent=avatar" aria-label="다음 단계">
         <NextIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />
       </AvatarFlowNextLink>
     </Shell>

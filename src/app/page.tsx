@@ -6,13 +6,15 @@ import font from "@/src/style/font";
 import color from "@/src/style/color";
 import { selectMockItems } from "@/src/mock/mock";
 
+const HERO_BANNER_SRCS = ["/images/banner.png", "/images/banner4.jpg"] as const;
+
 export default function Home() {
   return (
     <Main id="top">
       <Header />
 
       <HeroSection>
-        <HeroRotatingBanner />
+        <HeroRotatingBanner bannerSrcs={HERO_BANNER_SRCS} />
         <HeroOverlay />
         <HeroTitle>
             인생의 한 번뿐인
