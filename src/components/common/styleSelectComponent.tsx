@@ -28,10 +28,6 @@ type StyleSelectSectionProps = {
   subtitle?: string;
   items: StyleSelectItem[];
   showPaginationDots?: boolean;
-  /**
-   * true면 해시 오버레이가 바깥 클릭으로 닫히지 않고,
-   * 마지막 호버·선택 상태가 Next로 이탈할 때까지 유지됩니다.
-   */
   keepOverlayUntilNext?: boolean;
 };
 

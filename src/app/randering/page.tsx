@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import styled, { keyframes } from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
@@ -8,6 +10,15 @@ import color from "@/src/style/color";
 const HERO_SRC = "/images/rander.jpg";
 
 export default function RanderingPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      router.push("/result");
+    }, 3000);
+    return () => window.clearTimeout(id);
+  }, [router]);
+
   return (
     <Shell>
       <VisualPane>
