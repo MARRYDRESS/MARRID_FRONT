@@ -16,9 +16,9 @@ const Pill = styled.span`
   align-items: center;
   justify-content: center;
   padding: 4px 11px;
-  border-radius: 14px;
+  border-radius: 20px;
   border: 1px solid ${color.white};
   color: ${color.white};
-  ${font["text-sm"]};
+  ${font["text-md"]};
   white-space: nowrap;
 `;

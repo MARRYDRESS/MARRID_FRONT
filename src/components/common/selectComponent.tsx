@@ -1,28 +1,28 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import styled, { css } from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
 import SlideButton from "@/src/components/common/slideBtn";
 import SliderPaginationDots from "@/src/components/common/sliderPaginationDots";
-import StyleHashTag from "@/src/components/common/styleHashTag";
-import type { SelectMockItem, StyleSelectItem } from "@/src/mock/mock";
+import {
+  SlideBtnWrap,
+  SliderFrame,
+  Track,
+  Viewport,
+} from "@/src/components/common/selectSlider/primitives";
+import { useSelectSliderState } from "@/src/components/common/selectSlider/useSelectSliderState";
+import type { SelectMockItem } from "@/src/mock/mock";
 
-function isStyleSelectItem(item: SelectMockItem): item is StyleSelectItem {
-  return Array.isArray((item as StyleSelectItem).hashtags);
-}
+const VISIBLE_COUNT = 3;
 
 type SelectSectionProps = {
   id?: string;
   title: string;
-  /** `layout="style"` 등 두 줄 헤더용 보조 문구 */
-  subtitle?: string;
   items: SelectMockItem[];
   showPaginationDots?: boolean;
   titleVariant?: "md" | "sm";
-  layout?: "default" | "hall" | "style";
-  visibleCount?: number;
+  layout?: "default" | "hall";
 };
 
 export default function SelectComponent(props: SelectSectionProps) {
@@ -37,134 +37,32 @@ export default function SelectComponent(props: SelectSectionProps) {
 function SelectComponentInner({
   id,
   title,
-  subtitle,
   items,
   showPaginationDots = false,
   titleVariant = "md",
   layout = "default",
-  visibleCount: visibleCountProp,
 }: SelectSectionProps) {
-  const VISIBLE_COUNT = visibleCountProp ?? 3;
-  const [trackIndex, setTrackIndex] = useState(1);
-  const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  const pages = useMemo(() => {
-    if (items.length === 0) {
-      return [];
-    }
-
-    const pageCount = Math.ceil(items.length / VISIBLE_COUNT);
-
-    return Array.from({ length: pageCount }, (_, pageIndex) => {
-      const start = pageIndex * VISIBLE_COUNT;
-      return Array.from({ length: VISIBLE_COUNT }, (_, offset) => {
-        const index = (start + offset) % items.length;
-        return items[index];
-      });
-    });
-  }, [items, VISIBLE_COUNT]);
-
-  const loopedPages = useMemo(() => {
-    if (pages.length === 0) {
-      return [];
-    }
-    if (pages.length === 1) {
-      return [pages[0], pages[0], pages[0]];
-    }
-    return [pages[pages.length - 1], ...pages, pages[0]];
-  }, [pages]);
-
-  const handlePrev = () => {
-    if (pages.length === 0 || isAnimating) {
-      return;
-    }
-    setIsTransitionEnabled(true);
-    setIsAnimating(true);
-    setTrackIndex((prev) => prev - 1);
-  };
-
-  const handleNext = () => {
-    if (pages.length === 0 || isAnimating) {
-      return;
-    }
-    setIsTransitionEnabled(true);
-    setIsAnimating(true);
-    setTrackIndex((prev) => prev + 1);
-  };
-
-  const handleTrackTransitionEnd = () => {
-    if (pages.length === 0) {
-      setIsAnimating(false);
-      return;
-    }
-
-    if (pages.length === 1) {
-      setIsTransitionEnabled(false);
-      setTrackIndex(1);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => setIsTransitionEnabled(true));
-      });
-      setIsAnimating(false);
-      return;
-    }
-
-    if (trackIndex === 0) {
-      setIsTransitionEnabled(false);
-      setTrackIndex(pages.length);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => setIsTransitionEnabled(true));
-      });
-      setIsAnimating(false);
-      return;
-    }
-
-    if (trackIndex === pages.length + 1) {
-      setIsTransitionEnabled(false);
-      setTrackIndex(1);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => setIsTransitionEnabled(true));
-      });
-      setIsAnimating(false);
-      return;
-    }
-
-    setIsAnimating(false);
-  };
-
-  const activeDotIndex = useMemo(() => {
-    const n = pages.length;
-    if (n <= 1) {
-      return 0;
-    }
-    if (trackIndex === 0) {
-      return n - 1;
-    }
-    if (trackIndex === n + 1) {
-      return 0;
-    }
-    return trackIndex - 1;
-  }, [pages.length, trackIndex]);
+  const {
+    pages,
+    loopedPages,
+    trackIndex,
+    isTransitionEnabled,
+    handlePrev,
+    handleNext,
+    handleTrackTransitionEnd,
+    activeDotIndex,
+  } = useSelectSliderState(items, VISIBLE_COUNT);
 
   const isHall = layout === "hall";
-  const isStyle = layout === "style";
-  const isAvatarFlowSlider = isHall || isStyle;
 
   return (
     <Section id={id} $layout={layout}>
-      {isStyle ? (
-        <TitleStack>
-          <TitleMain>{title}</TitleMain>
-          {subtitle ? <TitleSub>{subtitle}</TitleSub> : null}
-        </TitleStack>
-      ) : (
-        <Title $variant={titleVariant} $layout={layout}>
-          {title}
-        </Title>
-      )}
+      <Title $variant={titleVariant} $layout={layout}>
+        {title}
+      </Title>
 
-      {isAvatarFlowSlider ? (
-        <AvatarFlowSliderShell $layout={isHall ? "hall" : "style"}>
+      {isHall ? (
+        <HallSliderBody>
           <SliderFrame>
             {pages.length > 1 ? (
               <>
@@ -192,17 +90,6 @@ function SelectComponentInner({
                             src={item.image}
                             alt={`${item.label} 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`}
                           />
-                          {layout === "style" &&
-                          isStyleSelectItem(item) &&
-                          item.hashtags.length > 0 ? (
-                            <HashTagOverlay>
-                              <HashTagRow>
-                                {item.hashtags.map((tag) => (
-                                  <StyleHashTag key={tag} label={tag} />
-                                ))}
-                              </HashTagRow>
-                            </HashTagOverlay>
-                          ) : null}
                         </CardImageWrap>
                         <CardLabel $layout={layout}>{item.label}</CardLabel>
                       </Card>
@@ -212,7 +99,7 @@ function SelectComponentInner({
               </Track>
             </Viewport>
           </SliderFrame>
-        </AvatarFlowSliderShell>
+        </HallSliderBody>
       ) : (
         <SliderFrame>
           {pages.length > 1 ? (
@@ -256,25 +143,24 @@ function SelectComponentInner({
         <SliderPaginationDots
           totalPages={pages.length}
           activeIndex={activeDotIndex}
-          placement={isAvatarFlowSlider ? "floatingAvatarFlow" : "below"}
+          placement={isHall ? "floatingAvatarFlow" : "below"}
         />
       ) : null}
     </Section>
   );
 }
 
-const Section = styled.section<{ $layout: "default" | "hall" | "style" }>`
+const Section = styled.section<{ $layout: "default" | "hall" }>`
   box-sizing: border-box;
   margin: 0 auto;
   width: 100%;
   max-width: 1440px;
   padding: 0 clamp(16px, 3vw, 32px);
-  position: ${({ $layout }) => ($layout === "hall" || $layout === "style" ? "relative" : "static")};
-  min-height: ${({ $layout }) =>
-    $layout === "hall" || $layout === "style" ? "min(100dvh, 1024px)" : "0"};
+  position: ${({ $layout }) => ($layout === "hall" ? "relative" : "static")};
+  min-height: ${({ $layout }) => ($layout === "hall" ? "min(100dvh, 1024px)" : "0")};
 `;
 
-const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" | "style" }>`
+const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" }>`
   color: ${color.gray900};
   ${({ $layout, $variant }) =>
     $layout === "hall"
@@ -298,136 +184,46 @@ const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" | "
         `}
 `;
 
-const TitleStack = styled.div`
-  position: absolute;
-  left: 50%;
-  top: 92px;
-  z-index: 3;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  text-align: center;
-  max-width: min(320px, calc(100vw - 48px));
-`;
-
-const TitleMain = styled.h2`
-  margin: 0;
-  padding: 0;
-  color: ${color.black};
-  font-weight: inherit;
-  ${font["title-sm"]};
-`;
-
-const TitleSub = styled.p`
-  margin: 0;
-  padding: 0;
-  color: ${color.black};
-  ${font["text-lg"]};
-`;
-
-const AvatarFlowSliderShell = styled.div<{ $layout: "hall" | "style" }>`
+const HallSliderBody = styled.div`
   box-sizing: border-box;
-  padding-top: ${({ $layout }) => ($layout === "hall" ? "160px" : "196px")};
+  padding-top: 160px;
 `;
 
-const Viewport = styled.div`
-  width: 100%;
-  overflow: hidden;
-`;
-
-const SliderFrame = styled.div`
-  position: relative;
-`;
-
-const SlideBtnWrap = styled.div<{ $position: "left" | "right" }>`
-  position: absolute;
-  top: 50%;
-  z-index: 2;
-  transform: translateY(-50%);
-  ${({ $position }) => ($position === "left" ? "left: 24px;" : "right: 24px;")}
-`;
-
-const Track = styled.div<{
-  $trackIndex: number;
-  $isTransitionEnabled: boolean;
-}>`
-  display: flex;
-  transform: translate3d(-${({ $trackIndex }) => $trackIndex * 100}%, 0, 0);
-  transition: ${({ $isTransitionEnabled }) =>
-    $isTransitionEnabled ? "transform 0.85s cubic-bezier(0.22, 1, 0.36, 1)" : "none"};
-  will-change: transform;
-`;
-
-const Page = styled.div<{ $layout: "default" | "hall" | "style" }>`
+const Page = styled.div<{ $layout: "default" | "hall" }>`
   flex: 0 0 100%;
   display: flex;
   justify-content: center;
   align-items: stretch;
-  gap: ${({ $layout }) => ($layout === "style" ? "16px" : "32px")};
+  gap: 32px;
   ${({ $layout }) =>
-    $layout === "hall" || $layout === "style"
+    $layout === "hall"
       ? css`
           align-items: flex-start;
         `
       : ""}
 `;
 
-const HashTagRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  align-items: center;
-  max-width: 100%;
-`;
-
-const HashTagOverlay = styled.div`
-  position: absolute;
-  inset: 0;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-  background: rgba(17, 24, 39, 0.42);
-  opacity: 0;
-  transition: opacity 0.22s ease;
-  z-index: 1;
-`;
-
-const Card = styled.article<{ $layout: "default" | "hall" | "style" }>`
+const Card = styled.article<{ $layout: "default" | "hall" }>`
   overflow: hidden;
   background: transparent;
   flex: 1 1 0;
   min-width: 0;
   ${({ $layout }) =>
-    $layout === "hall" || $layout === "style"
+    $layout === "hall"
       ? css`
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: ${$layout === "style" ? "4px" : "8px"};
-        `
-      : ""}
-
-  ${({ $layout }) =>
-    $layout === "style"
-      ? css`
-          &:hover ${HashTagOverlay} {
-            opacity: 1;
-          }
+          gap: 8px;
         `
       : ""}
 `;
 
-const CardImageWrap = styled.div<{ $layout: "default" | "hall" | "style" }>`
+const CardImageWrap = styled.div<{ $layout: "default" | "hall" }>`
   width: 100%;
-  aspect-ratio: ${({ $layout }) => ($layout === "style" ? "311 / 411" : "607 / 710")};
+  aspect-ratio: 607 / 710;
   overflow: hidden;
   flex-shrink: 0;
-  position: ${({ $layout }) => ($layout === "style" ? "relative" : "static")};
 `;
 
 const CardImage = styled.img`
@@ -438,12 +234,12 @@ const CardImage = styled.img`
   object-position: center;
 `;
 
-const CardLabel = styled.p<{ $layout: "default" | "hall" | "style" }>`
+const CardLabel = styled.p<{ $layout: "default" | "hall" }>`
   text-align: center;
-  ${({ $layout }) => ($layout === "style" ? font["text-md"] : font["text-lg"])};
+  ${font["text-lg"]};
   color: ${color.black};
   ${({ $layout }) =>
-    $layout === "hall" || $layout === "style"
+    $layout === "hall"
       ? css`
           margin: 0;
           padding: 0;
@@ -452,4 +248,3 @@ const CardLabel = styled.p<{ $layout: "default" | "hall" | "style" }>`
           padding: 12px 0;
         `}
 `;
-

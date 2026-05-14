@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import styled from "styled-components";
 import AvatarFlowNextLink from "@/src/components/avatar/avatarFlowNextLink";
-import SelectComponent from "@/src/components/common/selectComponent";
+import StyleSelectComponent from "@/src/components/common/styleSelectComponent";
 import color from "@/src/style/color";
 import { styleSelectItems } from "@/src/mock/mock";
 
@@ -23,16 +23,14 @@ export default function SelectStylePage() {
 
   return (
     <Shell>
-      <SelectComponent
+      <StyleSelectComponent
         id="style-select"
         title="어떤 스타일을 원하나요?"
         subtitle="추구미를 선택해주세요"
-        layout="style"
-        visibleCount={4}
         items={styleSelectItems}
         showPaginationDots
       />
-      <AvatarFlowNextLink href="/" aria-label="다음 단계">
+      <AvatarFlowNextLink href="/randering" aria-label="다음 단계">
         <NextIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />
       </AvatarFlowNextLink>
     </Shell>
