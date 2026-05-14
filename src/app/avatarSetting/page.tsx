@@ -91,7 +91,7 @@ export default function AvatarSettingPage() {
           </UploadZone>
 
           <Footnote>
-            얼굴과 몸매가 잘 드러나는 사진을 업로드 해주세요
+            이런 사진이 좋아요!
           </Footnote>
 
           <ExamplesRow>

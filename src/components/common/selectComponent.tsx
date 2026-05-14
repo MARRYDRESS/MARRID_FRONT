@@ -5,6 +5,7 @@ import styled, { css } from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
 import SlideButton from "@/src/components/common/slideBtn";
+import SliderPaginationDots from "@/src/components/common/sliderPaginationDots";
 import type { SelectMockItem } from "@/src/mock/mock";
 
 type SelectSectionProps = {
@@ -222,29 +223,11 @@ function SelectComponentInner({
       )}
 
       {showPaginationDots && pages.length > 1 ? (
-        isHall ? (
-          <DotsRowHall aria-hidden>
-            {pages.length === 2
-              ? [0, 1, 2, 3, 4, 5].map((i) => (
-                  <DotHall
-                    key={i}
-                    $active={
-                      (activeDotIndex === 0 && i === 0) ||
-                      (activeDotIndex === 1 && i === 3)
-                    }
-                  />
-                ))
-              : pages.map((_, i) => (
-                  <DotHall key={i} $active={i === activeDotIndex} />
-                ))}
-          </DotsRowHall>
-        ) : (
-          <DotsRow aria-hidden>
-            {pages.map((_, i) => (
-              <Dot key={i} $active={i === activeDotIndex} />
-            ))}
-          </DotsRow>
-        )
+        <SliderPaginationDots
+          totalPages={pages.length}
+          activeIndex={activeDotIndex}
+          placement={isHall ? "floating" : "below"}
+        />
       ) : null}
     </Section>
   );
@@ -375,44 +358,5 @@ const CardLabel = styled.p<{ $layout: "default" | "hall" }>`
       : css`
           padding: 18px 0;
         `}
-`;
-
-const DotsRow = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  padding: 32px 0 0;
-`;
-
-const Dot = styled.span<{ $active: boolean }>`
-  box-sizing: border-box;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 1px solid ${color.gray900};
-  background: ${({ $active }) => ($active ? color.gray900 : "transparent")};
-  flex-shrink: 0;
-`;
-
-const DotsRowHall = styled.div`
-  position: absolute;
-  left: 50%;
-  bottom: clamp(20px, 3vh, 40px);
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 2;
-`;
-
-const DotHall = styled.span<{ $active: boolean }>`
-  box-sizing: border-box;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  border: 1px solid ${color.gray900};
-  background: ${({ $active }) => ($active ? color.gray900 : "transparent")};
 `;
 
