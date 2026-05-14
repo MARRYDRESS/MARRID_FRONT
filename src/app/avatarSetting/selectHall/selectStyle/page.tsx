@@ -32,7 +32,7 @@ export default function SelectStylePage() {
         ))}
       </Grid>
 
-      <NextLink href="/avatarSetting" aria-label="다음 단계">
+      <NextLink href="/randering" aria-label="아바타 생성 대기 화면으로 이동">
         <NextIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />
       </NextLink>
     </Shell>
