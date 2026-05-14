@@ -81,7 +81,8 @@ const HeaderInner = styled.div`
   max-width: 1440px;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  box-sizing: border-box;
+  padding: 0 clamp(24px, 4vw, 48px);
 `;
 
 const Logo = styled(Link)`
