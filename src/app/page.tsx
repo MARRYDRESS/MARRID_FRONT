@@ -26,6 +26,7 @@ export default function Home() {
       <SelectComponent
         id="select-1"
         title="좋아하는 드레스를 찾아보세요"
+        titleVariant="sm"
         items={selectMockItems}
       />
 
@@ -34,6 +35,7 @@ export default function Home() {
       <SelectComponent
         id="select-2"
         title="추구미가 우아함이라면 머메이드를 추천해요"
+        titleVariant="sm"
         items={selectMockItems}
       />
 

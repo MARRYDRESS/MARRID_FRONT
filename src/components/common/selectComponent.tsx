@@ -275,8 +275,8 @@ const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" }>`
         `
       : css`
           padding: ${$variant === "sm"
-            ? "clamp(20px, 4vh, 48px) 0 clamp(12px, 2vh, 32px)"
-            : "48px 0"};
+            ? "clamp(20px, 4vh, 48px) 0 clamp(28px, 3.5vh, 56px)"
+            : "48px 0 72px"};
           text-align: center;
           white-space: normal;
           ${$variant === "sm" ? font["title-sm"] : font["title-md"]};
@@ -285,7 +285,7 @@ const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" }>`
 
 const HallSliderBody = styled.div`
   box-sizing: border-box;
-  padding-top: 152px;
+  padding-top: 176px;
 `;
 
 const Viewport = styled.div`
@@ -363,7 +363,7 @@ const CardImage = styled.img`
 
 const CardLabel = styled.p<{ $layout: "default" | "hall" }>`
   text-align: center;
-  ${font["title-sm"]};
+  ${font["text-lg"]};
   color: ${color.black};
   ${({ $layout }) =>
     $layout === "hall"
