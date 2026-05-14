@@ -1,28 +1,31 @@
 "use client";
 
 import Image from "next/image";
+import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
+import StyleHashTag from "@/src/components/common/styleHashTag";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
-import { selectMockItems } from "@/src/mock/mock";
-
-const FILTER_TAGS = [
-  "#발랄한",
-  "#러블리한",
-  "#우아한",
-  "#페미닌",
-  "#여성스러운",
-  "#로맨틱",
-  "#깔끔",
-  "#클래식",
-  "#글래머",
-] as const;
-
-const FIRST_CARD_TAGS = ["#러블리한", "#발랄한", "#발랄한"] as const;
-
-const DRESS_CARDS = selectMockItems.slice(0, 6);
+import {
+  dressFilterTagOptions,
+  dressGalleryItems,
+  type DressFilterTag,
+} from "@/src/mock/mock";
 
 export default function DressPage() {
+  const [selectedTag, setSelectedTag] = useState<DressFilterTag | null>(null);
+
+  const toggleFilter = useCallback((tag: DressFilterTag) => {
+    setSelectedTag((prev) => (prev === tag ? null : tag));
+  }, []);
+
+  const visibleItems = useMemo(() => {
+    if (!selectedTag) return dressGalleryItems;
+    return dressGalleryItems.filter((item) =>
+      item.filterTags.includes(selectedTag),
+    );
+  }, [selectedTag]);
+
   return (
     <Shell>
       <Inner>
@@ -32,39 +35,47 @@ export default function DressPage() {
         </Headline>
 
         <FilterRow aria-label="스타일 필터">
-          {FILTER_TAGS.map((tag) => (
-            <FilterTag key={tag} type="button">
-              {tag}
-            </FilterTag>
+          {dressFilterTagOptions.map((tag) => (
+            <FilterHit
+              key={tag}
+              type="button"
+              $active={selectedTag === tag}
+              onClick={() => toggleFilter(tag)}
+              aria-pressed={selectedTag === tag}
+            >
+              <StyleHashTag variant="filter" label={tag} />
+            </FilterHit>
           ))}
         </FilterRow>
 
-        <DressGrid>
-          {DRESS_CARDS.map((item, index) => (
-            <DressCard key={item.image}>
-              <DressImageWrap>
-                <Image
-                  src={item.image}
-                  alt={item.label}
-                  fill
-                  sizes="(max-width: 900px) 100vw, 420px"
-                  style={{ objectFit: "cover" }}
-                />
-              </DressImageWrap>
-              {index === 0 ? (
-                <>
-                  <CardDim />
+        {visibleItems.length === 0 ? (
+          <EmptyMessage>이 스타일에 맞는 드레스가 없어요.</EmptyMessage>
+        ) : (
+          <DressGrid>
+            {visibleItems.map((item) => (
+              <DressCard key={item.id}>
+                <DressImageWrap>
+                  <Image
+                    src={item.image}
+                    alt={item.label}
+                    fill
+                    sizes="(max-width: 900px) 100vw, 420px"
+                    style={{ objectFit: "cover" }}
+                  />
+                </DressImageWrap>
+                <HoverLayer className="dress-hover-layer">
+                  <CardDim aria-hidden />
                   <TagCluster>
-                    {FIRST_CARD_TAGS.map((tag, tagIndex) => (
-                      <OverlayTag key={`${tag}-${tagIndex}`}>{tag}</OverlayTag>
+                    {item.filterTags.map((tag) => (
+                      <StyleHashTag key={tag} label={tag} />
                     ))}
                   </TagCluster>
                   <FittingCta type="button">AI 피팅하기</FittingCta>
-                </>
-              ) : null}
-            </DressCard>
-          ))}
-        </DressGrid>
+                </HoverLayer>
+              </DressCard>
+            ))}
+          </DressGrid>
+        )}
       </Inner>
     </Shell>
   );
@@ -122,19 +133,17 @@ const FilterRow = styled.div`
   }
 `;
 
-const FilterTag = styled.button`
-  box-sizing: border-box;
+const FilterHit = styled.button<{ $active: boolean }>`
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 17px;
-  border-radius: 20px;
-  border: 1px solid ${color.gray900};
-  background: ${color.white};
-  color: ${color.gray700};
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
   cursor: pointer;
-  ${font["text-lg"]};
+  border-radius: 22px;
+  box-shadow: ${(p) =>
+    p.$active ? `0 0 0 2px ${color.primary}` : "none"};
+  transition: box-shadow 0.15s ease;
 
   &:focus-visible {
     outline: 2px solid ${color.primary};
@@ -164,11 +173,36 @@ const DressCard = styled.article`
   aspect-ratio: 420 / 567;
   overflow: hidden;
   border-radius: 0;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover .dress-hover-layer,
+    &:focus-within .dress-hover-layer {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
 `;
 
 const DressImageWrap = styled.div`
   position: absolute;
   inset: 0;
+`;
+
+const HoverLayer = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.2s ease;
+
+  @media (hover: hover) and (pointer: fine) {
+    opacity: 0;
+    pointer-events: none;
+  }
 `;
 
 const CardDim = styled.div`
@@ -179,34 +213,21 @@ const CardDim = styled.div`
 `;
 
 const TagCluster = styled.div`
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 8px;
   max-width: calc(100% - 32px);
+  margin: 0 auto;
   pointer-events: none;
-`;
-
-const OverlayTag = styled.span`
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 17px;
-  border-radius: 20px;
-  border: 1px solid ${color.white};
-  color: ${color.white};
-  ${font["text-lg"]};
-  white-space: nowrap;
 `;
 
 const FittingCta = styled.button`
   position: absolute;
+  z-index: 1;
   right: 16px;
   bottom: 16px;
   margin: 0;
@@ -226,4 +247,11 @@ const FittingCta = styled.button`
     outline: 2px solid ${color.white};
     outline-offset: 2px;
   }
+`;
+
+const EmptyMessage = styled.p`
+  margin: 0;
+  padding: 48px 0;
+  ${font["text-md"]};
+  color: ${color.gray600};
 `;
