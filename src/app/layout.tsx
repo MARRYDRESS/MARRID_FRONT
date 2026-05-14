@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import GlobalStyle from "@/src/style/globalStyle";
 import StyledComponentsRegistry from "@/src/lib/styledComponentsRegistry";
+import PageTransition from "@/src/components/layout/pageTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +31,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <StyledComponentsRegistry><GlobalStyle />{children}</StyledComponentsRegistry>
+        <StyledComponentsRegistry>
+          <GlobalStyle />
+          <PageTransition>{children}</PageTransition>
+        </StyledComponentsRegistry>
       </body>
     </html>
   );
