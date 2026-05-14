@@ -238,7 +238,7 @@ const Section = styled.section<{ $layout: "default" | "hall" }>`
   margin: 0 auto;
   width: 100%;
   max-width: 1440px;
-  padding: 0 clamp(20px, 4vw, 40px);
+  padding: 0 clamp(16px, 3vw, 32px);
   position: ${({ $layout }) => ($layout === "hall" ? "relative" : "static")};
   min-height: ${({ $layout }) => ($layout === "hall" ? "min(100dvh, 1024px)" : "0")};
 `;
@@ -259,8 +259,8 @@ const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" }>`
         `
       : css`
           padding: ${$variant === "sm"
-            ? "clamp(24px, 4vh, 52px) 0 clamp(32px, 4vh, 64px)"
-            : "52px 0 80px"};
+            ? "clamp(18px, 3vh, 40px) 0 clamp(22px, 3vh, 48px)"
+            : "40px 0 56px"};
           text-align: center;
           white-space: normal;
           ${$variant === "sm" ? font["title-sm"] : font["title-md"]};
@@ -269,7 +269,7 @@ const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" }>`
 
 const HallSliderBody = styled.div`
   box-sizing: border-box;
-  padding-top: 176px;
+  padding-top: 160px;
 `;
 
 const Viewport = styled.div`
@@ -303,7 +303,9 @@ const Track = styled.div<{
 const Page = styled.div<{ $layout: "default" | "hall" }>`
   flex: 0 0 100%;
   display: flex;
-  gap: 48px;
+  justify-content: center;
+  align-items: stretch;
+  gap: 32px;
   ${({ $layout }) =>
     $layout === "hall"
       ? css`
@@ -315,19 +317,17 @@ const Page = styled.div<{ $layout: "default" | "hall" }>`
 const Card = styled.article<{ $layout: "default" | "hall" }>`
   overflow: hidden;
   background: transparent;
+  flex: 1 1 0;
+  min-width: 0;
   ${({ $layout }) =>
     $layout === "hall"
       ? css`
-          flex: 0 0 calc((100% - 96px) / 3);
-          min-width: 0;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 10px;
+          gap: 8px;
         `
-      : css`
-          flex: 0 0 calc((100% - 96px) / 3);
-        `}
+      : ""}
 `;
 
 const CardImageWrap = styled.div`
@@ -356,7 +356,7 @@ const CardLabel = styled.p<{ $layout: "default" | "hall" }>`
           padding: 0;
         `
       : css`
-          padding: 18px 0;
+          padding: 12px 0;
         `}
 `;
 
