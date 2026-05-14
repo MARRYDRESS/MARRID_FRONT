@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect, useLayoutEffect, useState } from "react";
 import Link from "next/link";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
+
+const STORAGE_KEY = "marrid_home_header_intro_dismissed";
 
 const navItems = [
   { label: "아바타 만들기", href: "/avatarSetting" },
@@ -12,11 +15,70 @@ const navItems = [
   { label: "로그인", href: "#top" },
 ];
 
+function readIntroDismissed(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  return sessionStorage.getItem(STORAGE_KEY) === "1";
+}
+
 export default function Header() {
+  const [introDismissed, setIntroDismissed] = useState(false);
+
+  useLayoutEffect(() => {
+    setIntroDismissed(readIntroDismissed());
+  }, []);
+
+  useEffect(() => {
+    const dismiss = () => {
+      sessionStorage.setItem(STORAGE_KEY, "1");
+      setIntroDismissed(true);
+    };
+
+    const onScroll = () => {
+      if (window.scrollY > 24) {
+        dismiss();
+      }
+    };
+
+    const onClickCapture = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement | null)?.closest("a[href]");
+      if (!el) {
+        return;
+      }
+      const raw = el.getAttribute("href");
+      if (!raw || raw.startsWith("mailto:") || raw.startsWith("tel:")) {
+        return;
+      }
+      try {
+        const url = new URL(raw, window.location.href);
+        if (
+          url.pathname !== window.location.pathname ||
+          url.search !== window.location.search
+        ) {
+          dismiss();
+        }
+      } catch {
+        /* ignore invalid href */
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    document.addEventListener("click", onClickCapture, true);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("click", onClickCapture, true);
+    };
+  }, []);
+
+  const peekOnly = introDismissed;
+
   return (
-    <HeaderContainer>
+    <HeaderContainer $peekOnly={peekOnly}>
       <HoverStrip aria-hidden />
-      <HeaderBar>
+      <HeaderBar $peekOnly={peekOnly}>
         <HeaderInner>
           <Logo href="#top">MERRID</Logo>
           <Nav>
@@ -32,30 +94,35 @@ export default function Header() {
   );
 }
 
-const HeaderBar = styled.header`
+const HeaderBar = styled.header<{ $peekOnly: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 50;
-  transform: translateY(-100%);
+  transform: translateY(${({ $peekOnly }) => ($peekOnly ? "-100%" : "0")});
   border-bottom: 1px solid #cfcfcf;
   background: ${color.white};
   transition: transform 0.45s ease;
   backdrop-filter: blur(6px);
 `;
 
-const HeaderContainer = styled.div`
+const HeaderContainer = styled.div<{ $peekOnly: boolean }>`
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 50;
   width: 100%;
   height: 0;
 
-  &:hover ${HeaderBar},
-  &:focus-within ${HeaderBar} {
-    transform: translateY(0);
-  }
+  ${({ $peekOnly }) =>
+    $peekOnly
+      ? css`
+          &:hover ${HeaderBar},
+          &:focus-within ${HeaderBar} {
+            transform: translateY(0);
+          }
+        `
+      : ""}
 
   @media (hover: none) {
     ${HeaderBar} {
