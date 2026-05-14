@@ -1,7 +1,11 @@
 import styled, { css } from "styled-components";
 import color from "@/src/style/color";
+import { avatarFlowPaginationDotsAlignedCss } from "@/src/components/avatar/avatarFlowLayout";
 
-export type SliderPaginationDotsPlacement = "below" | "floating";
+export type SliderPaginationDotsPlacement =
+  | "below"
+  | "floating"
+  | "floatingAvatarFlow";
 
 const Row = styled.div<{ $placement: SliderPaginationDotsPlacement }>`
   display: flex;
@@ -10,19 +14,21 @@ const Row = styled.div<{ $placement: SliderPaginationDotsPlacement }>`
   flex-shrink: 0;
 
   ${({ $placement }) =>
-    $placement === "floating"
-      ? css`
-          position: absolute;
-          left: 50%;
-          bottom: clamp(20px, 3vh, 40px);
-          transform: translateX(-50%);
-          gap: 8px;
-          z-index: 2;
-        `
-      : css`
-          gap: 10px;
-          padding: 32px 0 0;
-        `}
+    $placement === "floatingAvatarFlow"
+      ? avatarFlowPaginationDotsAlignedCss
+      : $placement === "floating"
+        ? css`
+            position: absolute;
+            left: 50%;
+            bottom: clamp(20px, 3vh, 40px);
+            transform: translateX(-50%);
+            gap: 8px;
+            z-index: 2;
+          `
+        : css`
+            gap: 10px;
+            padding: 32px 0 0;
+          `}
 `;
 
 const Dot = styled.span<{ $active: boolean }>`

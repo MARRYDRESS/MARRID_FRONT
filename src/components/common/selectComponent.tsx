@@ -226,7 +226,7 @@ function SelectComponentInner({
         <SliderPaginationDots
           totalPages={pages.length}
           activeIndex={activeDotIndex}
-          placement={isHall ? "floating" : "below"}
+          placement={isHall ? "floatingAvatarFlow" : "below"}
         />
       ) : null}
     </Section>

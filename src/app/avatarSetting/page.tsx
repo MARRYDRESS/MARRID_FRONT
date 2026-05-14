@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+import AvatarFlowNextLink from "@/src/components/avatar/avatarFlowNextLink";
 import ExampleComponent from "@/src/components/common/exampleComponent";
 import SideBanner from "@/src/components/common/sideBanner";
 import color from "@/src/style/color";
@@ -98,16 +98,12 @@ export default function AvatarSettingPage() {
             <ExampleComponent variant="face" />
             <ExampleComponent variant="body" />
           </ExamplesRow>
-
-          <BottomBlock>
-            <NextRow>
-              <NextLink href="/avatarSetting/selectHall" aria-label="다음 단계">
-                <IconImg src="/icon/blackFront.svg" alt="" width={17} height={32} />
-              </NextLink>
-            </NextRow>
-          </BottomBlock>
         </RightInner>
       </RightPane>
+
+      <AvatarFlowNextLink href="/avatarSetting/selectHall" aria-label="다음 단계">
+        <IconImg src="/icon/blackFront.svg" alt="" width={17} height={32} />
+      </AvatarFlowNextLink>
     </Shell>
   );
 }
@@ -149,7 +145,7 @@ const RightInner = styled.div`
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: clamp(28px, 8vh, 111px) clamp(20px, 4vw, 46px) clamp(16px, 4vh, 48px)
+  padding: clamp(28px, 8vh, 111px) clamp(20px, 4vw, 46px) clamp(72px, 11vh, 104px)
     clamp(24px, 6.1vw, 88px);
   box-sizing: border-box;
 `;
@@ -241,14 +237,6 @@ const ExamplesRow = styled.div`
   align-content: stretch;
 `;
 
-const BottomBlock = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  margin-top: auto;
-  padding-top: clamp(8px, 1.5vh, 24px);
-`;
-
 const Footnote = styled.p`
   margin: clamp(16px, 2.5vh, 39px) 0 clamp(12px, 2vh, 44px);
   width: 100%;
@@ -258,32 +246,4 @@ const Footnote = styled.p`
   text-align: left;
   color: ${color.black};
   flex-shrink: 0;
-`;
-
-const NextRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-`;
-
-const NextLink = styled(Link)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  padding: 0;
-  border-radius: 100px;
-  border: 1px solid ${color.gray900};
-  background: ${color.white};
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
-  text-decoration: none;
-  color: inherit;
-  &:hover {
-    background: ${color.gray100};
-  }
-  &:focus-visible {
-    outline: 2px solid ${color.primary};
-    outline-offset: 2px;
-  }
 `;
