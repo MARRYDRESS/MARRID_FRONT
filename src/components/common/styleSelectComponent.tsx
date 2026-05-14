@@ -28,6 +28,11 @@ type StyleSelectSectionProps = {
   subtitle?: string;
   items: StyleSelectItem[];
   showPaginationDots?: boolean;
+  /**
+   * true면 해시 오버레이가 바깥 클릭으로 닫히지 않고,
+   * 마지막 호버·선택 상태가 Next로 이탈할 때까지 유지됩니다.
+   */
+  keepOverlayUntilNext?: boolean;
 };
 
 export default function StyleSelectComponent(props: StyleSelectSectionProps) {
@@ -45,6 +50,7 @@ function StyleSelectComponentInner({
   subtitle,
   items,
   showPaginationDots = false,
+  keepOverlayUntilNext = false,
 }: StyleSelectSectionProps) {
   const {
     pages,
@@ -58,9 +64,10 @@ function StyleSelectComponentInner({
   } = useSelectSliderState(items, VISIBLE_COUNT);
 
   const [styleOverlayPinnedKey, setStyleOverlayPinnedKey] = useState<string | null>(null);
+  const [persistHoverKey, setPersistHoverKey] = useState<string | null>(null);
 
   useEffect(() => {
-    if (styleOverlayPinnedKey == null) {
+    if (keepOverlayUntilNext || styleOverlayPinnedKey == null) {
       return;
     }
     const onDocPointerDown = (e: PointerEvent) => {
@@ -104,14 +111,25 @@ function StyleSelectComponentInner({
                   {page.map((item, cardIndex) => {
                     const cardKey = styleSelectCardKey(item);
                     const showHash = item.hashtags.length > 0;
-                    const overlayOpen = showHash && styleOverlayPinnedKey === cardKey;
+                    const overlayShown =
+                      showHash &&
+                      (styleOverlayPinnedKey === cardKey ||
+                        (keepOverlayUntilNext &&
+                          styleOverlayPinnedKey == null &&
+                          persistHoverKey === cardKey));
 
                     return (
                       <Card
                         key={`${item.image}-${pageIndex}-${cardIndex}`}
-                        $overlayOpen={overlayOpen}
+                        $overlayOpen={overlayShown}
+                        $useCssHoverOverlay={showHash && !keepOverlayUntilNext}
                         $hashInteractive={showHash}
                         data-style-select-card={showHash ? "" : undefined}
+                        onMouseEnter={() => {
+                          if (keepOverlayUntilNext && showHash) {
+                            setPersistHoverKey(cardKey);
+                          }
+                        }}
                         onClick={
                           showHash
                             ? () =>
@@ -231,13 +249,17 @@ const HashTagOverlay = styled.div`
   align-items: center;
   justify-content: center;
   padding: 12px;
-  background: rgba(17, 24, 39, 0.42);
+  background: rgba(0, 0, 0, 0.25);
   opacity: 0;
   transition: opacity 0.22s ease;
   z-index: 1;
 `;
 
-const Card = styled.article<{ $overlayOpen?: boolean; $hashInteractive?: boolean }>`
+const Card = styled.article<{
+  $overlayOpen?: boolean;
+  $useCssHoverOverlay?: boolean;
+  $hashInteractive?: boolean;
+}>`
   overflow: hidden;
   background: transparent;
   flex: 1 1 0;
@@ -254,9 +276,14 @@ const Card = styled.article<{ $overlayOpen?: boolean; $hashInteractive?: boolean
         `
       : ""}
 
-  &:hover ${HashTagOverlay} {
-    opacity: 1;
-  }
+  ${({ $useCssHoverOverlay }) =>
+    $useCssHoverOverlay
+      ? css`
+          &:hover ${HashTagOverlay} {
+            opacity: 1;
+          }
+        `
+      : ""}
 
   ${({ $overlayOpen }) =>
     $overlayOpen

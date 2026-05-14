@@ -29,6 +29,7 @@ export default function SelectStylePage() {
         subtitle="추구미를 선택해주세요"
         items={styleSelectItems}
         showPaginationDots
+        keepOverlayUntilNext
       />
       <AvatarFlowNextLink href="/randering" aria-label="다음 단계">
         <NextIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />

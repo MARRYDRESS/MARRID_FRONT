@@ -30,6 +30,7 @@ export default function SelectHallPage() {
         layout="hall"
         items={hallSelectItems}
         showPaginationDots
+        keepDimUntilNext
       />
       <AvatarFlowNextLink
         href="/avatarSetting/selectHall/selectStyle"

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import styled, { css } from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
@@ -14,6 +15,10 @@ import {
 import { useSelectSliderState } from "@/src/components/common/selectSlider/useSelectSliderState";
 import type { SelectMockItem } from "@/src/mock/mock";
 
+function selectCardKey(item: SelectMockItem): string {
+  return `${item.image}|${item.label}`;
+}
+
 const VISIBLE_COUNT = 3;
 
 type SelectSectionProps = {
@@ -23,6 +28,11 @@ type SelectSectionProps = {
   showPaginationDots?: boolean;
   titleVariant?: "md" | "sm";
   layout?: "default" | "hall";
+  /**
+   * true면 카드 딤(호버·선택)이 문서 바깥 클릭으로 풀리지 않고,
+   * 마지막으로 포인터가 올라간 카드 딤이 Next로 페이지 이탈할 때까지 유지됩니다. (홀 선택 등)
+   */
+  keepDimUntilNext?: boolean;
 };
 
 export default function SelectComponent(props: SelectSectionProps) {
@@ -41,6 +51,7 @@ function SelectComponentInner({
   showPaginationDots = false,
   titleVariant = "md",
   layout = "default",
+  keepDimUntilNext = false,
 }: SelectSectionProps) {
   const {
     pages,
@@ -54,6 +65,63 @@ function SelectComponentInner({
   } = useSelectSliderState(items, VISIBLE_COUNT);
 
   const isHall = layout === "hall";
+
+  const [selectedCardKey, setSelectedCardKey] = useState<string | null>(null);
+  const [persistHoverKey, setPersistHoverKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (keepDimUntilNext || selectedCardKey == null) {
+      return;
+    }
+    const onDocPointerDown = (e: PointerEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (!el?.closest("[data-select-card]")) {
+        setSelectedCardKey(null);
+      }
+    };
+    document.addEventListener("pointerdown", onDocPointerDown);
+    return () => document.removeEventListener("pointerdown", onDocPointerDown);
+  }, [selectedCardKey]);
+
+  const renderPages = (pageLayout: "default" | "hall") =>
+    loopedPages.map((page, pageIndex) => (
+      <Page key={`page-${pageIndex}`} $layout={pageLayout}>
+        {page.map((item, cardIndex) => {
+          const itemKey = selectCardKey(item);
+          const dimOpen =
+            selectedCardKey === itemKey ||
+            (keepDimUntilNext &&
+              selectedCardKey == null &&
+              persistHoverKey === itemKey);
+          return (
+            <Card
+              key={`${item.image}-${pageIndex}-${cardIndex}`}
+              $layout={pageLayout}
+              $dimOpen={dimOpen}
+              $useCssHoverDim={!keepDimUntilNext}
+              data-select-card=""
+              onMouseEnter={() => {
+                if (keepDimUntilNext) {
+                  setPersistHoverKey(itemKey);
+                }
+              }}
+              onClick={() =>
+                setSelectedCardKey((prev) => (prev === itemKey ? null : itemKey))
+              }
+            >
+              <CardImageWrap $layout={pageLayout}>
+                <CardImage
+                  src={item.image}
+                  alt={`${item.label} 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`}
+                />
+                <CardDimOverlay aria-hidden />
+              </CardImageWrap>
+              <CardLabel $layout={pageLayout}>{item.label}</CardLabel>
+            </Card>
+          );
+        })}
+      </Page>
+    ));
 
   return (
     <Section id={id} $layout={layout}>
@@ -81,21 +149,7 @@ function SelectComponentInner({
                 $isTransitionEnabled={isTransitionEnabled}
                 onTransitionEnd={handleTrackTransitionEnd}
               >
-                {loopedPages.map((page, pageIndex) => (
-                  <Page key={`page-${pageIndex}`} $layout={layout}>
-                    {page.map((item, cardIndex) => (
-                      <Card key={`${item.image}-${pageIndex}-${cardIndex}`} $layout={layout}>
-                        <CardImageWrap $layout={layout}>
-                          <CardImage
-                            src={item.image}
-                            alt={`${item.label} 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`}
-                          />
-                        </CardImageWrap>
-                        <CardLabel $layout={layout}>{item.label}</CardLabel>
-                      </Card>
-                    ))}
-                  </Page>
-                ))}
+                {renderPages("hall")}
               </Track>
             </Viewport>
           </SliderFrame>
@@ -119,21 +173,7 @@ function SelectComponentInner({
               $isTransitionEnabled={isTransitionEnabled}
               onTransitionEnd={handleTrackTransitionEnd}
             >
-              {loopedPages.map((page, pageIndex) => (
-                <Page key={`page-${pageIndex}`} $layout={layout}>
-                  {page.map((item, cardIndex) => (
-                    <Card key={`${item.image}-${pageIndex}-${cardIndex}`} $layout={layout}>
-                      <CardImageWrap $layout={layout}>
-                        <CardImage
-                          src={item.image}
-                          alt={`${item.label} 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`}
-                        />
-                      </CardImageWrap>
-                      <CardLabel $layout={layout}>{item.label}</CardLabel>
-                    </Card>
-                  ))}
-                </Page>
-              ))}
+              {renderPages("default")}
             </Track>
           </Viewport>
         </SliderFrame>
@@ -203,11 +243,27 @@ const Page = styled.div<{ $layout: "default" | "hall" }>`
       : ""}
 `;
 
-const Card = styled.article<{ $layout: "default" | "hall" }>`
+const CardDimOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  z-index: 1;
+  pointer-events: none;
+`;
+
+const Card = styled.article<{
+  $layout: "default" | "hall";
+  $dimOpen: boolean;
+  $useCssHoverDim: boolean;
+}>`
   overflow: hidden;
   background: transparent;
   flex: 1 1 0;
   min-width: 0;
+  cursor: pointer;
   ${({ $layout }) =>
     $layout === "hall"
       ? css`
@@ -217,9 +273,28 @@ const Card = styled.article<{ $layout: "default" | "hall" }>`
           gap: 8px;
         `
       : ""}
+
+  ${({ $useCssHoverDim }) =>
+    $useCssHoverDim
+      ? css`
+          &:hover ${CardDimOverlay} {
+            opacity: 1;
+          }
+        `
+      : ""}
+
+  ${({ $dimOpen }) =>
+    $dimOpen
+      ? css`
+          & ${CardDimOverlay} {
+            opacity: 1;
+          }
+        `
+      : ""}
 `;
 
 const CardImageWrap = styled.div<{ $layout: "default" | "hall" }>`
+  position: relative;
   width: 100%;
   aspect-ratio: 607 / 710;
   overflow: hidden;
