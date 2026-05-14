@@ -46,38 +46,42 @@ export default function ResultPage() {
 
       <RightPane>
         <RightInner>
-          <SectionTitle>
-            가장 잘 어울리는 드레스는 오간자 실크 &amp; A라인 이예요
-          </SectionTitle>
-          <PickGrid>
-            {PICKS_ROW1.map((p) => (
-              <PickCard key={p.src}>
-                <PickImageWrap>
-                  <Image src={p.src} alt={p.alt} fill sizes="362px" style={{ objectFit: "cover" }} />
-                </PickImageWrap>
-                <FitingButton type="button">AI 피팅하기</FitingButton>
-              </PickCard>
-            ))}
-          </PickGrid>
+          <RecommendBlock>
+            <SectionTitle>
+              가장 잘 어울리는 드레스는 오간자 실크 &amp; A라인 이예요
+            </SectionTitle>
+            <PickGrid>
+              {PICKS_ROW1.map((p) => (
+                <PickCard key={p.src}>
+                  <PickImageWrap>
+                    <Image src={p.src} alt={p.alt} fill sizes="362px" style={{ objectFit: "cover" }} />
+                  </PickImageWrap>
+                  <FitingButton type="button">AI 피팅하기</FitingButton>
+                </PickCard>
+              ))}
+            </PickGrid>
+          </RecommendBlock>
 
-          <SectionTitle $tight>
-            머메이드를 입고 싶다면 세미 머메이드를 추천해요
-          </SectionTitle>
-          <PickGrid>
-            {PICKS_ROW2.map((p) => (
-              <PickCard key={p.src}>
-                <PickImageWrap>
-                  <Image src={p.src} alt={p.alt} fill sizes="362px" style={{ objectFit: "cover" }} />
-                </PickImageWrap>
-                <FitingButton type="button">AI 피팅하기</FitingButton>
-              </PickCard>
-            ))}
-          </PickGrid>
+          <RecommendBlock>
+            <SectionTitle $tight>
+              머메이드를 입고 싶다면 세미 머메이드를 추천해요
+            </SectionTitle>
+            <PickGrid>
+              {PICKS_ROW2.map((p) => (
+                <PickCard key={p.src}>
+                  <PickImageWrap>
+                    <Image src={p.src} alt={p.alt} fill sizes="362px" style={{ objectFit: "cover" }} />
+                  </PickImageWrap>
+                  <FitingButton type="button">AI 피팅하기</FitingButton>
+                </PickCard>
+              ))}
+            </PickGrid>
+          </RecommendBlock>
 
           <MoreRow>
             <MoreLink href="/#select-1">더 많은 드레스 보러가기</MoreLink>
             <MoreIconWrap aria-hidden>
-              <MoreIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />
+              <MoreIcon src="/icon/blackFront.svg" alt="" width={15} height={28} />
             </MoreIconWrap>
           </MoreRow>
         </RightInner>
@@ -246,13 +250,19 @@ const RightInner = styled.div`
   gap: 40px;
 `;
 
+const RecommendBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+`;
+
 const SectionTitle = styled.h1<{ $tight?: boolean }>`
   margin: 0;
   padding: 0;
   max-width: ${({ $tight }) => ($tight ? "523px" : "576px")};
   color: ${color.black};
-  ${font["title-sm"]};
-  font-weight: 300;
+  ${font["text-lg"]};
 `;
 
 const PickGrid = styled.div`
@@ -309,7 +319,9 @@ const MoreRow = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 20px;
+  justify-content: flex-end;
+  gap: 16px;
+  width: 100%;
   padding-top: 8px;
 `;
 
@@ -334,8 +346,8 @@ const MoreIconWrap = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   border-radius: 100px;
   border: 1px solid ${color.gray900};
   background: ${color.white};
@@ -344,5 +356,4 @@ const MoreIconWrap = styled.span`
 
 const MoreIcon = styled.img`
   display: block;
-  transform: rotate(180deg);
 `;
