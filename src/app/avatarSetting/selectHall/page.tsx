@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
 import styled from "styled-components";
+import AvatarFlowNextLink from "@/src/components/avatar/avatarFlowNextLink";
 import SelectComponent from "@/src/components/common/selectComponent";
 import color from "@/src/style/color";
 import { hallSelectItems } from "@/src/mock/mock";
@@ -30,13 +30,14 @@ export default function SelectHallPage() {
         layout="hall"
         items={hallSelectItems}
         showPaginationDots
+        keepDimUntilNext
       />
-      <NextLink
+      <AvatarFlowNextLink
         href="/avatarSetting/selectHall/selectStyle"
         aria-label="다음 단계"
       >
         <NextIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />
-      </NextLink>
+      </AvatarFlowNextLink>
     </Shell>
   );
 }
@@ -52,37 +53,6 @@ const Shell = styled.div`
   overflow-y: hidden;
   background: ${color.white};
   color: ${color.black};
-`;
-
-const NextLink = styled(Link)`
-  position: absolute;
-  z-index: 4;
-  right: max(24px, calc((100vw - 1440px) * 0.5 + 62px));
-  top: min(927px, calc(100dvh - 80px));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  padding: 0;
-  border-radius: 100px;
-  border: 1px solid ${color.gray900};
-  background: ${color.white};
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-  transition: background 0.2s ease, border-color 0.2s ease;
-  &:hover {
-    background: ${color.gray100};
-  }
-  &:focus-visible {
-    outline: 2px solid ${color.primary};
-    outline-offset: 2px;
-  }
-  @media (max-height: 900px) {
-    top: auto;
-    bottom: 24px;
-  }
 `;
 
 const NextIcon = styled.img`

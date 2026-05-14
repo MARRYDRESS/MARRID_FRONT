@@ -1,9 +1,12 @@
 import SelectComponent from "@/src/components/common/selectComponent";
+import HeroRotatingBanner from "@/src/components/home/heroRotatingBanner";
 import Header from "@/src/components/layout/header";
 import styled from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
 import { selectMockItems } from "@/src/mock/mock";
+
+const HERO_BANNER_SRCS = ["/images/banner.png", "/images/banner4.jpg"] as const;
 
 export default function Home() {
   return (
@@ -11,7 +14,7 @@ export default function Home() {
       <Header />
 
       <HeroSection>
-        <HeroImage src="/mock/banner.png" alt="메인 배너" />
+        <HeroRotatingBanner bannerSrcs={HERO_BANNER_SRCS} />
         <HeroOverlay />
         <HeroTitle>
             인생의 한 번뿐인
@@ -25,6 +28,7 @@ export default function Home() {
       <SelectComponent
         id="select-1"
         title="좋아하는 드레스를 찾아보세요"
+        titleVariant="sm"
         items={selectMockItems}
       />
 
@@ -33,6 +37,7 @@ export default function Home() {
       <SelectComponent
         id="select-2"
         title="추구미가 우아함이라면 머메이드를 추천해요"
+        titleVariant="sm"
         items={selectMockItems}
       />
 
@@ -55,27 +60,20 @@ const HeroSection = styled.section`
   max-width: 1440px;
 `;
 
-const HeroImage = styled.img`
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
-  object-position: center;
-`;
-
 const HeroOverlay = styled.div`
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: rgba(0, 0, 0, 0.3);
 `;
 
 const HeroTitle = styled.h1`
   position: absolute;
+  z-index: 2;
   left: 189px;
   top: 492px;
   color: ${color.white};
-  font-size: ${font["title-lg"]};
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  ${font["title-lg"]};
 `;
 
 const SpacingTop = styled.div`
