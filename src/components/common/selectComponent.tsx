@@ -17,7 +17,6 @@ type SelectSectionProps = {
   showPaginationDots?: boolean;
   titleVariant?: "md" | "sm";
   layout?: "default" | "hall" | "style";
-  /** 한 화면에 보이는 카드 수 (기본 3, 스타일 선택은 4) */
   visibleCount?: number;
 };
 
@@ -286,13 +285,13 @@ const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" | "
 const TitleStack = styled.div`
   position: absolute;
   left: 50%;
-  top: 178px;
+  top: 92px;
   z-index: 3;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   text-align: center;
   max-width: min(320px, calc(100vw - 48px));
 `;
@@ -302,19 +301,19 @@ const TitleMain = styled.h2`
   padding: 0;
   color: ${color.black};
   font-weight: inherit;
-  ${font["text-lg"]};
+  ${font["title-sm"]};
 `;
 
 const TitleSub = styled.p`
   margin: 0;
   padding: 0;
   color: ${color.black};
-  ${font["text-md"]};
+  ${font["text-lg"]};
 `;
 
 const AvatarFlowSliderShell = styled.div<{ $layout: "hall" | "style" }>`
   box-sizing: border-box;
-  padding-top: ${({ $layout }) => ($layout === "hall" ? "160px" : "236px")};
+  padding-top: ${({ $layout }) => ($layout === "hall" ? "160px" : "196px")};
 `;
 
 const Viewport = styled.div`
