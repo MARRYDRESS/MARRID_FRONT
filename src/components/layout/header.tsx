@@ -14,16 +14,16 @@ const navItems = [
 export default function Header() {
   return (
     <HeaderContainer>
-      <HoverTrigger />
+      <HoverStrip aria-hidden />
       <HeaderBar>
         <HeaderInner>
           <Logo href="#top">merrid</Logo>
           <Nav>
-          {navItems.map((item) => (
+            {navItems.map((item) => (
               <NavLink key={item.label} href={item.href}>
                 {item.label}
               </NavLink>
-          ))}
+            ))}
           </Nav>
         </HeaderInner>
       </HeaderBar>
@@ -31,35 +31,45 @@ export default function Header() {
   );
 }
 
-const HeaderContainer = styled.div`
-  position: fixed;
-  inset: 0 0 auto 0;
-  z-index: 50;
-  width: 100%;
-  &:hover header {
-    transform: translateY(0);
-  }
-    &:focus-within header {
-    transform: translateY(0);
-  }
-  @media (hover: none) {
-    header {
-      transform: translateY(0);
-    }
-  }
-`;
-
-const HoverTrigger = styled.div`
-  height: 20px;
-  width: 100%;
-`;
-
 const HeaderBar = styled.header`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
   transform: translateY(-100%);
   border-bottom: 1px solid #cfcfcf;
   background: ${color.white};
   transition: transform 0.45s ease;
   backdrop-filter: blur(6px);
+`;
+
+const HeaderContainer = styled.div`
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  width: 100%;
+  height: 0;
+
+  &:hover ${HeaderBar},
+  &:focus-within ${HeaderBar} {
+    transform: translateY(0);
+  }
+
+  @media (hover: none) {
+    ${HeaderBar} {
+      transform: translateY(0);
+    }
+  }
+`;
+
+const HoverStrip = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  z-index: 51;
 `;
 
 const HeaderInner = styled.div`
