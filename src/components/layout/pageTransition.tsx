@@ -44,7 +44,7 @@ export default function PageTransition({ children }: Props) {
 
   return (
     <Shell>
-      <Stage key={pathname}>{children}</Stage>
+      <Stage data-route={pathname}>{children}</Stage>
     </Shell>
   );
 }

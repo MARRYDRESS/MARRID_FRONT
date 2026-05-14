@@ -74,7 +74,7 @@ function StyleSelectComponentInner({
     };
     document.addEventListener("pointerdown", onDocPointerDown);
     return () => document.removeEventListener("pointerdown", onDocPointerDown);
-  }, [styleOverlayPinnedKey]);
+  }, [keepOverlayUntilNext, styleOverlayPinnedKey]);
 
   return (
     <Section id={id}>
@@ -120,12 +120,27 @@ function StyleSelectComponentInner({
                         $overlayOpen={overlayShown}
                         $useCssHoverOverlay={showHash && !keepOverlayUntilNext}
                         $hashInteractive={showHash}
+                        role={showHash ? "button" : undefined}
+                        tabIndex={showHash ? 0 : undefined}
+                        aria-pressed={showHash ? styleOverlayPinnedKey === cardKey : undefined}
                         data-style-select-card={showHash ? "" : undefined}
                         onMouseEnter={() => {
                           if (keepOverlayUntilNext && showHash) {
                             setPersistHoverKey(cardKey);
                           }
                         }}
+                        onKeyDown={
+                          showHash
+                            ? (e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  setStyleOverlayPinnedKey((prev) =>
+                                    prev === cardKey ? null : cardKey
+                                  );
+                                }
+                              }
+                               : undefined
+                        }
                         onClick={
                           showHash
                             ? () =>

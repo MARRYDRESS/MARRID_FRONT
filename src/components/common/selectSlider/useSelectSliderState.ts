@@ -7,6 +7,11 @@ export function useSelectSliderState<T extends SelectMockItem>(
   items: T[],
   visibleCount: number,
 ) {
+
+  if (!Number.isInteger(visibleCount) || visibleCount <= 0) {
+     throw new Error("visibleCount must be a positive integer");
+      }
+
   const [trackIndex, setTrackIndex] = useState(1);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);

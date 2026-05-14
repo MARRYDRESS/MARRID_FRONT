@@ -21,7 +21,7 @@ export default function RanderingClient({ isFitting }: RanderingClientProps) {
       router.push("/result");
     }, 3000);
     return () => window.clearTimeout(id);
-  }, [router]);
+  }, []);
 
   const lead = isFitting ? "옷을 입고 있어요" : "아바타를 만들고 있어요";
   const heroAlt = isFitting

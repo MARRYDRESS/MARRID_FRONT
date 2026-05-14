@@ -24,6 +24,9 @@ const Slide = styled.img<{ $active: boolean }>`
   object-position: center;
   opacity: ${({ $active }) => ($active ? 1 : 0)};
   transition: opacity 0.9s ease-in-out;
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
   backface-visibility: hidden;
   transform: translateZ(0);
   image-rendering: high-quality;
@@ -34,7 +37,9 @@ export default function HeroRotatingBanner({ bannerSrcs }: HeroRotatingBannerPro
   const count = bannerSrcs.length;
 
   useEffect(() => {
-    if (count <= 1) return;
+    if (count <= 1 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
     const id = window.setInterval(() => {
       setIndex((i) => (i + 1) % count);
     }, ROTATE_MS);

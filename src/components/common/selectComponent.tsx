@@ -81,7 +81,7 @@ function SelectComponentInner({
     };
     document.addEventListener("pointerdown", onDocPointerDown);
     return () => document.removeEventListener("pointerdown", onDocPointerDown);
-  }, [selectedCardKey]);
+  }, [keepDimUntilNext, selectedCardKey]);
 
   const renderPages = (pageLayout: "default" | "hall") =>
     loopedPages.map((page, pageIndex) => (
@@ -99,10 +99,19 @@ function SelectComponentInner({
               $layout={pageLayout}
               $dimOpen={dimOpen}
               $useCssHoverDim={!keepDimUntilNext}
+              role="button"
+              tabIndex={0}
+              aria-pressed={selectedCardKey === itemKey}
               data-select-card=""
               onMouseEnter={() => {
                 if (keepDimUntilNext) {
                   setPersistHoverKey(itemKey);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedCardKey((prev) => (prev === itemKey ? null : itemKey));
                 }
               }}
               onClick={() =>
