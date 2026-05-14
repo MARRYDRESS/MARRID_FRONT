@@ -18,42 +18,29 @@ const DRESS_ALL_TAG = "#전체";
 
 const dressFilterChips = [DRESS_ALL_TAG, ...dressFilterTagOptions] as const;
 
-function isDressFilterTag(tag: string): tag is DressFilterTag {
-  return (dressFilterTagOptions as readonly string[]).includes(tag);
-}
-
 export default function DressPage() {
-  const [selectedTags, setSelectedTags] = useState<string[]>([
-    DRESS_ALL_TAG,
-  ]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const toggleFilter = useCallback((tag: string) => {
     if (tag === DRESS_ALL_TAG) {
-      setSelectedTags((prev) =>
-        prev.includes(DRESS_ALL_TAG) ? [] : [DRESS_ALL_TAG],
-      );
+      setSelectedTags([]);
       return;
     }
 
     setSelectedTags((prev) => {
-      const withoutAll = prev.filter((t) => t !== DRESS_ALL_TAG);
-      if (withoutAll.includes(tag)) {
-        return withoutAll.filter((t) => t !== tag);
+      if (prev.includes(tag)) {
+        return prev.filter((t) => t !== tag);
       }
-      return [...withoutAll, tag];
+      return [...prev, tag];
     });
   }, []);
 
   const visibleItems = useMemo(() => {
-    const showAll =
-      selectedTags.length === 0 || selectedTags.includes(DRESS_ALL_TAG);
-    if (showAll) return dressGalleryItems;
-
-    const activeFilters = selectedTags.filter(isDressFilterTag);
-    if (activeFilters.length === 0) return dressGalleryItems;
-
+    if (selectedTags.length === 0) return dressGalleryItems;
     return dressGalleryItems.filter((item) =>
-      activeFilters.some((t) => item.filterTags.includes(t)),
+      selectedTags.some((t) =>
+        item.filterTags.includes(t as DressFilterTag),
+      ),
     );
   }, [selectedTags]);
 
@@ -67,17 +54,22 @@ export default function DressPage() {
         </Headline>
 
         <FilterRow aria-label="스타일 필터">
-          {dressFilterChips.map((tag) => (
-            <FilterHit
-              key={tag}
-              type="button"
-              $active={selectedTags.includes(tag)}
-              onClick={() => toggleFilter(tag)}
-              aria-pressed={selectedTags.includes(tag)}
-            >
-              <StyleHashTag variant="filter" label={tag} />
-            </FilterHit>
-          ))}
+          {dressFilterChips.map((tag) => {
+            const isAllChip = tag === DRESS_ALL_TAG;
+            const pressed = isAllChip ? false : selectedTags.includes(tag);
+            return (
+              <FilterHit
+                key={tag}
+                type="button"
+                $active={pressed}
+                onClick={() => toggleFilter(tag)}
+                aria-pressed={isAllChip ? undefined : pressed}
+                aria-label={isAllChip ? "필터 초기화 후 전체 드레스 보기" : undefined}
+              >
+                <StyleHashTag variant="filter" label={tag} />
+              </FilterHit>
+            );
+          })}
         </FilterRow>
 
         {visibleItems.length === 0 ? (
