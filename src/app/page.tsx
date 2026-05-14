@@ -1,4 +1,5 @@
 import SelectComponent from "@/src/components/common/selectComponent";
+import HeroRotatingBanner from "@/src/components/home/heroRotatingBanner";
 import Header from "@/src/components/layout/header";
 import styled from "styled-components";
 import font from "@/src/style/font";
@@ -11,7 +12,7 @@ export default function Home() {
       <Header />
 
       <HeroSection>
-        <HeroImage src="/mock/banner.png" alt="메인 배너" />
+        <HeroRotatingBanner />
         <HeroOverlay />
         <HeroTitle>
             인생의 한 번뿐인
@@ -55,27 +56,20 @@ const HeroSection = styled.section`
   max-width: 1440px;
 `;
 
-const HeroImage = styled.img`
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
-  object-position: center;
-`;
-
 const HeroOverlay = styled.div`
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: rgba(0, 0, 0, 0.3);
 `;
 
 const HeroTitle = styled.h1`
   position: absolute;
+  z-index: 2;
   left: 189px;
   top: 492px;
   color: ${color.white};
-  font-size: ${font["title-lg"]};
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  ${font["title-lg"]};
 `;
 
 const SpacingTop = styled.div`
