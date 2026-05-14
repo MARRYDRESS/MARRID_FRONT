@@ -255,6 +255,7 @@ const Section = styled.section<{ $layout: "default" | "hall" }>`
   margin: 0 auto;
   width: 100%;
   max-width: 1440px;
+  padding: 0 clamp(20px, 4vw, 40px);
   position: ${({ $layout }) => ($layout === "hall" ? "relative" : "static")};
   min-height: ${({ $layout }) => ($layout === "hall" ? "min(100dvh, 1024px)" : "0")};
 `;
@@ -275,8 +276,8 @@ const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" }>`
         `
       : css`
           padding: ${$variant === "sm"
-            ? "clamp(20px, 4vh, 48px) 0 clamp(28px, 3.5vh, 56px)"
-            : "48px 0 72px"};
+            ? "clamp(24px, 4vh, 52px) 0 clamp(32px, 4vh, 64px)"
+            : "52px 0 80px"};
           text-align: center;
           white-space: normal;
           ${$variant === "sm" ? font["title-sm"] : font["title-md"]};
@@ -319,7 +320,7 @@ const Track = styled.div<{
 const Page = styled.div<{ $layout: "default" | "hall" }>`
   flex: 0 0 100%;
   display: flex;
-  gap: 40px;
+  gap: 48px;
   ${({ $layout }) =>
     $layout === "hall"
       ? css`
@@ -334,15 +335,15 @@ const Card = styled.article<{ $layout: "default" | "hall" }>`
   ${({ $layout }) =>
     $layout === "hall"
       ? css`
-          flex: 0 0 calc((100% - 80px) / 3);
+          flex: 0 0 calc((100% - 96px) / 3);
           min-width: 0;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
         `
       : css`
-          flex: 0 0 calc((100% - 80px) / 3);
+          flex: 0 0 calc((100% - 96px) / 3);
         `}
 `;
 
@@ -372,7 +373,7 @@ const CardLabel = styled.p<{ $layout: "default" | "hall" }>`
           padding: 0;
         `
       : css`
-          padding: 12px 0;
+          padding: 18px 0;
         `}
 `;
 
@@ -380,8 +381,8 @@ const DotsRow = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  padding: 24px 0 0;
+  gap: 10px;
+  padding: 32px 0 0;
 `;
 
 const Dot = styled.span<{ $active: boolean }>`
