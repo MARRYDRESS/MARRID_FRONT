@@ -15,10 +15,10 @@ const Pill = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 17px;
-  border-radius: 20px;
+  padding: 4px 11px;
+  border-radius: 14px;
   border: 1px solid ${color.white};
   color: ${color.white};
-  ${font["text-lg"]};
+  ${font["text-sm"]};
   white-space: nowrap;
 `;

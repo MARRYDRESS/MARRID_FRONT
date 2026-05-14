@@ -6,7 +6,12 @@ import font from "@/src/style/font";
 import color from "@/src/style/color";
 import SlideButton from "@/src/components/common/slideBtn";
 import SliderPaginationDots from "@/src/components/common/sliderPaginationDots";
-import type { SelectMockItem } from "@/src/mock/mock";
+import StyleHashTag from "@/src/components/common/styleHashTag";
+import type { SelectMockItem, StyleSelectItem } from "@/src/mock/mock";
+
+function isStyleSelectItem(item: SelectMockItem): item is StyleSelectItem {
+  return Array.isArray((item as StyleSelectItem).hashtags);
+}
 
 type SelectSectionProps = {
   id?: string;
@@ -187,6 +192,17 @@ function SelectComponentInner({
                             src={item.image}
                             alt={`${item.label} 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`}
                           />
+                          {layout === "style" &&
+                          isStyleSelectItem(item) &&
+                          item.hashtags.length > 0 ? (
+                            <HashTagOverlay>
+                              <HashTagRow>
+                                {item.hashtags.map((tag) => (
+                                  <StyleHashTag key={tag} label={tag} />
+                                ))}
+                              </HashTagRow>
+                            </HashTagOverlay>
+                          ) : null}
                         </CardImageWrap>
                         <CardLabel $layout={layout}>{item.label}</CardLabel>
                       </Card>
@@ -358,6 +374,29 @@ const Page = styled.div<{ $layout: "default" | "hall" | "style" }>`
       : ""}
 `;
 
+const HashTagRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  max-width: 100%;
+`;
+
+const HashTagOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(17, 24, 39, 0.42);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  z-index: 1;
+`;
+
 const Card = styled.article<{ $layout: "default" | "hall" | "style" }>`
   overflow: hidden;
   background: transparent;
@@ -372,6 +411,15 @@ const Card = styled.article<{ $layout: "default" | "hall" | "style" }>`
           gap: ${$layout === "style" ? "4px" : "8px"};
         `
       : ""}
+
+  ${({ $layout }) =>
+    $layout === "style"
+      ? css`
+          &:hover ${HashTagOverlay} {
+            opacity: 1;
+          }
+        `
+      : ""}
 `;
 
 const CardImageWrap = styled.div<{ $layout: "default" | "hall" | "style" }>`
@@ -379,6 +427,7 @@ const CardImageWrap = styled.div<{ $layout: "default" | "hall" | "style" }>`
   aspect-ratio: ${({ $layout }) => ($layout === "style" ? "311 / 411" : "607 / 710")};
   overflow: hidden;
   flex-shrink: 0;
+  position: ${({ $layout }) => ($layout === "style" ? "relative" : "static")};
 `;
 
 const CardImage = styled.img`
