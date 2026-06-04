@@ -62,6 +62,19 @@ function StyleSelectComponentInner({
   const [styleOverlayPinnedKey, setStyleOverlayPinnedKey] = useState<string | null>(null);
   const [persistHoverKey, setPersistHoverKey] = useState<string | null>(null);
 
+  const clearOverlayState = () => {
+    setStyleOverlayPinnedKey(null);
+    setPersistHoverKey(null);
+  };
+
+  const toggleOverlay = (cardKey: string) => {
+    if (styleOverlayPinnedKey === cardKey) {
+      clearOverlayState();
+      return;
+    }
+    setStyleOverlayPinnedKey(cardKey);
+  };
+
   useEffect(() => {
     if (keepOverlayUntilNext || styleOverlayPinnedKey == null) {
       return;
@@ -88,10 +101,28 @@ function StyleSelectComponentInner({
           {pages.length > 1 ? (
             <>
               <SlideBtnWrap $position="left">
-                <SlideButton direction="left" variant="light" onClick={handlePrev} />
+              <SlideButton
+                direction="left"
+                variant="light"
+                onClick={() => {
+                  if (keepOverlayUntilNext) {
+                    clearOverlayState();
+                  }
+                  handlePrev();
+                }}
+              />
               </SlideBtnWrap>
               <SlideBtnWrap $position="right">
-                <SlideButton direction="right" variant="light" onClick={handleNext} />
+              <SlideButton
+                direction="right"
+                variant="light"
+                onClick={() => {
+                  if (keepOverlayUntilNext) {
+                    clearOverlayState();
+                  }
+                  handleNext();
+                }}
+              />
               </SlideBtnWrap>
             </>
           ) : null}
@@ -134,19 +165,14 @@ function StyleSelectComponentInner({
                             ? (e) => {
                                 if (e.key === "Enter" || e.key === " ") {
                                   e.preventDefault();
-                                  setStyleOverlayPinnedKey((prev) =>
-                                    prev === cardKey ? null : cardKey
-                                  );
+                                  toggleOverlay(cardKey);
                                 }
                               }
                                : undefined
                         }
                         onClick={
                           showHash
-                            ? () =>
-                                setStyleOverlayPinnedKey((prev) =>
-                                  prev === cardKey ? null : cardKey
-                                )
+                          ? () => toggleOverlay(cardKey)
                             : undefined
                         }
                       >

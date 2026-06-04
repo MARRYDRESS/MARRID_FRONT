@@ -18,7 +18,7 @@ export default function RanderingClient({ isFitting }: RanderingClientProps) {
 
   useEffect(() => {
     const id = window.setTimeout(() => {
-      router.push("/result");
+      router.replace("/result");
     }, 3000);
     return () => window.clearTimeout(id);
   }, []);

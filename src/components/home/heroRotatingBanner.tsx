@@ -37,6 +37,14 @@ export default function HeroRotatingBanner({ bannerSrcs }: HeroRotatingBannerPro
   const count = bannerSrcs.length;
 
   useEffect(() => {
+    if (count === 0) {
+      setIndex(0);
+      return;
+    }
+    setIndex((prev) => prev % count);
+  }, [count]);
+
+  useEffect(() => {
     if (count <= 1 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
@@ -50,7 +58,7 @@ export default function HeroRotatingBanner({ bannerSrcs }: HeroRotatingBannerPro
     <Root>
       {bannerSrcs.map((src, i) => (
         <Slide
-          key={src}
+          key={`${src}-${i}`}
           src={src}
           alt={i === index ? "메인 배너" : ""}
           $active={i === index}
