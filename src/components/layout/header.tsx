@@ -11,6 +11,7 @@ const STORAGE_KEY = "marrid_home_header_intro_dismissed";
 const navItems = [
   { label: "아바타 만들기", href: "/avatarSetting" },
   { label: "드레스 보기", href: "/dress" },
+  { label: "샵 보기", href: "/shop" },
   { label: "마이페이지", href: "/mypage" },
   { label: "로그인", href: "/login" },
 ];
