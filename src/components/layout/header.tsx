@@ -80,7 +80,9 @@ export default function Header() {
       <HoverStrip aria-hidden />
       <HeaderBar $peekOnly={peekOnly}>
         <HeaderInner>
-          <Logo href="/">MERRID</Logo>
+          <Logo href="/">
+            <img src="/icon/logo.svg" alt="MERRID" height={28} />
+          </Logo>
           <Nav>
             {navItems.map((item) => (
               <NavLink key={item.label} href={item.href}>
@@ -153,9 +155,10 @@ const HeaderInner = styled.div`
 `;
 
 const Logo = styled(Link)`
-  ${font["title-md"]};
-  color: ${color.gray900};
+  display: flex;
+  align-items: center;
   text-decoration: none;
+  flex-shrink: 0;
 `;
 
 const Nav = styled.nav`

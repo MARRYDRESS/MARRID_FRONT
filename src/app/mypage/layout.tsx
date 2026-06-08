@@ -30,7 +30,9 @@ export default function MypageLayout({ children }: { children: React.ReactNode }
   return (
     <Shell>
       <Sidebar>
-        <Logo>MERRID</Logo>
+        <LogoLink href="/">
+          <img src="/icon/logo.svg" alt="MERRID" height={24} />
+        </LogoLink>
         <Nav>
           {NAV_ITEMS.map((item) => {
             const isActive = pathname.startsWith(item.href);
@@ -63,11 +65,11 @@ const Sidebar = styled.aside`
   flex-direction: column;
 `;
 
-const Logo = styled.p`
-  margin: 0;
+const LogoLink = styled(Link)`
+  display: flex;
+  align-items: center;
   padding: 40px 0 0 24px;
-  ${font["title-md"]};
-  color: ${color.black};
+  text-decoration: none;
 `;
 
 const Nav = styled.nav`
