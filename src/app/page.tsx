@@ -44,7 +44,7 @@ export default function Home() {
           </HeroDesc>
           <HeroActions>
             <BtnPrimary href="/avatarSetting">
-              <SparkIcon />
+              
               지금 아바타 만들기
             </BtnPrimary>
             <BtnGhost href="/dress">드레스 둘러보기</BtnGhost>

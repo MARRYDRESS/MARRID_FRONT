@@ -138,22 +138,23 @@ function StyleSelectComponentInner({
                   {page.map((item, cardIndex) => {
                     const cardKey = styleSelectCardKey(item);
                     const showHash = item.hashtags.length > 0;
-                    const overlayShown =
+                    const isPinned = styleOverlayPinnedKey === cardKey;
+                    // 호버 상태 (클릭으로 고정된 경우 제외)
+                    const hoverShown =
                       showHash &&
-                      (styleOverlayPinnedKey === cardKey ||
-                        (keepOverlayUntilNext &&
-                          styleOverlayPinnedKey == null &&
-                          persistHoverKey === cardKey));
+                      !isPinned &&
+                      keepOverlayUntilNext &&
+                      persistHoverKey === cardKey;
 
                     return (
                       <Card
                         key={`${item.image}-${pageIndex}-${cardIndex}`}
-                        $overlayOpen={overlayShown}
-                        $useCssHoverOverlay={showHash && !keepOverlayUntilNext}
+                        $overlayOpen={hoverShown}
+                        $useCssHoverOverlay={showHash && !keepOverlayUntilNext && !isPinned}
                         $hashInteractive={showHash}
                         role={showHash ? "button" : undefined}
                         tabIndex={showHash ? 0 : undefined}
-                        aria-pressed={showHash ? styleOverlayPinnedKey === cardKey : undefined}
+                        aria-pressed={showHash ? isPinned : undefined}
                         data-style-select-card={showHash ? "" : undefined}
                         onMouseEnter={() => {
                           if (keepOverlayUntilNext && showHash) {
@@ -173,11 +174,11 @@ function StyleSelectComponentInner({
                                   toggleOverlay(cardKey);
                                 }
                               }
-                               : undefined
+                            : undefined
                         }
                         onClick={
                           showHash
-                          ? () => toggleOverlay(cardKey)
+                            ? () => toggleOverlay(cardKey)
                             : undefined
                         }
                       >
@@ -186,22 +187,17 @@ function StyleSelectComponentInner({
                             src={item.image}
                             alt={`${item.label} 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`}
                           />
-                          {showHash ? (
-                            <HashTagOverlay
-                              onClick={(e) => {
-                                e.stopPropagation();
-                              }}
-                            >
+                          {showHash && (
+                            <HashTagOverlay onClick={(e) => e.stopPropagation()}>
                               <HashTagRow>
                                 {item.hashtags.map((tag) => (
                                   <StyleHashTag key={tag} label={tag} />
                                 ))}
                               </HashTagRow>
                             </HashTagOverlay>
-                          ) : null}
-                          {styleOverlayPinnedKey === cardKey && (
-                            <SelectRing aria-hidden />
                           )}
+                          {isPinned && <CardDimOverlay aria-hidden />}
+                          {isPinned && <SelectRing aria-hidden />}
                         </CardImageWrap>
                         <CardLabel>{item.label}</CardLabel>
                       </Card>
@@ -348,11 +344,19 @@ const CardImageWrap = styled.div`
   position: relative;
 `;
 
+const CardDimOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 2;
+  pointer-events: none;
+`;
+
 const SelectRing = styled.div`
   position: absolute;
   inset: 0;
   border: 3px solid ${color.gray600};
-  z-index: 10;
+  z-index: 3;
   pointer-events: none;
 `;
 
