@@ -30,8 +30,13 @@ export default function ShopCard({
           style={{ objectFit: "cover", objectPosition: "center top" }}
         />
         <HoverOverlay>
-        <FittingLink href={href} aria-label={`${brandName} 샵 방문하기`}>
-        샵 더 알아보기
+          <FittingLink
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${brandName} 샵 방문하기`}
+          >
+            샵 더 알아보기
           </FittingLink>
         </HoverOverlay>
       </ImageWrap>
