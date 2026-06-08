@@ -14,26 +14,13 @@ import {
   type DressFilterTag,
 } from "@/src/mock/mock";
 
-/** 필터 UI 전용 — 목록 데이터에는 없음 */
-const DRESS_ALL_TAG = "#전체";
-
-const dressFilterChips = [DRESS_ALL_TAG, ...dressFilterTagOptions] as const;
-
 export default function DressPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const toggleFilter = useCallback((tag: string) => {
-    if (tag === DRESS_ALL_TAG) {
-      setSelectedTags([]);
-      return;
-    }
-
-    setSelectedTags((prev) => {
-      if (prev.includes(tag)) {
-        return prev.filter((t) => t !== tag);
-      }
-      return [...prev, tag];
-    });
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
   }, []);
 
   const visibleItems = useMemo(() => {
@@ -55,20 +42,18 @@ export default function DressPage() {
         </Headline>
 
         <FilterRow aria-label="스타일 필터">
-          {dressFilterChips.map((tag) => {
-            const isAllChip = tag === DRESS_ALL_TAG;
-            const pressed = isAllChip ? false : selectedTags.includes(tag);
+          {dressFilterTagOptions.map((tag) => {
+            const pressed = selectedTags.includes(tag);
             return (
-              <FilterHit
+              <FilterChip
                 key={tag}
                 type="button"
                 $active={pressed}
                 onClick={() => toggleFilter(tag)}
-                aria-pressed={isAllChip ? undefined : pressed}
-                aria-label={isAllChip ? "필터 초기화 후 전체 드레스 보기" : undefined}
+                aria-pressed={pressed}
               >
-                <StyleHashTag variant="filter" label={tag} />
-              </FilterHit>
+                {tag}
+              </FilterChip>
             );
           })}
         </FilterRow>
@@ -142,7 +127,7 @@ const TitleLine = styled.p`
 const TitleAccent = styled.p`
   margin: 0;
   width: 100%;
-  ${font["title-md"]};
+  ${font["title-lg"]};
 `;
 
 const FilterRow = styled.div`
@@ -161,19 +146,25 @@ const FilterRow = styled.div`
   }
 `;
 
-const FilterHit = styled.button<{ $active: boolean }>`
+const FilterChip = styled.button<{ $active: boolean }>`
   flex-shrink: 0;
-  margin: 0;
-  padding: 0;
-  border: none;
+  padding: 8px 17px;
+  border-radius: 20px;
+  border: 1px solid ${color.gray900};
+  background: ${({ $active }) => ($active ? color.gray900 : "transparent")};
+  color: ${({ $active }) => ($active ? color.white : color.gray700)};
+  ${font["text-lg"]};
   cursor: pointer;
-  border-radius: 22px;
-  background: ${(p) =>
-    p.$active ? "rgba(17, 24, 39, 0.2)" : "transparent"};
-  transition: background 0.15s ease;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: ${color.gray900};
+    color: ${color.white};
+  }
 
   &:focus-visible {
-    outline: 2px solid ${color.gray400};
+    outline: 2px solid ${color.gray900};
     outline-offset: 2px;
   }
 `;
