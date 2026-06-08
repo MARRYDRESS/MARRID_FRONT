@@ -44,6 +44,7 @@ export type DressGalleryItem = {
   id: string;
   image: string;
   label: string;
+  shopName: string;
   /** 필터 선택 시 이 태그 중 하나라도 포함되면 노출 */
   filterTags: DressFilterTag[];
 };
@@ -69,96 +70,113 @@ export const dressGalleryImagePaths = [
   "/mock/main14.jpg",
 ] as const;
 
+const SHOP_NAMES = ["엔조 최재훈", "소유 브라이덜", "Kelly SONYUNHUI"] as const;
+
 /** 행 5×열 3 기준 15장 — 이미지는 main1~14 순환, 필터 태그 조합 유지 */
 export const dressGalleryItems: DressGalleryItem[] = [
   {
     id: "d1",
     image: dressGalleryImagePaths[0],
-    label: "드레스 01",
+    label: "미카도 실크 A라인",
+    shopName: SHOP_NAMES[0],
     filterTags: ["#발랄한", "#러블리한", "#깔끔"],
   },
   {
     id: "d2",
     image: dressGalleryImagePaths[1],
-    label: "드레스 02",
+    label: "머메이드 새틴",
+    shopName: SHOP_NAMES[1],
     filterTags: ["#러블리한", "#페미닌"],
   },
   {
     id: "d3",
     image: dressGalleryImagePaths[2],
-    label: "드레스 03",
+    label: "오프숄더 레이스",
+    shopName: SHOP_NAMES[2],
     filterTags: ["#우아한", "#클래식", "#여성스러운"],
   },
   {
     id: "d4",
     image: dressGalleryImagePaths[3],
-    label: "드레스 04",
+    label: "벨라인 클래식",
+    shopName: SHOP_NAMES[0],
     filterTags: ["#로맨틱", "#글래머"],
   },
   {
     id: "d5",
     image: dressGalleryImagePaths[4],
-    label: "드레스 05",
+    label: "프린세스 튤레",
+    shopName: SHOP_NAMES[1],
     filterTags: ["#깔끔", "#클래식"],
   },
   {
     id: "d6",
     image: dressGalleryImagePaths[5],
-    label: "드레스 06",
+    label: "브이넥 실크",
+    shopName: SHOP_NAMES[2],
     filterTags: ["#발랄한", "#여성스러운"],
   },
   {
     id: "d7",
     image: dressGalleryImagePaths[6],
-    label: "드레스 07",
+    label: "홀터넥 미니",
+    shopName: SHOP_NAMES[0],
     filterTags: ["#페미닌", "#로맨틱", "#러블리한"],
   },
   {
     id: "d8",
     image: dressGalleryImagePaths[7],
-    label: "드레스 08",
+    label: "엠파이어 오간자",
+    shopName: SHOP_NAMES[1],
     filterTags: ["#글래머", "#우아한"],
   },
   {
     id: "d9",
     image: dressGalleryImagePaths[8],
-    label: "드레스 09",
+    label: "스트레이트 크레이프",
+    shopName: SHOP_NAMES[2],
     filterTags: ["#클래식", "#깔끔", "#페미닌"],
   },
   {
     id: "d10",
     image: dressGalleryImagePaths[9],
-    label: "드레스 10",
+    label: "오간자 볼가운",
+    shopName: SHOP_NAMES[0],
     filterTags: ["#여성스러운", "#로맨틱"],
   },
   {
     id: "d11",
     image: dressGalleryImagePaths[10],
-    label: "드레스 11",
+    label: "시스루 레이스",
+    shopName: SHOP_NAMES[1],
     filterTags: ["#발랄한", "#글래머", "#깔끔"],
   },
   {
     id: "d12",
     image: dressGalleryImagePaths[11],
-    label: "드레스 12",
+    label: "플리츠 볼가운",
+    shopName: SHOP_NAMES[2],
     filterTags: ["#러블리한", "#우아한", "#클래식"],
   },
   {
     id: "d13",
     image: dressGalleryImagePaths[12],
-    label: "드레스 13",
+    label: "리본 벨라인",
+    shopName: SHOP_NAMES[0],
     filterTags: ["#페미닌", "#여성스러운"],
   },
   {
     id: "d14",
     image: dressGalleryImagePaths[13],
-    label: "드레스 14",
+    label: "하이넥 시스",
+    shopName: SHOP_NAMES[1],
     filterTags: ["#로맨틱", "#깔끔", "#발랄한"],
   },
   {
     id: "d15",
     image: dressGalleryImagePaths[0],
-    label: "드레스 15",
+    label: "드롭웨이스트 새틴",
+    shopName: SHOP_NAMES[2],
     filterTags: ["#글래머", "#클래식", "#우아한"],
   },
 ];
