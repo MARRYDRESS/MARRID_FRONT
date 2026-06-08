@@ -316,19 +316,8 @@ const CardImageWrap = styled.div<{ $layout: "default" | "hall"; $selected?: bool
   overflow: hidden;
   flex-shrink: 0;
 
-  ${({ $selected }) =>
-    $selected
-      ? css`
-          &::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border: 3px solid ${color.primary};
-            z-index: 2;
-            pointer-events: none;
-          }
-        `
-      : ""}
+  outline: ${({ $selected }) => ($selected ? `3px solid ${color.gray600}` : "none")};
+  outline-offset: -3px;
 `;
 
 const CardImage = styled.img`

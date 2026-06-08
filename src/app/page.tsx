@@ -228,6 +228,7 @@ const PageShell = styled.main`
   background: ${color.white};
   color: ${color.black};
   overflow-x: hidden;
+  font-family: "Leferi Base Type", sans-serif;
 `;
 
 /* hero */
@@ -412,7 +413,7 @@ const HowNum = styled.p`
   color: ${ACCENT};
   line-height: 1;
   margin: 0 0 18px;
-  font-family: serif;
+  font-family: "Leferi Point Type", sans-serif;
 `;
 const HowHeading = styled.h4`
   ${font["text-lg"]};
@@ -545,7 +546,7 @@ const PriceRange = styled.p`
   font-weight: 300;
   color: ${ACCENT};
   margin: 0 0 14px;
-  font-family: serif;
+  font-family: "Leferi Point Type", sans-serif;
 `;
 const PriceCardTitle = styled.h4`
   ${font["text-lg"]};

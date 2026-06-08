@@ -92,9 +92,6 @@ export default function ResultPage() {
 
           <MoreRow>
             <MoreLink href="/dress">더 많은 드레스 보러가기</MoreLink>
-            <MoreIconWrap aria-hidden>
-              <MoreIcon src="/icon/blackFront.svg" alt="" width={15} height={28} />
-            </MoreIconWrap>
           </MoreRow>
         </RightInner>
       </RightPane>
@@ -255,7 +252,7 @@ const RightInner = styled.div`
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  padding: clamp(32px, 4vw, 48px) clamp(20px, 3vw, 48px) 80px;
+  padding: clamp(72px, 8vw, 100px) clamp(20px, 3vw, 48px) 80px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -358,18 +355,3 @@ const MoreLink = styled(Link)`
   }
 `;
 
-const MoreIconWrap = styled.span`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 100px;
-  border: 1px solid ${color.gray900};
-  background: ${color.white};
-  flex-shrink: 0;
-`;
-
-const MoreIcon = styled.img`
-  display: block;
-`;

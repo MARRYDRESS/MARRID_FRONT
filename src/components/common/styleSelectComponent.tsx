@@ -181,7 +181,7 @@ function StyleSelectComponentInner({
                             : undefined
                         }
                       >
-                        <CardImageWrap $selected={styleOverlayPinnedKey === cardKey}>
+                        <CardImageWrap>
                           <CardImage
                             src={item.image}
                             alt={`${item.label} 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`}
@@ -199,6 +199,9 @@ function StyleSelectComponentInner({
                               </HashTagRow>
                             </HashTagOverlay>
                           ) : null}
+                          {styleOverlayPinnedKey === cardKey && (
+                            <SelectRing aria-hidden />
+                          )}
                         </CardImageWrap>
                         <CardLabel>{item.label}</CardLabel>
                       </Card>
@@ -337,26 +340,20 @@ const Card = styled.article<{
       : ""}
 `;
 
-const CardImageWrap = styled.div<{ $selected?: boolean }>`
+const CardImageWrap = styled.div`
   width: 100%;
   aspect-ratio: 311 / 411;
   overflow: hidden;
   flex-shrink: 0;
   position: relative;
+`;
 
-  ${({ $selected }) =>
-    $selected
-      ? css`
-          &::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border: 3px solid ${color.primary};
-            z-index: 2;
-            pointer-events: none;
-          }
-        `
-      : ""}
+const SelectRing = styled.div`
+  position: absolute;
+  inset: 0;
+  border: 3px solid ${color.gray600};
+  z-index: 10;
+  pointer-events: none;
 `;
 
 const CardImage = styled.img`
