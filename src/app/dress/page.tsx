@@ -11,7 +11,9 @@ import {
   dressFilterTagOptions,
   dressGalleryItems,
   brandList,
+  dressPriceRanges,
   type DressFilterTag,
+  type DressPriceRange,
 } from "@/src/mock/mock";
 
 const TABS = ["전체보기", "가격별로 보기", "브랜드 별로 보기", "추구미별로 보기"] as const;
@@ -56,10 +58,12 @@ export default function DressPage() {
   const [activeTab, setActiveTab] = useState<Tab>("전체보기");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedPrices, setSelectedPrices] = useState<DressPriceRange[]>([]);
   const [brandsExpanded, setBrandsExpanded] = useState(false);
 
   const showTagFilter = activeTab === "추구미별로 보기";
   const showBrandFilter = activeTab === "브랜드 별로 보기";
+  const showPriceFilter = activeTab === "가격별로 보기";
 
   const toggleTag = useCallback((tag: string) => {
     if (tag === "#전체") { setSelectedTags([]); return; }
@@ -75,6 +79,12 @@ export default function DressPage() {
     );
   }, []);
 
+  const togglePrice = useCallback((price: DressPriceRange) => {
+    setSelectedPrices((prev) =>
+      prev.includes(price) ? prev.filter((p) => p !== price) : [...prev, price]
+    );
+  }, []);
+
   const visibleItems = useMemo(() => {
     if (showTagFilter && selectedTags.length > 0)
       return dressGalleryItems.filter((item) =>
@@ -82,8 +92,10 @@ export default function DressPage() {
       );
     if (showBrandFilter && selectedBrands.length > 0)
       return dressGalleryItems.filter((item) => selectedBrands.includes(item.shopName));
+    if (showPriceFilter && selectedPrices.length > 0)
+      return dressGalleryItems.filter((item) => selectedPrices.includes(item.priceRange));
     return dressGalleryItems;
-  }, [showTagFilter, showBrandFilter, selectedTags, selectedBrands]);
+  }, [showTagFilter, showBrandFilter, showPriceFilter, selectedTags, selectedBrands, selectedPrices]);
 
   return (
     <Shell>
@@ -107,6 +119,7 @@ export default function DressPage() {
                 setActiveTab(tab);
                 setSelectedTags([]);
                 setSelectedBrands([]);
+                setSelectedPrices([]);
                 setBrandsExpanded(false);
               }}
             >
@@ -127,6 +140,30 @@ export default function DressPage() {
                 onClick={() => toggleTag(tag)}
               >
                 {tag}
+              </FilterChip>
+            ))}
+          </FilterInner>
+        </FilterRow>
+      )}
+
+      {showPriceFilter && (
+        <FilterRow>
+          <FilterInner>
+            <FilterChip
+              type="button"
+              $active={selectedPrices.length === 0}
+              onClick={() => setSelectedPrices([])}
+            >
+              전체
+            </FilterChip>
+            {dressPriceRanges.map((price) => (
+              <FilterChip
+                key={price}
+                type="button"
+                $active={selectedPrices.includes(price)}
+                onClick={() => togglePrice(price)}
+              >
+                {price}
               </FilterChip>
             ))}
           </FilterInner>

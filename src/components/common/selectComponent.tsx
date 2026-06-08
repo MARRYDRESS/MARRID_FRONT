@@ -24,6 +24,7 @@ const VISIBLE_COUNT = 3;
 type SelectSectionProps = {
   id?: string;
   title: string;
+  subtitle?: string;
   items: SelectMockItem[];
   showPaginationDots?: boolean;
   titleVariant?: "md" | "sm";
@@ -47,6 +48,7 @@ export default function SelectComponent(props: SelectSectionProps) {
 function SelectComponentInner({
   id,
   title,
+  subtitle,
   items,
   showPaginationDots = false,
   titleVariant = "md",
@@ -139,9 +141,14 @@ function SelectComponentInner({
 
   return (
     <Section id={id} $layout={layout}>
-      <Title $variant={titleVariant} $layout={layout}>
-        {title}
-      </Title>
+      {isHall ? (
+        <TitleStack>
+          <Title $variant={titleVariant} $layout={layout}>{title}</Title>
+          {subtitle && <TitleSub>{subtitle}</TitleSub>}
+        </TitleStack>
+      ) : (
+        <Title $variant={titleVariant} $layout={layout}>{title}</Title>
+      )}
 
       {isHall ? (
         <HallSliderBody>
@@ -214,18 +221,33 @@ const Section = styled.section<{ $layout: "default" | "hall" }>`
   min-height: ${({ $layout }) => ($layout === "hall" ? "min(100dvh, 1024px)" : "0")};
 `;
 
+const TitleStack = styled.div`
+  position: absolute;
+  left: 50%;
+  top: 150px;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+`;
+
+const TitleSub = styled.p`
+  margin: 0;
+  padding: 0;
+  color: ${color.black};
+  ${font["text-lg"]};
+`;
+
 const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" }>`
   color: ${color.gray900};
   ${({ $layout, $variant }) =>
     $layout === "hall"
       ? css`
-          position: absolute;
-          left: 50%;
-          top: 150px;
-          transform: translateX(-50%);
           margin: 0;
           padding: 0;
-          z-index: 3;
           white-space: nowrap;
           text-align: center;
           ${$variant === "sm" ? font["title-sm"] : font["title-md"]};
