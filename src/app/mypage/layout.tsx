@@ -8,7 +8,7 @@ import font from "@/src/style/font";
 
 const NAV_ITEMS = [
   { label: "대시보드", href: "/mypage/dashboard" },
-  { label: "내 아바타", href: "/mypage" },
+  { label: "내 아바타", href: "/mypage/avatar" },
   { label: "저장된 드레스", href: "/mypage/saved-dress" },
   { label: "저장된 샵", href: "/mypage/saved-shop" },
 ] as const;
@@ -33,10 +33,7 @@ export default function MypageLayout({ children }: { children: React.ReactNode }
         <Logo>MERRID</Logo>
         <Nav>
           {NAV_ITEMS.map((item) => {
-            const isActive =
-              item.href === "/mypage"
-                ? pathname === "/mypage"
-                : pathname.startsWith(item.href);
+            const isActive = pathname.startsWith(item.href);
             return (
               <NavItem key={item.href} href={item.href} $active={isActive}>
                 <UserIcon />
