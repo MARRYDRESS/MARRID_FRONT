@@ -14,7 +14,13 @@ const NAV_ITEMS = [
   { label: "로그인", href: "/login" },
 ];
 
-export default function Header({ forceScrolled = false }: { forceScrolled?: boolean }) {
+export default function Header({
+  forceScrolled = false,
+  peekOnly = false,
+}: {
+  forceScrolled?: boolean;
+  peekOnly?: boolean;
+}) {
   const [scrolled, setScrolled] = useState(forceScrolled);
 
   useEffect(() => {
@@ -25,11 +31,33 @@ export default function Header({ forceScrolled = false }: { forceScrolled?: bool
     return () => window.removeEventListener("scroll", onScroll);
   }, [forceScrolled]);
 
+  if (peekOnly) {
+    return (
+      <PeekContainer>
+        <HoverStrip aria-hidden />
+        <PeekNav>
+          <NavInner>
+            <Logo href="/" $scrolled>
+              <img src="/icon/logo.svg" alt="MERRID" height={14} />
+            </Logo>
+            <NavLinks>
+              {NAV_ITEMS.map((item) => (
+                <NavLink key={item.label} href={item.href} $scrolled>
+                  {item.label}
+                </NavLink>
+              ))}
+            </NavLinks>
+          </NavInner>
+        </PeekNav>
+      </PeekContainer>
+    );
+  }
+
   return (
     <Nav $scrolled={scrolled}>
       <NavInner>
         <Logo href="/" $scrolled={scrolled}>
-          <img src="/icon/logo.svg" alt="MERRID" height={20} />
+          <img src="/icon/logo.svg" alt="MERRID" height={14} />
         </Logo>
         <NavLinks>
           {NAV_ITEMS.map((item) => (
@@ -54,6 +82,36 @@ const Nav = styled.header<{ $scrolled: boolean }>`
   border-bottom: ${({ $scrolled }) =>
     $scrolled ? "1px solid rgba(0,0,0,0.06)" : "none"};
   transition: height 0.3s, background 0.3s, border-color 0.3s;
+`;
+
+/* peek-only: 숨겨져 있다가 상단 hover 시 슬라이드인 */
+const PeekNav = styled.header`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 64px;
+  background: ${color.white};
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transform: translateY(-100%);
+  transition: transform 0.35s ease;
+`;
+
+const HoverStrip = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  z-index: 51;
+`;
+
+const PeekContainer = styled.div`
+  &:hover ${PeekNav},
+  &:focus-within ${PeekNav} {
+    transform: translateY(0);
+  }
 `;
 
 const NavInner = styled.div`

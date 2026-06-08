@@ -24,7 +24,7 @@ const PICKS_ROW2 = [
 export default function ResultPage() {
   return (
     <Shell>
-      <Header />
+      <Header peekOnly />
       <LeftPane>
         <LeftTopBar>
           <BackLink href="/" aria-label="홈으로">

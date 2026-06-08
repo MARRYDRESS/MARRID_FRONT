@@ -160,6 +160,11 @@ function StyleSelectComponentInner({
                             setPersistHoverKey(cardKey);
                           }
                         }}
+                        onMouseLeave={() => {
+                          if (keepOverlayUntilNext) {
+                            setPersistHoverKey(null);
+                          }
+                        }}
                         onKeyDown={
                           showHash
                             ? (e) => {
@@ -230,7 +235,7 @@ const Section = styled.section`
 const TitleStack = styled.div`
   position: absolute;
   left: 50%;
-  top: 92px;
+  top: 150px;
   z-index: 3;
   transform: translateX(-50%);
   display: flex;
@@ -258,7 +263,7 @@ const TitleSub = styled.p`
 
 const StyleSliderShell = styled.div`
   box-sizing: border-box;
-  padding-top: 196px;
+  padding-top: 260px;
 `;
 
 const Page = styled.div`
