@@ -16,6 +16,32 @@ import {
 const TABS = ["전체보기", "가격별로 보기", "브랜드 별로 보기", "추구미별로 보기"] as const;
 type Tab = (typeof TABS)[number];
 
+const ALL_BRANDS = [...new Set(dressGalleryItems.map((d) => d.shopName))];
+
+function ChevronIcon({ $expanded }: { $expanded: boolean }) {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      style={{
+        transform: $expanded ? "rotate(180deg)" : "rotate(0deg)",
+        transition: "transform 0.2s ease",
+        display: "block",
+      }}
+    >
+      <path
+        d="M2 4l4 4 4-4"
+        stroke={color.gray700}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function LocationPin() {
   return (
     <svg width="10" height="13" viewBox="0 0 10 13" fill="none">
@@ -30,25 +56,35 @@ function LocationPin() {
 export default function DressPage() {
   const [activeTab, setActiveTab] = useState<Tab>("추구미별로 보기");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [brandsExpanded, setBrandsExpanded] = useState(false);
 
-  const showFilterRow = activeTab === "추구미별로 보기";
+  const showTagFilter = activeTab === "추구미별로 보기";
+  const showBrandFilter = activeTab === "브랜드 별로 보기";
 
-  const toggleFilter = useCallback((tag: string) => {
-    if (tag === "#전체") {
-      setSelectedTags([]);
-      return;
-    }
+  const toggleTag = useCallback((tag: string) => {
+    if (tag === "#전체") { setSelectedTags([]); return; }
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   }, []);
 
-  const visibleItems = useMemo(() => {
-    if (!showFilterRow || selectedTags.length === 0) return dressGalleryItems;
-    return dressGalleryItems.filter((item) =>
-      selectedTags.some((t) => item.filterTags.includes(t as DressFilterTag))
+  const toggleBrand = useCallback((brand: string) => {
+    if (brand === "전체") { setSelectedBrands([]); return; }
+    setSelectedBrands((prev) =>
+      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
     );
-  }, [selectedTags, showFilterRow]);
+  }, []);
+
+  const visibleItems = useMemo(() => {
+    if (showTagFilter && selectedTags.length > 0)
+      return dressGalleryItems.filter((item) =>
+        selectedTags.some((t) => item.filterTags.includes(t as DressFilterTag))
+      );
+    if (showBrandFilter && selectedBrands.length > 0)
+      return dressGalleryItems.filter((item) => selectedBrands.includes(item.shopName));
+    return dressGalleryItems;
+  }, [showTagFilter, showBrandFilter, selectedTags, selectedBrands]);
 
   return (
     <Shell>
@@ -71,6 +107,8 @@ export default function DressPage() {
               onClick={() => {
                 setActiveTab(tab);
                 setSelectedTags([]);
+                setSelectedBrands([]);
+                setBrandsExpanded(false);
               }}
             >
               {tab}
@@ -79,24 +117,51 @@ export default function DressPage() {
         </TabInner>
       </TabBar>
 
-      {showFilterRow && (
+      {showTagFilter && (
         <FilterRow>
           <FilterInner>
-            {(["#전체", ...dressFilterTagOptions] as const).map((tag) => {
-              const active =
-                tag === "#전체" ? selectedTags.length === 0 : selectedTags.includes(tag);
-              return (
-                <FilterChip
-                  key={tag}
-                  type="button"
-                  $active={active}
-                  onClick={() => toggleFilter(tag)}
-                >
-                  {tag}
-                </FilterChip>
-              );
-            })}
+            {(["#전체", ...dressFilterTagOptions] as const).map((tag) => (
+              <FilterChip
+                key={tag}
+                type="button"
+                $active={tag === "#전체" ? selectedTags.length === 0 : selectedTags.includes(tag)}
+                onClick={() => toggleTag(tag)}
+              >
+                {tag}
+              </FilterChip>
+            ))}
           </FilterInner>
+        </FilterRow>
+      )}
+
+      {showBrandFilter && (
+        <FilterRow $expanded={brandsExpanded}>
+          <FilterInner $wrap>
+            <FilterChip
+              type="button"
+              $active={selectedBrands.length === 0}
+              onClick={() => toggleBrand("전체")}
+            >
+              전체
+            </FilterChip>
+            {ALL_BRANDS.map((brand) => (
+              <FilterChip
+                key={brand}
+                type="button"
+                $active={selectedBrands.includes(brand)}
+                onClick={() => toggleBrand(brand)}
+              >
+                {brand}
+              </FilterChip>
+            ))}
+          </FilterInner>
+          <ExpandBtn
+            type="button"
+            onClick={() => setBrandsExpanded((v) => !v)}
+            aria-label={brandsExpanded ? "접기" : "더 보기"}
+          >
+            <ChevronIcon $expanded={brandsExpanded} />
+          </ExpandBtn>
         </FilterRow>
       )}
 
@@ -215,24 +280,47 @@ const TabBtn = styled.button<{ $active: boolean }>`
   }
 `;
 
-const FilterRow = styled.div`
+const FilterRow = styled.div<{ $expanded?: boolean }>`
   width: 100%;
   background: ${color.gray100};
-  height: 75px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  max-height: ${({ $expanded }) => ($expanded ? "400px" : "75px")};
+  overflow: hidden;
+  transition: max-height 0.3s ease;
 `;
 
-const FilterInner = styled.div`
+const FilterInner = styled.div<{ $wrap?: boolean }>`
   box-sizing: border-box;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 clamp(24px, 5vw, 79px);
+  padding: 16px clamp(24px, 5vw, 79px);
   display: flex;
   align-items: center;
-  gap: 8px;
-  overflow-x: auto;
+  flex-wrap: ${({ $wrap }) => ($wrap ? "wrap" : "nowrap")};
+  gap: ${({ $wrap }) => ($wrap ? "12px 8px" : "8px")};
+  overflow-x: ${({ $wrap }) => ($wrap ? "visible" : "auto")};
+`;
+
+const ExpandBtn = styled.button`
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 16px clamp(12px, 3vw, 48px) 0 0;
+  border: 1px solid ${color.gray300};
+  border-radius: 50%;
+  background: ${color.white};
+  cursor: pointer;
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: ${color.gray500};
+  }
 `;
 
 const FilterChip = styled.button<{ $active: boolean }>`
