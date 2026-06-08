@@ -108,7 +108,6 @@ export default function AvatarSettingPage() {
                     <PreviewLabel>{i === 0 ? "얼굴 사진" : "전신 사진"}</PreviewLabel>
                   </PreviewItem>
                 ))}
-                <ChangeHint>클릭해서 사진 변경</ChangeHint>
               </PreviewArea>
             ) : (
               <UploadInner>
@@ -126,6 +125,10 @@ export default function AvatarSettingPage() {
               </UploadInner>
             )}
           </UploadZone>
+
+          {previews.length > 0 && (
+            <ChangeHint>클릭해서 사진 변경</ChangeHint>
+          )}
 
           <Footnote>
             이런 사진이 좋아요!
@@ -202,39 +205,42 @@ const UploadZone = styled.label<{ $active: boolean; $hasPreview: boolean }>`
   justify-content: center;
   width: 100%;
   max-width: 469px;
-  min-height: clamp(140px, 22vh, 238px);
-  flex-shrink: 1;
-  padding: ${({ $hasPreview }) => ($hasPreview ? "16px" : "clamp(12px, 2vh, 24px) 16px")};
+  height: clamp(140px, 22vh, 238px);
+  flex-shrink: 0;
+  padding: 12px 16px;
   margin: 0;
   border-radius: 12px;
   border: 1px dashed ${({ $active }) => ($active ? color.gray400 : color.gray300)};
   background: ${({ $active }) => ($active ? color.gray200 : color.gray100)};
   cursor: pointer;
   text-align: center;
+  overflow: hidden;
   transition: background 0.2s ease, border-color 0.2s ease;
 `;
 
 const PreviewArea = styled.div`
   display: flex;
-  flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
-  align-items: flex-start;
+  align-items: flex-end;
   width: 100%;
+  height: 100%;
 `;
 
 const PreviewItem = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  flex: 1 1 120px;
-  max-width: 180px;
+  gap: 4px;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
 `;
 
 const PreviewImg = styled.img`
+  flex: 1 1 0;
+  min-height: 0;
   width: 100%;
-  aspect-ratio: 3 / 4;
   object-fit: cover;
   object-position: top;
   border-radius: 6px;
@@ -248,11 +254,12 @@ const PreviewLabel = styled.p`
 `;
 
 const ChangeHint = styled.p`
-  width: 100%;
-  margin: 4px 0 0;
+  margin: 6px 0 0;
+  max-width: 469px;
   text-align: center;
   ${font.caption};
   color: ${color.gray400};
+  flex-shrink: 0;
 `;
 
 const VisuallyHiddenInput = styled.input`

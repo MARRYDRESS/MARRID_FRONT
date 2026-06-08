@@ -30,7 +30,7 @@ export default function FittingPage() {
 
   return (
     <Shell>
-      <Header />
+      <Header peekOnly />
       <LeftPane>
         <LeftTopBar>
           <BackLink href="/dress" aria-label="드레스 목록으로">

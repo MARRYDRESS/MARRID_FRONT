@@ -108,6 +108,11 @@ function SelectComponentInner({
                   setPersistHoverKey(itemKey);
                 }
               }}
+              onMouseLeave={() => {
+                if (keepDimUntilNext) {
+                  setPersistHoverKey(null);
+                }
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -118,7 +123,7 @@ function SelectComponentInner({
                 setSelectedCardKey((prev) => (prev === itemKey ? null : itemKey))
               }
             >
-              <CardImageWrap $layout={pageLayout}>
+              <CardImageWrap $layout={pageLayout} $selected={selectedCardKey === itemKey}>
                 <CardImage
                   src={item.image}
                   alt={`${item.label} 이미지 ${pageIndex * VISIBLE_COUNT + cardIndex + 1}`}
@@ -215,12 +220,14 @@ const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" }>`
     $layout === "hall"
       ? css`
           position: absolute;
-          left: calc(50% - 190px);
-          top: 98px;
+          left: 50%;
+          top: 150px;
+          transform: translateX(-50%);
           margin: 0;
           padding: 0;
           z-index: 3;
           white-space: nowrap;
+          text-align: center;
           ${$variant === "sm" ? font["title-sm"] : font["title-md"]};
         `
       : css`
@@ -235,7 +242,7 @@ const Title = styled.h2<{ $variant: "md" | "sm"; $layout: "default" | "hall" }>`
 
 const HallSliderBody = styled.div`
   box-sizing: border-box;
-  padding-top: 160px;
+  padding-top: 260px;
 `;
 
 const Page = styled.div<{ $layout: "default" | "hall" }>`
@@ -302,12 +309,26 @@ const Card = styled.article<{
       : ""}
 `;
 
-const CardImageWrap = styled.div<{ $layout: "default" | "hall" }>`
+const CardImageWrap = styled.div<{ $layout: "default" | "hall"; $selected?: boolean }>`
   position: relative;
   width: 100%;
   aspect-ratio: 607 / 710;
   overflow: hidden;
   flex-shrink: 0;
+
+  ${({ $selected }) =>
+    $selected
+      ? css`
+          &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border: 3px solid ${color.primary};
+            z-index: 2;
+            pointer-events: none;
+          }
+        `
+      : ""}
 `;
 
 const CardImage = styled.img`
