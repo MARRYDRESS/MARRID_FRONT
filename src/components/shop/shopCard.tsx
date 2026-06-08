@@ -10,28 +10,28 @@ export type ShopCardProps = {
   imageSrc: string;
   brandName: string;
   description?: string;
-  href?: string;
+  href: string;
 };
 
 export default function ShopCard({
   imageSrc,
   brandName,
   description,
-  href = "/dress",
+  href,
 }: ShopCardProps) {
   return (
     <Article>
       <ImageWrap>
         <Image
           src={imageSrc}
-          alt={`${brandName} 웨딩 드레스`}
+          alt={`${brandName} 브랜드 대표 이미지`}
           fill
           sizes="(max-width: 900px) 100vw, 420px"
           style={{ objectFit: "cover", objectPosition: "center top" }}
         />
         <HoverOverlay>
-          <FittingLink href={href} aria-label={`${brandName} 드레스 보러가기`}>
-            드레스 보러가기
+        <FittingLink href={href} aria-label={`${brandName} 샵 방문하기`}>
+        샵 더 알아보기
           </FittingLink>
         </HoverOverlay>
       </ImageWrap>

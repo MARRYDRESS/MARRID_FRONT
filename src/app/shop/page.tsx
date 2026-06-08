@@ -87,10 +87,11 @@ export default function ShopPage() {
         </BannerOverlay>
       </BannerWrap>
 
-      <FilterBar>
+      <FilterBar aria-label="가격대별 필터">
         {PRICE_FILTERS.map((f) => (
           <FilterTab
             key={f.value}
+            type="button"
             $active={activeFilter === f.value}
             onClick={() => setActiveFilter(f.value)}
           >
@@ -109,6 +110,7 @@ export default function ShopPage() {
               imageSrc={brand.imageSrc}
               brandName={brand.brandName}
               description={brand.description}
+              href={brand.url}
             />
           ))}
         </BrandGrid>
