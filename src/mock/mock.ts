@@ -81,6 +81,29 @@ const SHOP_NAMES = [
   "레베카앤코",
 ] as const;
 
+export const brandList = [
+  "엔조 최재훈",
+  "소유 브라이덜",
+  "Kelly SONYUNHUI",
+  "지앤부띠끄",
+  "더화이트",
+  "라흰",
+  "아모레쥬",
+  "레베카앤코",
+  "브라이드 손윤희",
+  "아뜰리에로리에",
+  "르메르 브라이덜",
+  "에뜨와",
+  "모닝드레스",
+  "화이트앤화이트",
+  "프리마 브라이덜",
+  "로시떼",
+  "클레르 드 뤼느",
+  "아이린 브라이덜",
+  "르블랑 웨딩",
+  "마리엘",
+] as const;
+
 /** 행 5×열 3 기준 15장 — 이미지는 main1~14 순환, 필터 태그 조합 유지 */
 export const dressGalleryItems: DressGalleryItem[] = [
   {

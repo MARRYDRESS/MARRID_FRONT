@@ -10,13 +10,12 @@ import Header from "@/src/components/layout/header";
 import {
   dressFilterTagOptions,
   dressGalleryItems,
+  brandList,
   type DressFilterTag,
 } from "@/src/mock/mock";
 
 const TABS = ["전체보기", "가격별로 보기", "브랜드 별로 보기", "추구미별로 보기"] as const;
 type Tab = (typeof TABS)[number];
-
-const ALL_BRANDS = [...new Set(dressGalleryItems.map((d) => d.shopName))];
 
 function ChevronIcon({ $expanded }: { $expanded: boolean }) {
   return (
@@ -54,7 +53,7 @@ function LocationPin() {
 }
 
 export default function DressPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("추구미별로 보기");
+  const [activeTab, setActiveTab] = useState<Tab>("전체보기");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [brandsExpanded, setBrandsExpanded] = useState(false);
@@ -88,7 +87,7 @@ export default function DressPage() {
 
   return (
     <Shell>
-      <Header />
+      <Header forceScrolled />
 
       <Inner>
         <HeadingGroup>
@@ -136,7 +135,7 @@ export default function DressPage() {
 
       {showBrandFilter && (
         <FilterRow $expanded={brandsExpanded}>
-          <FilterInner $wrap>
+          <FilterInner $wrap={brandsExpanded}>
             <FilterChip
               type="button"
               $active={selectedBrands.length === 0}
@@ -144,7 +143,7 @@ export default function DressPage() {
             >
               전체
             </FilterChip>
-            {ALL_BRANDS.map((brand) => (
+            {brandList.map((brand) => (
               <FilterChip
                 key={brand}
                 type="button"
@@ -204,6 +203,7 @@ const Shell = styled.div`
   box-sizing: border-box;
   width: 100%;
   min-height: 100dvh;
+  padding-top: 64px;
   background: ${color.white};
   color: ${color.black};
 `;
@@ -301,7 +301,7 @@ const FilterInner = styled.div<{ $wrap?: boolean }>`
   align-items: center;
   flex-wrap: ${({ $wrap }) => ($wrap ? "wrap" : "nowrap")};
   gap: ${({ $wrap }) => ($wrap ? "12px 8px" : "8px")};
-  overflow-x: ${({ $wrap }) => ($wrap ? "visible" : "auto")};
+  overflow: ${({ $wrap }) => ($wrap ? "visible" : "hidden")};
 `;
 
 const ExpandBtn = styled.button`

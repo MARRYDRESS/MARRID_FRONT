@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import styled from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
+import Header from "@/src/components/layout/header";
 
 const NAV_ITEMS = [
   { label: "대시보드", href: "/mypage/dashboard" },
@@ -28,31 +29,32 @@ export default function MypageLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
 
   return (
-    <Shell>
-      <Sidebar>
-        <LogoLink href="/">
-          <img src="/icon/logo.svg" alt="MERRID" height={24} />
-        </LogoLink>
-        <Nav>
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname.startsWith(item.href);
-            return (
-              <NavItem key={item.href} href={item.href} $active={isActive}>
-                <UserIcon />
-                <span>{item.label}</span>
-              </NavItem>
-            );
-          })}
-        </Nav>
-      </Sidebar>
-      <Main>{children}</Main>
-    </Shell>
+    <>
+      <Header forceScrolled />
+      <Shell>
+        <Sidebar>
+          <Nav>
+            {NAV_ITEMS.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              return (
+                <NavItem key={item.href} href={item.href} $active={isActive}>
+                  <UserIcon />
+                  <span>{item.label}</span>
+                </NavItem>
+              );
+            })}
+          </Nav>
+        </Sidebar>
+        <Main>{children}</Main>
+      </Shell>
+    </>
   );
 }
 
 const Shell = styled.div`
   display: flex;
   min-height: 100dvh;
+  padding-top: 64px;
   background: ${color.white};
 `;
 
@@ -65,17 +67,11 @@ const Sidebar = styled.aside`
   flex-direction: column;
 `;
 
-const LogoLink = styled(Link)`
-  display: flex;
-  align-items: center;
-  padding: 40px 0 0 24px;
-  text-decoration: none;
-`;
 
 const Nav = styled.nav`
   display: flex;
   flex-direction: column;
-  margin-top: 64px;
+  margin-top: 32px;
 `;
 
 const NavItem = styled(Link)<{ $active: boolean }>`
