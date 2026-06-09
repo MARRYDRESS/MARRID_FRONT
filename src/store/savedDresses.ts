@@ -17,19 +17,21 @@ export function useSavedDresses() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setDresses(JSON.parse(raw));
-    } catch {}
+    } catch (e) {
+      console.warn("Failed to load saved dresses:", e);
+    }
   }, []);
 
-  const persist = (next: SavedDress[]) => {
+  const persist = useCallback((next: SavedDress[]) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     setDresses(next);
-  };
+  }, []);
 
   const saveDress = useCallback((imageSrc: string) => {
     setDresses((prev) => {
       const next: SavedDress[] = [
         ...prev,
-        { id: `${imageSrc}-${prev.length}`, imageSrc, savedAt: Date.now() },
+        { id: `${imageSrc}-${Date.now()}`, imageSrc, savedAt: Date.now() },
       ];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       return next;
@@ -38,7 +40,7 @@ export function useSavedDresses() {
 
   const reorder = useCallback((next: SavedDress[]) => {
     persist(next);
-  }, []);
+  }, [persist]);
 
   const remove = useCallback((id: string) => {
     setDresses((prev) => {

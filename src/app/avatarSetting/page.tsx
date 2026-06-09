@@ -35,6 +35,10 @@ export default function AvatarSettingPage() {
     };
   }, []);
 
+  const normalizeImageFiles = useCallback((files: File[]) => {
+    return files.filter((f) => f.type.startsWith("image/")).slice(0, 2);
+  }, []);
+  
   const applyFiles = useCallback((files: File[]) => {
     prevUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
     const urls = files.map((f) => URL.createObjectURL(f));
@@ -58,23 +62,19 @@ export default function AvatarSettingPage() {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    const files = Array.from(e.dataTransfer.files).filter((f) =>
-      f.type.startsWith("image/")
-    );
+    const files = normalizeImageFiles(Array.from(e.dataTransfer.files));
     if (files.length && inputRef.current) {
       const dt = new DataTransfer();
       files.forEach((f) => dt.items.add(f));
       inputRef.current.files = dt.files;
       applyFiles(files);
     }
-  }, [applyFiles]);
+  }, [applyFiles, normalizeImageFiles]);
 
   const onInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []).filter((f) =>
-      f.type.startsWith("image/")
-    );
+    const files = normalizeImageFiles(Array.from(e.target.files ?? []));
     if (files.length) applyFiles(files);
-  }, [applyFiles]);
+  }, [applyFiles, normalizeImageFiles]);
 
   return (
     <Shell>

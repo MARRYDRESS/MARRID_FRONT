@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styled from "styled-components";
@@ -21,11 +21,19 @@ const FITTING_PICKS = [
 export default function FittingPage() {
   const { saveDress } = useSavedDresses();
   const [saved, setSaved] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   function handleSave() {
     saveDress(LEFT_HERO);
     setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setSaved(false), 1500);
   }
 
   return (

@@ -213,12 +213,12 @@ export default function DressPage() {
                     src={item.image}
                     alt={item.label}
                     fill
-                    sizes="(max-width: 1200px) 25vw, 294px"
+                    sizes="(max-width: 480px) 100vw, (max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw"
                     style={{ objectFit: "cover", objectPosition: "top" }}
                   />
                   <HoverOverlay className="dress-hover">
-                    <FittingPill href="/fitting">AI 피팅하기</FittingPill>
-                  </HoverOverlay>
++                    <FittingPill href={`/fitting?dressId=${item.id}`}>AI 피팅하기</FittingPill>
++                  </HoverOverlay>
                 </ImageArea>
                 <InfoBar>
                   <DressName>{item.label}</DressName>

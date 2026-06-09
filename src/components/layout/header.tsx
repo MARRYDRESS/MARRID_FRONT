@@ -24,7 +24,10 @@ export default function Header({
   const [scrolled, setScrolled] = useState(forceScrolled);
 
   useEffect(() => {
-    if (forceScrolled) return;
+    if (forceScrolled) {
+      setScrolled(true);
+        return;
+      }
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -84,7 +87,6 @@ const Nav = styled.header<{ $scrolled: boolean }>`
   transition: height 0.3s, background 0.3s, border-color 0.3s;
 `;
 
-/* peek-only: 숨겨져 있다가 상단 hover 시 슬라이드인 */
 const PeekNav = styled.header`
   position: fixed;
   top: 0;

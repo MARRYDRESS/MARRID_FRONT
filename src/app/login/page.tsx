@@ -15,6 +15,9 @@ function GoogleIcon() {
 }
 
 export default function LoginPage() {
+  const handleGoogleLogin = () => {
+    window.location.href = "/api/auth/google";
+  };
   return (
     <Shell>
       <LeftPane>
@@ -31,7 +34,7 @@ export default function LoginPage() {
       <RightPane>
         <RightInner>
           <Logo>MARRID</Logo>
-          <GoogleBtn type="button">
+          <GoogleBtn type="button" onClick={handleGoogleLogin}>
             <GoogleIcon />
             <span>구글로 로그인하기</span>
           </GoogleBtn>
@@ -53,6 +56,9 @@ const LeftPane = styled.div`
   position: relative;
   flex: 0 0 55%;
   overflow: hidden;
+  @media (max-width: 900px) {
+    display: none;
+  }
 `;
 
 const RightPane = styled.div`
@@ -68,6 +74,7 @@ const RightInner = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 40px;
+  width: min(92vw, 360px);
 `;
 
 const Logo = styled.h1`
@@ -81,7 +88,8 @@ const GoogleBtn = styled.button`
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 280px;
+  width: 100%;
+  max-width: 320px;
   height: 62px;
   padding: 0 24px;
   border: 1px solid ${color.gray700};
