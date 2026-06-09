@@ -7,7 +7,7 @@ import color from "@/src/style/color";
 import font from "@/src/style/font";
 import Header from "@/src/components/layout/header";
 import ShopCard from "@/src/components/shop/shopCard";
-import type { Dresse } from "./page";
+import type { Shop } from "./page";
 
 const PRICE_FILTERS = [
   { label: "전체 보기", value: 0 },
@@ -27,7 +27,7 @@ function getSectionTitle(filter: PriceRange) {
   return `${filter}만원 대 드레스, 여기서 확인하세요`;
 }
 
-export default function ShopClient({ brands }: { brands: Dresse[] }) {
+export default function ShopClient({ brands }: { brands: Shop[] }) {
   const [activeFilter, setActiveFilter] = useState<PriceRange>(0);
 
   const filtered =
@@ -74,7 +74,7 @@ export default function ShopClient({ brands }: { brands: Dresse[] }) {
           {filtered.map((brand) => (
             <ShopCard
               key={brand.id}
-              imageSrc={brand.image_url}
+              imageSrc={brand.cover_image_url}
               brandName={brand.shop_name}
               region={brand.region}
               url={brand.source_url}

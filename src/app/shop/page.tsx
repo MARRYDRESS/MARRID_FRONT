@@ -1,23 +1,22 @@
 import { supabase } from "@/src/lib/supabase";
 import ShopClient from "./ShopClient";
 
-export type Dresse = {
+export type Shop = {
   id: string;
   shop_name: string;
-  source_url: string;
+  cover_image_url: string;
   region: string;
-  image_url: string;
   price_range: number;
+  source_url: string;
+  created_at: string;
 };
 
 export default async function ShopPage() {
-  const { data, error } = await supabase.from("dresses").select("*");
+  const { data, error } = await supabase.from("shops").select("*");
 
   if (error) {
-    console.error("dresse 테이블 조회 실패:", error.message);
+    console.error("shops fetch error:", error.message);
   }
 
-  console.log("dresse 데이터:", data, "에러:", error);
-
-  return <ShopClient brands={(data ?? []) as Dresse[]} />;
+  return <ShopClient brands={(data ?? []) as Shop[]} />;
 }
