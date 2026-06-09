@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MERRID - 인생의 한 번뿐인 내 드레스를 완벽하게</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --black:#111827; --white:#fff; --gray100:#F3F4F6; --gray300:#D1D5DB;
+    --gray400:#9CA3AF; --gray700:#374151; --gray-light:#f9f8f6; --gray-mid:#e8e5e0;
+    --accent:#c9a96e; --accent-light:#f5efe4;
+  }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--white); color:var(--black); overflow-x:hidden; }
+
+  /* NAVBAR */
+  nav { position:fixed; top:0; left:0; right:0; z-index:100; height:84px; display:flex; align-items:center; justify-content:space-between; padding:0 60px; transition:all 0.3s; }
+  nav.scrolled { background:white; height:74px; border-bottom:1px solid rgba(0,0,0,0.06); }
+  .nav-logo { font-family:'Noto Serif KR',serif; font-size:30px; font-weight:300; letter-spacing:0.18em; color:white; text-decoration:none; transition:color 0.3s; }
+  nav.scrolled .nav-logo { color:var(--black); }
+  .nav-menu { display:flex; gap:52px; list-style:none; }
+  .nav-menu a { font-size:16px; font-weight:300; color:white; text-decoration:none; letter-spacing:0.05em; transition:all 0.3s; }
+  nav.scrolled .nav-menu a { color:var(--black); }
+  .nav-menu a:hover { opacity:0.6; }
+  .nav-login { display:flex; align-items:center; gap:6px; font-size:16px; font-weight:300; color:white; text-decoration:none; transition:color 0.3s; }
+  nav.scrolled .nav-login { color:var(--black); }
+  .nav-login svg { width:20px; height:20px; }
+
+  /* ━━━━━ HERO BANNER ━━━━━ */
+  .hero { position:relative; height:100vh; min-height:640px; overflow:hidden; display:flex; align-items:center; }
+  .hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse at 65% 40%, #3a322a 0%, #241f1a 55%, #14110e 100%); }
+  .hero-pattern { position:absolute; inset:0; background-image:repeating-linear-gradient(45deg,transparent,transparent 90px,rgba(201,169,110,0.05) 90px,rgba(201,169,110,0.05) 91px); }
+  /* 신부 실루엣 장식 */
+  .hero-silhouette { position:absolute; right:8%; bottom:0; height:88%; opacity:0.18; }
+  .hero-silhouette-2 { position:absolute; right:24%; bottom:0; height:64%; opacity:0.08; }
+
+  .hero-content { position:relative; z-index:2; padding:0 80px; max-width:760px; }
+  .hero-eyebrow { font-size:13px; letter-spacing:0.28em; color:var(--accent); text-transform:uppercase; margin-bottom:26px; opacity:0; animation:fadeUp 0.9s 0.2s ease forwards; }
+  .hero-title { font-family:'Noto Serif KR',serif; font-size:54px; font-weight:300; line-height:1.42; letter-spacing:0.03em; color:white; margin-bottom:28px; opacity:0; animation:fadeUp 0.9s 0.4s ease forwards; }
+  .hero-desc { font-size:17px; font-weight:300; line-height:1.9; color:rgba(255,255,255,0.7); letter-spacing:0.03em; margin-bottom:42px; opacity:0; animation:fadeUp 0.9s 0.6s ease forwards; }
+  .hero-actions { display:flex; gap:14px; opacity:0; animation:fadeUp 0.9s 0.8s ease forwards; }
+  .btn-hero-primary { padding:17px 40px; background:white; color:var(--black); font-size:15px; letter-spacing:0.06em; text-decoration:none; display:inline-flex; align-items:center; gap:9px; transition:all 0.25s; }
+  .btn-hero-primary:hover { background:var(--accent); color:white; }
+  .btn-hero-primary svg { width:17px; height:17px; }
+  .btn-hero-ghost { padding:17px 40px; background:transparent; color:white; font-size:15px; letter-spacing:0.06em; text-decoration:none; border:1px solid rgba(255,255,255,0.4); transition:all 0.25s; }
+  .btn-hero-ghost:hover { background:rgba(255,255,255,0.1); border-color:white; }
+
+  .hero-scroll { position:absolute; bottom:38px; left:50%; transform:translateX(-50%); z-index:2; color:rgba(255,255,255,0.5); font-size:11px; letter-spacing:0.18em; text-align:center; }
+  .hero-scroll svg { width:18px; height:18px; margin-top:8px; animation:bounce 1.8s infinite; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
+  @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(6px);} }
+
+  /* ━━━━━ VALUE PROPS ━━━━━ */
+  .section { padding:110px 80px; }
+  .section-label { font-size:12px; letter-spacing:0.24em; color:var(--accent); text-transform:uppercase; text-align:center; margin-bottom:16px; }
+  .section-title { font-family:'Noto Serif KR',serif; font-size:36px; font-weight:300; text-align:center; letter-spacing:0.03em; line-height:1.4; margin-bottom:14px; }
+  .section-sub { font-size:15px; color:var(--gray400); font-weight:300; text-align:center; line-height:1.8; margin-bottom:64px; }
+
+  .value-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:40px; max-width:1080px; margin:0 auto; }
+  .value-item { text-align:center; }
+  .value-icon { width:64px; height:64px; border-radius:50%; background:var(--accent-light); display:flex; align-items:center; justify-content:center; margin:0 auto 22px; }
+  .value-icon svg { width:28px; height:28px; stroke:var(--accent); stroke-width:1.3; fill:none; }
+  .value-item h3 { font-family:'Noto Serif KR',serif; font-size:20px; font-weight:300; margin-bottom:12px; letter-spacing:0.03em; }
+  .value-item p { font-size:14px; color:var(--gray700); font-weight:300; line-height:1.9; letter-spacing:0.02em; }
+
+  /* ━━━━━ HOW IT WORKS ━━━━━ */
+  .how { background:var(--gray-light); }
+  .how-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:32px; max-width:1080px; margin:0 auto; }
+  .how-step { background:white; border:1px solid var(--gray-mid); padding:40px 36px; position:relative; }
+  .how-num { font-family:'Noto Serif KR',serif; font-size:48px; font-weight:300; color:var(--accent-light); line-height:1; margin-bottom:18px; }
+  .how-step.active-num .how-num { color:var(--accent); }
+  .how-step h4 { font-family:'Noto Serif KR',serif; font-size:19px; font-weight:400; margin-bottom:10px; letter-spacing:0.03em; }
+  .how-step p { font-size:13px; color:var(--gray700); font-weight:300; line-height:1.85; }
+  .how-arrow { display:flex; align-items:center; justify-content:center; }
+
+  /* ━━━━━ FEATURED DRESSES ━━━━━ */
+  .featured-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; max-width:1200px; margin:0 auto; }
+  .f-card { border:1px solid var(--gray-mid); overflow:hidden; cursor:pointer; transition:transform 0.28s, box-shadow 0.28s; position:relative; }
+  .f-card:hover { transform:translateY(-4px); box-shadow:0 16px 48px rgba(0,0,0,0.09); }
+  .f-img { aspect-ratio:3/4; position:relative; display:flex; align-items:flex-end; justify-content:center; }
+  .f-img svg.sil { width:50%; opacity:0.3; }
+  .f-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,0.45),transparent 45%); opacity:0; transition:opacity 0.28s; display:flex; align-items:flex-end; justify-content:center; padding-bottom:18px; }
+  .f-card:hover .f-overlay { opacity:1; }
+  .f-fit-btn { background:white; color:var(--black); font-size:13px; padding:9px 20px; border-radius:20px; letter-spacing:0.04em; display:flex; align-items:center; gap:6px; }
+  .f-fit-btn svg { width:13px; height:13px; }
+  .f-tags { position:absolute; top:12px; left:12px; display:flex; gap:5px; }
+  .f-mini-tag { background:rgba(255,255,255,0.85); font-size:10px; color:var(--gray700); padding:4px 9px; border-radius:10px; }
+  .f-body { padding:15px; background:white; }
+  .f-name { font-family:'Noto Serif KR',serif; font-size:14px; font-weight:300; margin-bottom:4px; letter-spacing:0.02em; }
+  .f-shop { font-size:11px; color:var(--gray400); font-weight:300; }
+  .d1{background:linear-gradient(165deg,#ece5db,#ddd5c8);} .d2{background:linear-gradient(165deg,#e8e1d8,#dad3cc);}
+  .d3{background:linear-gradient(165deg,#e5ddd5,#d8d0c4);} .d4{background:linear-gradient(165deg,#e2dbd2,#d4ccc0);}
+
+  .center-btn { text-align:center; margin-top:48px; }
+  .btn-line { display:inline-flex; align-items:center; gap:8px; padding:14px 34px; border:1px solid var(--black); font-size:14px; letter-spacing:0.06em; color:var(--black); text-decoration:none; transition:all 0.22s; }
+  .btn-line:hover { background:var(--black); color:white; }
+  .btn-line svg { width:15px; height:15px; }
+
+  /* ━━━━━ PRICE RANGE TEASER ━━━━━ */
+  .price { background:var(--black); color:white; }
+  .price .section-label { color:var(--accent); }
+  .price .section-title { color:white; }
+  .price .section-sub { color:rgba(255,255,255,0.5); }
+  .price-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; max-width:1080px; margin:0 auto; }
+  .price-card { border:1px solid rgba(255,255,255,0.15); padding:38px 34px; cursor:pointer; transition:all 0.25s; }
+  .price-card:hover { background:rgba(255,255,255,0.04); border-color:var(--accent); }
+  .price-range { font-family:'Noto Serif KR',serif; font-size:28px; font-weight:300; color:var(--accent); margin-bottom:14px; }
+  .price-card h4 { font-size:16px; font-weight:400; margin-bottom:10px; letter-spacing:0.02em; }
+  .price-card p { font-size:13px; color:rgba(255,255,255,0.5); font-weight:300; line-height:1.8; margin-bottom:20px; }
+  .price-card .arrow { font-size:13px; color:white; letter-spacing:0.06em; display:flex; align-items:center; gap:6px; }
+
+  /* ━━━━━ FINAL CTA ━━━━━ */
+  .final-cta { padding:120px 80px; text-align:center; background:linear-gradient(170deg, var(--accent-light), #fff); }
+  .final-cta .section-label { color:var(--accent); }
+  .final-cta h2 { font-family:'Noto Serif KR',serif; font-size:40px; font-weight:300; line-height:1.4; letter-spacing:0.03em; margin-bottom:20px; }
+  .final-cta p { font-size:16px; color:var(--gray700); font-weight:300; margin-bottom:40px; }
+  .btn-cta { display:inline-flex; align-items:center; gap:10px; padding:18px 48px; background:var(--black); color:white; font-size:16px; letter-spacing:0.06em; text-decoration:none; transition:all 0.25s; }
+  .btn-cta:hover { background:var(--accent); }
+  .btn-cta svg { width:18px; height:18px; }
+
+  /* FOOTER */
+  footer { background:var(--black); padding:60px 80px 40px; color:rgba(255,255,255,0.4); }
+  .footer-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:40px; padding-bottom:36px; border-bottom:1px solid rgba(255,255,255,0.1); }
+  .footer-logo { font-family:'Noto Serif KR',serif; font-size:26px; font-weight:300; color:white; letter-spacing:0.18em; margin-bottom:14px; }
+  .footer-tagline { font-size:13px; font-weight:300; letter-spacing:0.04em; color:rgba(255,255,255,0.5); }
+  .footer-links { display:flex; gap:48px; }
+  .footer-col h5 { font-size:13px; color:white; font-weight:400; margin-bottom:16px; letter-spacing:0.06em; }
+  .footer-col a { display:block; font-size:13px; color:rgba(255,255,255,0.45); text-decoration:none; margin-bottom:10px; font-weight:300; transition:color 0.2s; }
+  .footer-col a:hover { color:white; }
+  .footer-bottom { font-size:12px; font-weight:300; letter-spacing:0.06em; }
+
+  @media(max-width:1000px){
+    .value-grid,.how-steps,.price-cards{grid-template-columns:1fr;}
+    .featured-grid{grid-template-columns:repeat(2,1fr);}
+    .hero-title{font-size:38px;} .section{padding:70px 32px;} .hero-content{padding:0 32px;}
+    nav{padding:0 32px;} .footer-top{flex-direction:column;gap:32px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="nav">
+  <a class="nav-logo" href="#">MERRID</a>
+  <ul class="nav-menu">
+    <li><a href="#">아바타 만들기</a></li>
+    <li><a href="#">드레스 보기</a></li>
+    <li><a href="#">드레스샵 추천</a></li>
+    <li><a href="#">마이페이지</a></li>
+  </ul>
+  <a class="nav-login" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>로그인</a>
+</nav>
+
+<!-- ━━━━━ HERO BANNER ━━━━━ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-pattern"></div>
+  <svg class="hero-silhouette" viewBox="0 0 200 480" fill="white"><path d="M100 10 C90 10 80 20 80 40 C80 60 70 70 60 80 L30 200 C20 240 15 280 20 320 L10 460 L100 480 L190 460 L180 320 C185 280 180 240 170 200 L140 80 C130 70 120 60 120 40 C120 20 110 10 100 10Z"/></svg>
+  <svg class="hero-silhouette-2" viewBox="0 0 200 480" fill="white"><path d="M100 10 C88 10 78 20 78 38 C78 56 68 64 56 70 L24 220 C12 280 8 340 14 400 L6 465 L100 480 L194 465 L186 400 C192 340 188 280 176 220 L144 70 C132 64 122 56 122 38 C122 20 112 10 100 10Z"/></svg>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">AI WEDDING DRESS FITTING</div>
+    <h1 class="hero-title">인생의 한 번뿐인<br>내 드레스를 완벽하게</h1>
+    <p class="hero-desc">사진 한 장으로 나만의 아바타를 만들고,<br>세상의 모든 드레스를 직접 입어보세요.<br>당신에게 꼭 맞는 드레스와 드레스샵을 찾아드려요.</p>
+    <div class="hero-actions">
+      <a class="btn-hero-primary" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l1.6 4.8L18 9.5l-4.4 1.7L12 16l-1.6-4.8L6 9.5l4.4-1.7z"/></svg>지금 아바타 만들기</a>
+      <a class="btn-hero-ghost" href="#">드레스 둘러보기</a>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    SCROLL
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+  </div>
+</section>
+
+<!-- ━━━━━ VALUE PROPS ━━━━━ -->
+<section class="section">
+  <div class="section-label">WHY MERRID</div>
+  <h2 class="section-title">드레스 투어, 더 똑똑하게</h2>
+  <p class="section-sub">발품 팔기 전에, 온라인에서 미리 입어보고 결정하세요</p>
+  <div class="value-grid">
+    <div class="value-item">
+      <div class="value-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+      <h3>나만의 AI 아바타</h3>
+      <p>얼굴과 전신 사진만 올리면<br>나와 똑같은 아바타가 완성돼요.</p>
+    </div>
+    <div class="value-item">
+      <div class="value-icon"><svg viewBox="0 0 24 24"><path d="M12 3l1.6 4.8L18 9.5l-4.4 1.7L12 16l-1.6-4.8L6 9.5l4.4-1.7z"/></svg></div>
+      <h3>무제한 가상 피팅</h3>
+      <p>궁금했던 드레스를 부담 없이<br>몇 번이든 입어볼 수 있어요.</p>
+    </div>
+    <div class="value-item">
+      <div class="value-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+      <h3>예산별 샵 추천</h3>
+      <p>마음에 든 드레스를 실제로<br>입어볼 수 있는 샵까지 연결해드려요.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━ HOW IT WORKS ━━━━━ -->
+<section class="section how">
+  <div class="section-label">HOW IT WORKS</div>
+  <h2 class="section-title">단 세 단계면 충분해요</h2>
+  <p class="section-sub">복잡한 과정 없이, 사진 한 장에서 시작돼요</p>
+  <div class="how-steps">
+    <div class="how-step active-num">
+      <div class="how-num">01</div>
+      <h4>사진 업로드</h4>
+      <p>얼굴 사진과 전신 사진을 한 장씩 올리면, AI가 체형과 분위기를 분석해 나만의 아바타를 만들어요.</p>
+    </div>
+    <div class="how-step active-num">
+      <div class="how-num">02</div>
+      <h4>추구미 분석 &amp; 피팅</h4>
+      <p>나에게 어울리는 스타일을 분석하고, 원하는 드레스를 아바타에 입혀 어울림 정도를 확인해요.</p>
+    </div>
+    <div class="how-step active-num">
+      <div class="how-num">03</div>
+      <h4>드레스샵 연결</h4>
+      <p>마음에 든 드레스를 실제로 입어볼 수 있는 샵을 예산과 위치에 맞춰 추천하고 예약까지 도와드려요.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━ FEATURED DRESSES ━━━━━ -->
+<section class="section">
+  <div class="section-label">FEATURED DRESSES</div>
+  <h2 class="section-title">지금 인기 있는 드레스</h2>
+  <p class="section-sub">많은 예비 신부님들이 입어보고 있어요</p>
+  <div class="featured-grid" id="featuredGrid"></div>
+  <div class="center-btn">
+    <a class="btn-line" href="#">드레스 전체 보기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  </div>
+</section>
+
+<!-- ━━━━━ PRICE RANGE ━━━━━ -->
+<section class="section price">
+  <div class="section-label">BY BUDGET</div>
+  <h2 class="section-title">예산에 맞는 드레스샵</h2>
+  <p class="section-sub">가격대별로 엄선한 드레스샵을 만나보세요</p>
+  <div class="price-cards">
+    <div class="price-card">
+      <div class="price-range">100만원대</div>
+      <h4>합리적인 첫 드레스</h4>
+      <p>부담 없는 가격으로 만나는<br>아름다운 드레스</p>
+      <div class="arrow">샵 보기 →</div>
+    </div>
+    <div class="price-card">
+      <div class="price-range">200~300만원대</div>
+      <h4>감각적인 프리미엄</h4>
+      <p>세련된 디자인과<br>고급 소재의 드레스</p>
+      <div class="arrow">샵 보기 →</div>
+    </div>
+    <div class="price-card">
+      <div class="price-range">800만원대</div>
+      <h4>오직 나만을 위한</h4>
+      <p>완전 맞춤 제작의<br>럭셔리 쿠튀르</p>
+      <div class="arrow">샵 보기 →</div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━ FINAL CTA ━━━━━ -->
+<section class="final-cta">
+  <div class="section-label">START NOW</div>
+  <h2>당신의 완벽한 드레스를<br>지금 만나보세요</h2>
+  <p>회원가입 없이도 바로 체험할 수 있어요</p>
+  <a class="btn-cta" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M12 3l1.6 4.8L18 9.5l-4.4 1.7L12 16l-1.6-4.8L6 9.5l4.4-1.7z"/></svg>무료로 아바타 만들기</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-logo">MERRID</div>
+      <div class="footer-tagline">인생의 한 번뿐인 내 드레스를 완벽하게</div>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h5>서비스</h5>
+        <a href="#">아바타 만들기</a>
+        <a href="#">드레스 보기</a>
+        <a href="#">드레스샵 추천</a>
+      </div>
+      <div class="footer-col">
+        <h5>회사</h5>
+        <a href="#">소개</a>
+        <a href="#">제휴 문의</a>
+        <a href="#">고객센터</a>
+      </div>
+      <div class="footer-col">
+        <h5>약관</h5>
+        <a href="#">이용약관</a>
+        <a href="#">개인정보처리방침</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2025 MERRID. All rights reserved.</div>
+</footer>
+
+<script>
+  // 네비게이션 스크롤 효과
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // 인기 드레스
+  const SIL = {
+    aline:'M100 10 C90 10 80 20 80 40 C80 60 70 70 60 80 L30 200 C20 240 15 280 20 320 L10 460 L100 480 L190 460 L180 320 C185 280 180 240 170 200 L140 80 C130 70 120 60 120 40 C120 20 110 10 100 10Z',
+    mermaid:'M100 10 C90 10 80 20 80 40 C80 60 55 80 40 120 L20 240 C15 280 30 360 40 420 L60 460 L100 480 L140 460 L160 420 C170 360 185 280 180 240 L160 120 C145 80 120 60 120 40 C120 20 110 10 100 10Z',
+    ball:'M100 10 C88 10 78 20 78 38 C78 56 68 64 56 70 L24 220 C12 280 8 340 14 400 L6 465 L100 480 L194 465 L186 400 C192 340 188 280 176 220 L144 70 C132 64 122 56 122 38 C122 20 112 10 100 10Z',
+    sheath:'M100 10 C92 10 84 18 84 36 C84 54 76 64 68 74 L50 160 C40 200 38 240 44 280 L30 460 L100 480 L170 460 L156 280 C162 240 160 200 150 160 L132 74 C124 64 116 54 116 36 C116 18 108 10 100 10Z'
+  };
+  const spark = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l1.6 4.8L18 9.5l-4.4 1.7L12 16l-1.6-4.8L6 9.5l4.4-1.7z"/></svg>`;
+  const FEAT = [
+    { name:'미카도 실크 에이라인', shop:'르마리에 웨딩', tags:['우아한'], bg:'d1', sil:'aline' },
+    { name:'오간자 머메이드', shop:'오뜨 브라이덜', tags:['글래머'], bg:'d2', sil:'mermaid' },
+    { name:'샹티이 레이스 볼가운', shop:'아뜰리에 블랑', tags:['로맨틱'], bg:'d3', sil:'ball' },
+    { name:'미니멀 쉬스 실크', shop:'메종 드 마리에', tags:['미니멀'], bg:'d4', sil:'sheath' },
+  ];
+  document.getElementById('featuredGrid').innerHTML = FEAT.map(d => `
+    <div class="f-card">
+      <div class="f-img ${d.bg}">
+        <div class="f-tags">${d.tags.map(t=>`<span class="f-mini-tag">#${t}</span>`).join('')}</div>
+        <svg class="sil" viewBox="0 0 200 480" fill="#a89478"><path d="${SIL[d.sil]}"/></svg>
+        <div class="f-overlay"><div class="f-fit-btn">${spark} AI 피팅하기</div></div>
+      </div>
+      <div class="f-body">
+        <div class="f-name">${d.name}</div>
+        <div class="f-shop">${d.shop}</div>
+      </div>
+    </div>`).join('');
+</script>
+</body>
+</html>

@@ -13,6 +13,8 @@ const BANNER = "/images/avatar_setting_banner.jpg";
 export default function AvatarSettingPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const prevUrlsRef = useRef<string[]>([]);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -25,6 +27,23 @@ export default function AvatarSettingPage() {
       html.style.overflow = prevHtmlOverflow;
       body.style.overflow = prevBodyOverflow;
     };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      prevUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
+
+  const normalizeImageFiles = useCallback((files: File[]) => {
+    return files.filter((f) => f.type.startsWith("image/")).slice(0, 2);
+  }, []);
+  
+  const applyFiles = useCallback((files: File[]) => {
+    prevUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    const urls = files.map((f) => URL.createObjectURL(f));
+    prevUrlsRef.current = urls;
+    setPreviews(urls);
   }, []);
 
   const onDragOver = useCallback((e: React.DragEvent) => {
@@ -43,15 +62,19 @@ export default function AvatarSettingPage() {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    const files = Array.from(e.dataTransfer.files).filter((f) =>
-      f.type.startsWith("image/")
-    );
+    const files = normalizeImageFiles(Array.from(e.dataTransfer.files));
     if (files.length && inputRef.current) {
       const dt = new DataTransfer();
       files.forEach((f) => dt.items.add(f));
       inputRef.current.files = dt.files;
+      applyFiles(files);
     }
-  }, []);
+  }, [applyFiles, normalizeImageFiles]);
+
+  const onInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = normalizeImageFiles(Array.from(e.target.files ?? []));
+    if (files.length) applyFiles(files);
+  }, [applyFiles, normalizeImageFiles]);
 
   return (
     <Shell>
@@ -64,6 +87,7 @@ export default function AvatarSettingPage() {
           <UploadZone
             htmlFor="avatar-upload-input"
             $active={isDragging}
+            $hasPreview={previews.length > 0}
             onDragOver={onDragOver}
             onDragLeave={onDragLeave}
             onDrop={onDrop}
@@ -74,21 +98,37 @@ export default function AvatarSettingPage() {
               type="file"
               accept="image/*"
               multiple
+              onChange={onInputChange}
             />
-            <UploadInner>
-              <PlusWrap aria-hidden>
-                <IconImg src="/icon/plus.svg" alt="" width={62} height={62} />
-              </PlusWrap>
-              <UploadTexts>
-                <UploadPrimary>
-                  얼굴 사진 1장과 전신사진 1장을 업로드해주세요
-                </UploadPrimary>
-                <UploadHint>
-                  파일을 여기로 드래그하거나 클릭해 업로드
-                </UploadHint>
-              </UploadTexts>
-            </UploadInner>
+            {previews.length > 0 ? (
+              <PreviewArea>
+                {previews.map((url, i) => (
+                  <PreviewItem key={url}>
+                    <PreviewImg src={url} alt={`업로드 사진 ${i + 1}`} />
+                    <PreviewLabel>{i === 0 ? "얼굴 사진" : "전신 사진"}</PreviewLabel>
+                  </PreviewItem>
+                ))}
+              </PreviewArea>
+            ) : (
+              <UploadInner>
+                <PlusWrap aria-hidden>
+                  <IconImg src="/icon/plus.svg" alt="" width={62} height={62} />
+                </PlusWrap>
+                <UploadTexts>
+                  <UploadPrimary>
+                    얼굴 사진 1장과 전신사진 1장을 업로드해주세요
+                  </UploadPrimary>
+                  <UploadHint>
+                    파일을 여기로 드래그하거나 클릭해 업로드
+                  </UploadHint>
+                </UploadTexts>
+              </UploadInner>
+            )}
           </UploadZone>
+
+          {previews.length > 0 && (
+            <ChangeHint>클릭해서 사진 변경</ChangeHint>
+          )}
 
           <Footnote>
             이런 사진이 좋아요!
@@ -158,24 +198,68 @@ const Headline = styled.p`
   flex-shrink: 0;
 `;
 
-const UploadZone = styled.label<{ $active: boolean }>`
+const UploadZone = styled.label<{ $active: boolean; $hasPreview: boolean }>`
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   max-width: 469px;
-  min-height: clamp(140px, 22vh, 238px);
-  flex-shrink: 1;
-  padding: clamp(12px, 2vh, 24px) 16px;
+  height: clamp(140px, 22vh, 238px);
+  flex-shrink: 0;
+  padding: 12px 16px;
   margin: 0;
   border-radius: 12px;
-  border: 1px dashed ${color.gray300};
-  background: ${(p) =>
-    p.$active ? color.gray200 : color.gray100};
+  border: 1px dashed ${({ $active }) => ($active ? color.gray400 : color.gray300)};
+  background: ${({ $active }) => ($active ? color.gray200 : color.gray100)};
   cursor: pointer;
   text-align: center;
+  overflow: hidden;
   transition: background 0.2s ease, border-color 0.2s ease;
+`;
+
+const PreviewArea = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+`;
+
+const PreviewItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+`;
+
+const PreviewImg = styled.img`
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 6px;
+  display: block;
+`;
+
+const PreviewLabel = styled.p`
+  margin: 0;
+  ${font.caption};
+  color: ${color.gray500};
+`;
+
+const ChangeHint = styled.p`
+  margin: 6px 0 0;
+  max-width: 469px;
+  text-align: center;
+  ${font.caption};
+  color: ${color.gray400};
+  flex-shrink: 0;
 `;
 
 const VisuallyHiddenInput = styled.input`

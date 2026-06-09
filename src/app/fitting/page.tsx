@@ -1,11 +1,13 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styled from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
 import Header from "@/src/components/layout/header";
+import { useSavedDresses } from "@/src/store/savedDresses";
 
 const LEFT_HERO = "/mock/avatarResult.jpg";
 
@@ -17,15 +19,34 @@ const FITTING_PICKS = [
 ] as const;
 
 export default function FittingPage() {
+  const { saveDress } = useSavedDresses();
+  const [saved, setSaved] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  function handleSave() {
+    saveDress(LEFT_HERO);
+    setSaved(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setSaved(false), 1500);
+  }
+
   return (
     <Shell>
-      <Header />
+      <Header peekOnly />
       <LeftPane>
         <LeftTopBar>
           <BackLink href="/dress" aria-label="드레스 목록으로">
             <BackIcon src="/icon/blackBack.svg" alt="" width={14} height={26} />
           </BackLink>
-          <SaveButton type="button">저장하기</SaveButton>
+          <SaveButton type="button" onClick={handleSave} $saved={saved}>
+            {saved ? "저장됨 ✓" : "저장하기"}
+          </SaveButton>
         </LeftTopBar>
         <LeftImageFrame>
           <LeftImageInner>
@@ -149,16 +170,17 @@ const BackIcon = styled.img`
   display: block;
 `;
 
-const SaveButton = styled.button`
+const SaveButton = styled.button<{ $saved?: boolean }>`
   box-sizing: border-box;
   margin: 0;
   padding: 9px 25px;
   border-radius: 16px;
-  border: 1px solid ${color.gray700};
-  background: ${color.white};
+  border: 1px solid ${({ $saved }) => ($saved ? color.primary : color.gray700)};
+  background: ${({ $saved }) => ($saved ? color.second : color.white)};
   color: ${color.black};
   cursor: pointer;
   ${font["text-sm"]};
+  transition: background 0.2s, border-color 0.2s;
 
   &:hover {
     background: ${color.gray200};

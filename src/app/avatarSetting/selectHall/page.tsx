@@ -26,6 +26,7 @@ export default function SelectHallPage() {
       <SelectComponent
         id="hall-select"
         title="내 결혼식장 스타일을 선택해 보세요."
+        subtitle="홀 스타일을 선택해주세요"
         titleVariant="sm"
         layout="hall"
         items={hallSelectItems}

@@ -4,101 +4,229 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
-import StyleHashTag from "@/src/components/common/styleHashTag";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
 import Header from "@/src/components/layout/header";
 import {
   dressFilterTagOptions,
   dressGalleryItems,
+  brandList,
+  dressPriceRanges,
   type DressFilterTag,
+  type DressPriceRange,
 } from "@/src/mock/mock";
 
-/** 필터 UI 전용 — 목록 데이터에는 없음 */
-const DRESS_ALL_TAG = "#전체";
+const TABS = ["전체보기", "가격별로 보기", "브랜드 별로 보기", "추구미별로 보기"] as const;
+type Tab = (typeof TABS)[number];
 
-const dressFilterChips = [DRESS_ALL_TAG, ...dressFilterTagOptions] as const;
+function ChevronIcon({ $expanded }: { $expanded: boolean }) {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      style={{
+        transform: $expanded ? "rotate(180deg)" : "rotate(0deg)",
+        transition: "transform 0.2s ease",
+        display: "block",
+      }}
+    >
+      <path
+        d="M2 4l4 4 4-4"
+        stroke={color.gray700}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function LocationPin() {
+  return (
+    <svg width="10" height="13" viewBox="0 0 10 13" fill="none">
+      <path
+        d="M5 0C2.79 0 1 1.79 1 4c0 2.99 4 9 4 9s4-6.01 4-9c0-2.21-1.79-4-4-4zm0 5.5A1.5 1.5 0 115 2.5a1.5 1.5 0 010 3z"
+        fill={color.gray400}
+      />
+    </svg>
+  );
+}
 
 export default function DressPage() {
+  const [activeTab, setActiveTab] = useState<Tab>("전체보기");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedPrices, setSelectedPrices] = useState<DressPriceRange[]>([]);
+  const [brandsExpanded, setBrandsExpanded] = useState(false);
 
-  const toggleFilter = useCallback((tag: string) => {
-    if (tag === DRESS_ALL_TAG) {
-      setSelectedTags([]);
-      return;
-    }
+  const showTagFilter = activeTab === "추구미별로 보기";
+  const showBrandFilter = activeTab === "브랜드 별로 보기";
+  const showPriceFilter = activeTab === "가격별로 보기";
 
-    setSelectedTags((prev) => {
-      if (prev.includes(tag)) {
-        return prev.filter((t) => t !== tag);
-      }
-      return [...prev, tag];
-    });
+  const toggleTag = useCallback((tag: string) => {
+    if (tag === "#전체") { setSelectedTags([]); return; }
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  }, []);
+
+  const toggleBrand = useCallback((brand: string) => {
+    if (brand === "전체") { setSelectedBrands([]); return; }
+    setSelectedBrands((prev) =>
+      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
+    );
+  }, []);
+
+  const togglePrice = useCallback((price: DressPriceRange) => {
+    setSelectedPrices((prev) =>
+      prev.includes(price) ? prev.filter((p) => p !== price) : [...prev, price]
+    );
   }, []);
 
   const visibleItems = useMemo(() => {
-    if (selectedTags.length === 0) return dressGalleryItems;
-    return dressGalleryItems.filter((item) =>
-      selectedTags.some((t) =>
-        item.filterTags.includes(t as DressFilterTag),
-      ),
-    );
-  }, [selectedTags]);
+    if (showTagFilter && selectedTags.length > 0)
+      return dressGalleryItems.filter((item) =>
+        selectedTags.some((t) => item.filterTags.includes(t as DressFilterTag))
+      );
+    if (showBrandFilter && selectedBrands.length > 0)
+      return dressGalleryItems.filter((item) => selectedBrands.includes(item.shopName));
+    if (showPriceFilter && selectedPrices.length > 0)
+      return dressGalleryItems.filter((item) => selectedPrices.includes(item.priceRange));
+    return dressGalleryItems;
+  }, [showTagFilter, showBrandFilter, showPriceFilter, selectedTags, selectedBrands, selectedPrices]);
 
   return (
     <Shell>
-      <Header />
-      <Inner>
-        <Headline>
-          <TitleLine>세상의 모든 드레스,</TitleLine>
-          <TitleAccent>궁금했던 드레스를 입어보세요</TitleAccent>
-        </Headline>
+      <Header forceScrolled />
 
-        <FilterRow aria-label="스타일 필터">
-          {dressFilterChips.map((tag) => {
-            const isAllChip = tag === DRESS_ALL_TAG;
-            const pressed = isAllChip ? false : selectedTags.includes(tag);
-            return (
-              <FilterHit
+      <Inner>
+        <HeadingGroup>
+          <Sub>세상의 모든 드레스,</Sub>
+          <Title>궁금했던 드레스를 입어보세요</Title>
+        </HeadingGroup>
+      </Inner>
+
+      <TabBar>
+        <TabInner>
+          {TABS.map((tab) => (
+            <TabBtn
+              key={tab}
+              type="button"
+              $active={activeTab === tab}
+              onClick={() => {
+                setActiveTab(tab);
+                setSelectedTags([]);
+                setSelectedBrands([]);
+                setSelectedPrices([]);
+                setBrandsExpanded(false);
+              }}
+            >
+              {tab}
+            </TabBtn>
+          ))}
+        </TabInner>
+      </TabBar>
+
+      {showTagFilter && (
+        <FilterRow>
+          <FilterInner>
+            {(["#전체", ...dressFilterTagOptions] as const).map((tag) => (
+              <FilterChip
                 key={tag}
                 type="button"
-                $active={pressed}
-                onClick={() => toggleFilter(tag)}
-                aria-pressed={isAllChip ? undefined : pressed}
-                aria-label={isAllChip ? "필터 초기화 후 전체 드레스 보기" : undefined}
+                $active={tag === "#전체" ? selectedTags.length === 0 : selectedTags.includes(tag)}
+                onClick={() => toggleTag(tag)}
               >
-                <StyleHashTag variant="filter" label={tag} />
-              </FilterHit>
-            );
-          })}
+                {tag}
+              </FilterChip>
+            ))}
+          </FilterInner>
         </FilterRow>
+      )}
 
+      {showPriceFilter && (
+        <FilterRow>
+          <FilterInner>
+            <FilterChip
+              type="button"
+              $active={selectedPrices.length === 0}
+              onClick={() => setSelectedPrices([])}
+            >
+              전체
+            </FilterChip>
+            {dressPriceRanges.map((price) => (
+              <FilterChip
+                key={price}
+                type="button"
+                $active={selectedPrices.includes(price)}
+                onClick={() => togglePrice(price)}
+              >
+                {price}
+              </FilterChip>
+            ))}
+          </FilterInner>
+        </FilterRow>
+      )}
+
+      {showBrandFilter && (
+        <FilterRow $expanded={brandsExpanded}>
+          <FilterInner $wrap={brandsExpanded}>
+            <FilterChip
+              type="button"
+              $active={selectedBrands.length === 0}
+              onClick={() => toggleBrand("전체")}
+            >
+              전체
+            </FilterChip>
+            {brandList.map((brand) => (
+              <FilterChip
+                key={brand}
+                type="button"
+                $active={selectedBrands.includes(brand)}
+                onClick={() => toggleBrand(brand)}
+              >
+                {brand}
+              </FilterChip>
+            ))}
+          </FilterInner>
+          <ExpandBtn
+            type="button"
+            onClick={() => setBrandsExpanded((v) => !v)}
+            aria-label={brandsExpanded ? "접기" : "더 보기"}
+          >
+            <ChevronIcon $expanded={brandsExpanded} />
+          </ExpandBtn>
+        </FilterRow>
+      )}
+
+      <Inner>
         {visibleItems.length === 0 ? (
-          <EmptyMessage>이 스타일에 맞는 드레스가 없어요.</EmptyMessage>
+          <Empty>이 스타일에 맞는 드레스가 없어요.</Empty>
         ) : (
           <DressGrid>
             {visibleItems.map((item) => (
               <DressCard key={item.id}>
-                <DressImageWrap>
+                <ImageArea>
                   <Image
                     src={item.image}
                     alt={item.label}
                     fill
-                    sizes="(max-width: 900px) 100vw, 420px"
-                    style={{ objectFit: "cover" }}
+                    sizes="(max-width: 480px) 100vw, (max-width: 760px) 50vw, (max-width: 1100px) 33vw, 25vw"
+                    style={{ objectFit: "cover", objectPosition: "top" }}
                   />
-                </DressImageWrap>
-                <HoverLayer className="dress-hover-layer">
-                  <CardDim aria-hidden />
-                  <TagCluster>
-                    {item.filterTags.map((tag) => (
-                      <StyleHashTag key={tag} label={tag} />
-                    ))}
-                  </TagCluster>
-                  <FittingCta href="/fitting" aria-label="AI 피팅하기 페이지로">
-                    AI 피팅하기
-                  </FittingCta>
-                </HoverLayer>
+                  <HoverOverlay className="dress-hover">
++                    <FittingPill href={`/fitting?dressId=${item.id}`}>AI 피팅하기</FittingPill>
++                  </HoverOverlay>
+                </ImageArea>
+                <InfoBar>
+                  <DressName>{item.label}</DressName>
+                  <ShopRow>
+                    <LocationPin />
+                    <ShopName>{item.shopName}</ShopName>
+                  </ShopRow>
+                </InfoBar>
               </DressCard>
             ))}
           </DressGrid>
@@ -112,7 +240,7 @@ const Shell = styled.div`
   box-sizing: border-box;
   width: 100%;
   min-height: 100dvh;
-  margin: 0;
+  padding-top: 64px;
   background: ${color.white};
   color: ${color.black};
 `;
@@ -122,164 +250,237 @@ const Inner = styled.div`
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: clamp(48px, 8vw, 120px) clamp(24px, 5vw, 85px) 80px;
+  padding: 0 clamp(24px, 5vw, 85px);
 `;
 
-const Headline = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0;
-  margin-bottom: 24px;
+const HeadingGroup = styled.div`
+  padding: clamp(48px, 8vw, 120px) 0 32px;
 `;
 
-const TitleLine = styled.p`
+const Sub = styled.p`
   margin: 0;
-  width: 100%;
   ${font["title-sm"]};
+  color: ${color.black};
 `;
 
-const TitleAccent = styled.p`
+const Title = styled.h1`
   margin: 0;
-  width: 100%;
   ${font["title-md"]};
+  color: ${color.black};
 `;
 
-const FilterRow = styled.div`
+const TabBar = styled.nav`
+  width: 100%;
+  border-bottom: 1px solid ${color.gray300};
+  height: 69px;
   display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-  scrollbar-width: thin;
-  margin-top: 32px;
+  align-items: stretch;
+`;
 
-  &::-webkit-scrollbar {
-    height: 6px;
+const TabInner = styled.div`
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 5vw, 85px);
+  display: flex;
+  align-items: stretch;
+  gap: 56px;
+`;
+
+const TabBtn = styled.button<{ $active: boolean }>`
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  ${font["text-sm"]};
+  color: ${({ $active }) => ($active ? color.gray900 : color.gray600)};
+  font-weight: ${({ $active }) => ($active ? 700 : 400)};
+  white-space: nowrap;
+  transition: color 0.15s;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: ${color.gray800};
+    opacity: ${({ $active }) => ($active ? 1 : 0)};
+    transition: opacity 0.15s;
+  }
+
+  &:hover {
+    color: ${color.gray900};
   }
 `;
 
-const FilterHit = styled.button<{ $active: boolean }>`
-  flex-shrink: 0;
-  margin: 0;
-  padding: 0;
-  border: none;
-  cursor: pointer;
-  border-radius: 22px;
-  background: ${(p) =>
-    p.$active ? "rgba(17, 24, 39, 0.2)" : "transparent"};
-  transition: background 0.15s ease;
+const FilterRow = styled.div<{ $expanded?: boolean }>`
+  width: 100%;
+  background: ${color.gray100};
+  display: flex;
+  align-items: flex-start;
+  max-height: ${({ $expanded }) => ($expanded ? "400px" : "75px")};
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+`;
 
-  &:focus-visible {
-    outline: 2px solid ${color.gray400};
-    outline-offset: 2px;
+const FilterInner = styled.div<{ $wrap?: boolean }>`
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 16px clamp(24px, 5vw, 79px);
+  display: flex;
+  align-items: center;
+  flex-wrap: ${({ $wrap }) => ($wrap ? "wrap" : "nowrap")};
+  gap: ${({ $wrap }) => ($wrap ? "12px 8px" : "8px")};
+  overflow: ${({ $wrap }) => ($wrap ? "visible" : "hidden")};
+`;
+
+const ExpandBtn = styled.button`
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 16px clamp(12px, 3vw, 48px) 0 0;
+  border: 1px solid ${color.gray300};
+  border-radius: 50%;
+  background: ${color.white};
+  cursor: pointer;
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: ${color.gray500};
+  }
+`;
+
+const FilterChip = styled.button<{ $active: boolean }>`
+  flex-shrink: 0;
+  padding: 8px 13px;
+  border-radius: 20px;
+  border: 1px solid ${({ $active }) => ($active ? color.gray900 : color.gray500)};
+  background: ${({ $active }) => ($active ? color.gray900 : "transparent")};
+  color: ${({ $active }) => ($active ? color.white : color.black)};
+  ${font["text-sm"]};
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover {
+    border-color: ${color.gray900};
+    background: ${color.gray900};
+    color: ${color.white};
   }
 `;
 
 const DressGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 420px));
-  gap: 24px 31px;
-  justify-content: start;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px 24px;
+  padding: 28px 0 80px;
 
   @media (max-width: 1100px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 760px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 480px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const DressCard = styled.article`
-  position: relative;
-  width: 100%;
-  max-width: 420px;
-  aspect-ratio: 420 / 567;
-  overflow: hidden;
-  border-radius: 0;
-
-  @media (hover: hover) and (pointer: fine) {
-    &:hover .dress-hover-layer,
-    &:focus-within .dress-hover-layer {
-      opacity: 1;
-      pointer-events: auto;
-    }
-  }
-`;
-
-const DressImageWrap = styled.div`
-  position: absolute;
-  inset: 0;
-`;
-
-const HoverLayer = styled.div`
-  position: absolute;
-  inset: 0;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 0.2s ease;
+  border: 1px solid ${color.gray200};
+  overflow: hidden;
 
-  @media (hover: hover) and (pointer: fine) {
-    opacity: 0;
-    pointer-events: none;
+  &:hover .dress-hover {
+    opacity: 1;
   }
 `;
 
-const CardDim = styled.div`
+const ImageArea = styled.div`
+  position: relative;
+  width: 100%;
+  aspect-ratio: 294 / 378;
+  overflow: hidden;
+  flex-shrink: 0;
+`;
+
+const HoverOverlay = styled.div`
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.25);
-  pointer-events: none;
+  background: linear-gradient(to bottom, transparent 40%, #505050 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 28px;
 `;
 
-const TagCluster = styled.div`
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
+const FittingPill = styled(Link)`
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  max-width: calc(100% - 32px);
-  margin: 0 auto;
-  pointer-events: none;
-`;
-
-const FittingCta = styled(Link)`
-  position: absolute;
-  z-index: 1;
-  right: 16px;
-  bottom: 16px;
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: none;
+  width: 88px;
+  height: 26px;
+  border-radius: 20px;
+  border: 1px solid ${color.white};
+  background: transparent;
   color: ${color.white};
-  font-family: "Leferi Base Type", sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: normal;
-  cursor: pointer;
-  text-align: right;
-  white-space: nowrap;
+  ${font.caption};
   text-decoration: none;
+  white-space: nowrap;
 
-  &:focus-visible {
-    outline: 2px solid ${color.white};
-    outline-offset: 2px;
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
   }
 `;
 
-const EmptyMessage = styled.p`
+const InfoBar = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  height: 66px;
+  padding: 0 24px;
+  background: ${color.white};
+  flex-shrink: 0;
+`;
+
+const DressName = styled.p`
   margin: 0;
-  padding: 48px 0;
   ${font["text-md"]};
-  color: ${color.gray600};
+  color: ${color.black};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const ShopRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const ShopName = styled.span`
+  ${font.caption};
+  color: ${color.gray400};
+`;
+
+const Empty = styled.p`
+  padding: 80px 0;
+  ${font["text-md"]};
+  color: ${color.gray500};
 `;
