@@ -9,15 +9,15 @@ import font from "@/src/style/font";
 export type ShopCardProps = {
   imageSrc: string;
   brandName: string;
-  description?: string;
-  href: string;
+  region?: string;
+  url: string;
 };
 
 export default function ShopCard({
   imageSrc,
   brandName,
-  description,
-  href,
+  region,
+  url,
 }: ShopCardProps) {
   return (
     <Article>
@@ -31,7 +31,7 @@ export default function ShopCard({
         />
         <HoverOverlay>
           <FittingLink
-            href={href}
+            href={`/shop/${url}`}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`${brandName} 샵 방문하기`}
@@ -42,7 +42,22 @@ export default function ShopCard({
       </ImageWrap>
       <Info>
         <BrandName>{brandName}</BrandName>
-        {description && <Description>{description}</Description>}
+        {region && (
+          <RegionRow>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              style={{ flexShrink: 0 }}
+            >
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+            </svg>
+            <Description>{region}</Description>
+          </RegionRow>
+        )}
       </Info>
     </Article>
   );
@@ -92,6 +107,13 @@ const BrandName = styled.p`
   margin: 0;
   ${font["title-sm"]};
   color: ${color.black};
+`;
+
+const RegionRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: ${color.gray500};
 `;
 
 const Description = styled.p`
