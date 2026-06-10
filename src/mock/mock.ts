@@ -23,6 +23,7 @@ export const hallSelectItems: SelectMockItem[] = [
   { image: "/images/darkHall.jpg", label: "어두운 홀" },
   { image: "/images/chapelHall.jpg", label: "채플 웨딩" },
   { image: "/images/houseHall.jpg", label: "하우스 웨딩" },
+  { image: "/images/koreaHall.png", label: "한옥 웨딩" },
 ];
 
 /** 드레스 갤러리 상단 필터·카드 매칭에 공통으로 쓰는 태그 목록 */
