@@ -4,14 +4,14 @@ import font from "@/src/style/font";
 
 const EXAMPLES = {
   face: {
-    imageSrc: "/images/face_example.jpg",
+    imageSrc: "/images/example.jpg",
     imageAlt: "얼굴 사진 예시",
-    label: "얼굴 예시",
+    label: "이런 사진은 안돼요",
   },
   body: {
     imageSrc: "/images/body_example.jpg",
     imageAlt: "전신 사진 예시",
-    label: "전신 예시",
+    label: "이런 사진이 좋아요",
   },
 } as const;
 
