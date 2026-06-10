@@ -31,7 +31,7 @@ export default function ShopCard({
         />
         <HoverOverlay>
           <FittingLink
-            href={`/shop/${url}`}
+            href={url}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`${brandName} 샵 방문하기`}
