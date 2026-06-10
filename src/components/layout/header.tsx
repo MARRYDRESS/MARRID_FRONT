@@ -5,13 +5,13 @@ import Link from "next/link";
 import styled from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
+import { useAuth } from "@/src/hooks/useAuth";
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
   { label: "아바타 만들기", href: "/avatarSetting" },
   { label: "드레스 보기", href: "/dress" },
   { label: "샵 보기", href: "/shop" },
   { label: "마이페이지", href: "/mypage" },
-  { label: "로그인", href: "/login" },
 ];
 
 export default function Header({
@@ -22,6 +22,13 @@ export default function Header({
   peekOnly?: boolean;
 }) {
   const [scrolled, setScrolled] = useState(forceScrolled);
+  const { user } = useAuth();
+
+  const givenName = user?.user_metadata?.given_name ?? user?.user_metadata?.name?.split(" ")[0];
+  const authItem = user
+    ? { label: `${givenName} 님`, href: "/mypage/dashboard" }
+    : { label: "로그인", href: "/login" };
+  const NAV_ITEMS = [...BASE_NAV_ITEMS, authItem];
 
   useEffect(() => {
     if (forceScrolled) {
