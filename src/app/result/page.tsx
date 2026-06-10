@@ -62,7 +62,7 @@ export default function ResultPage() {
                 fill
                 sizes="552px"
                 priority
-                style={{ objectFit: "cover", objectPosition: "center top" }}
+                style={{ objectFit: "contain", objectPosition: "center" }}
               />
             )}
             {isFitting && (
@@ -238,8 +238,8 @@ const HeroImg = styled.img`
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  object-fit: contain;
+  object-position: center;
 `;
 
 const LeftImageInner = styled.div`
