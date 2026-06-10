@@ -265,8 +265,8 @@ const HeroTitle = styled.h1`
   font-family: "Restweek", serif;
   font-size: clamp(64px, 10vw, 120px);
   color: ${color.white};
-  margin: 0 0 24px;
-  line-height: 1.2;
+  margin: 0 0 10px;
+  line-height: 0.85;
   opacity: 0;
   animation: ${fadeUp} 0.9s 0.4s ease forwards;
 `;
@@ -277,7 +277,7 @@ const HeroDesc = styled.p`
   color: rgba(255, 255, 255, 0.78);
   letter-spacing: 0.03em;
   margin: 0 0 42px;
-  margin-top: 24px;
+  margin-top: 10px;
   opacity: 0;
   animation: ${fadeUp} 0.9s 0.6s ease forwards;
 `;
