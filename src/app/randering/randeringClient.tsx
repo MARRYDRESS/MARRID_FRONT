@@ -89,6 +89,7 @@ export default function RanderingClient({ isFitting }: RanderingClientProps) {
           alt={heroAlt}
           fill
           priority
+          quality={100}
           sizes="(max-width: 768px) 100vw, 796px"
           style={{ objectFit: "cover", objectPosition: "center top" }}
         />
