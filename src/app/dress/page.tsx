@@ -6,15 +6,33 @@ export type Dress = {
   image_url: string;
   silhouette: string;
   material: string;
+  shop_name: string;
+  price_range: number | null;
 };
 
 export default async function DressPage() {
-  const { data, error } = await supabase
-    .from("dresses")
-    .select("id, image_url, silhouette, material")
-    .order("created_at", { ascending: true });
+  const [{ data: dresses, error: dressErr }, { data: shops, error: shopErr }] =
+    await Promise.all([
+      supabase.from("dresses").select("id, image_url, silhouette, material, shop_id").order("created_at"),
+      supabase.from("shops").select("id, shop_name, price_range"),
+    ]);
 
-  if (error) console.error("dresses fetch error:", error.message);
+  if (dressErr) console.error("dresses error:", dressErr.message);
+  if (shopErr) console.error("dresse error:", shopErr.message);
 
-  return <DressClient dresses={(data ?? []) as Dress[]} />;
+  const shopMap = new Map((shops ?? []).map((s) => [s.id, s]));
+
+  const merged: Dress[] = (dresses ?? []).map((d) => {
+    const shop = shopMap.get(d.shop_id);
+    return {
+      id: d.id,
+      image_url: d.image_url,
+      silhouette: d.silhouette ?? "",
+      material: d.material ?? "",
+      shop_name: shop?.shop_name ?? "",
+      price_range: shop?.price_range ?? null,
+    };
+  });
+
+  return <DressClient dresses={merged} />;
 }
