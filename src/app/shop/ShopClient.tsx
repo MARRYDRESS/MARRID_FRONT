@@ -45,6 +45,7 @@ export default function ShopClient({ brands }: { brands: Shop[] }) {
           alt="MARRID 웨딩 드레스 샵"
           fill
           priority
+          quality={100}
           sizes="100vw"
           style={{ objectFit: "cover", objectPosition: "center" }}
         />

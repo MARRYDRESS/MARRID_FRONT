@@ -1,39 +1,105 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
 import Header from "@/src/components/layout/header";
 import { useSavedDresses } from "@/src/store/savedDresses";
+import { supabase } from "@/src/lib/supabase";
 
-const LEFT_HERO = "/mock/avatarResult.jpg";
+type Pick = { id: string; image_url: string };
 
-const FITTING_PICKS = [
-  { src: "/mock/main1.png", alt: "추천 드레스 1" },
-  { src: "/mock/main2.png", alt: "추천 드레스 2" },
-  { src: "/mock/main3.png", alt: "추천 드레스 3" },
-  { src: "/mock/main4.png", alt: "추천 드레스 4" },
-] as const;
+function shuffle<T>(arr: T[]): T[] {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
 
 export default function FittingPage() {
   const { saveDress } = useSavedDresses();
   const [saved, setSaved] = useState(false);
+  const [fittingSrc, setFittingSrc] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [picks, setPicks] = useState<Pick[]>([]);
+  const [selectedDressUrl, setSelectedDressUrl] = useState<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // sessionStorage에서 초기 드레스 URL 읽기
   useEffect(() => {
+    const dressUrl = sessionStorage.getItem("marrid_dress_url");
+    if (dressUrl) setSelectedDressUrl(dressUrl);
+  }, []);
+
+  // 드레스 변경 시 피팅 재실행
+  useEffect(() => {
+    const personB64 = sessionStorage.getItem("marrid_person_b64");
+    if (!personB64 || !selectedDressUrl) return;
+
+    let cancelled = false;
+    if (pollRef.current) clearInterval(pollRef.current);
+    setIsGenerating(true);
+    setFittingSrc(null);
+
+    fetch("/api/tryon", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ person_b64: personB64, product_url: selectedDressUrl }),
+    })
+      .then((r) => r.json())
+      .then(({ id, error }) => {
+        if (cancelled || error || !id) {
+          if (!cancelled) setIsGenerating(false);
+          return;
+        }
+        pollRef.current = setInterval(async () => {
+          if (cancelled) return;
+          try {
+            const res = await fetch(`/api/tryon/status?id=${id}`);
+            const data = await res.json();
+            if (data.status === "completed" && data.output?.[0]) {
+              clearInterval(pollRef.current!);
+              setFittingSrc(data.output[0]);
+              setIsGenerating(false);
+            } else if (data.status === "failed") {
+              clearInterval(pollRef.current!);
+              setIsGenerating(false);
+            }
+          } catch {
+            clearInterval(pollRef.current!);
+            setIsGenerating(false);
+          }
+        }, 2000);
+      })
+      .catch(() => { if (!cancelled) setIsGenerating(false); });
+
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      cancelled = true;
+      if (pollRef.current) clearInterval(pollRef.current);
     };
+  }, [selectedDressUrl]);
+
+  // Supabase에서 랜덤 드레스 4개 로드
+  useEffect(() => {
+    supabase.from("dresses").select("id, image_url").then(({ data }) => {
+      if (!data || data.length === 0) return;
+      const current = sessionStorage.getItem("marrid_dress_url");
+      const filtered = current ? data.filter((d) => d.image_url !== current) : data;
+      setPicks(shuffle(filtered).slice(0, 4));
+    });
   }, []);
 
   function handleSave() {
-    saveDress(LEFT_HERO);
+    if (fittingSrc) saveDress(fittingSrc);
     setSaved(true);
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => setSaved(false), 1500);
+  }
+
+  function handlePickDress(imageUrl: string) {
+    sessionStorage.setItem("marrid_dress_url", imageUrl);
+    setSelectedDressUrl(imageUrl);
+    setSaved(false);
   }
 
   return (
@@ -44,45 +110,39 @@ export default function FittingPage() {
           <BackLink href="/dress" aria-label="드레스 목록으로">
             <BackIcon src="/icon/blackBack.svg" alt="" width={14} height={26} />
           </BackLink>
-          <SaveButton type="button" onClick={handleSave} $saved={saved}>
+          <SaveButton type="button" onClick={handleSave} $saved={saved} disabled={!fittingSrc}>
             {saved ? "저장됨 ✓" : "저장하기"}
           </SaveButton>
         </LeftTopBar>
-        <LeftImageFrame>
-          <LeftImageInner>
-            <Image
-              src={LEFT_HERO}
-              alt="피팅 미리보기"
-              fill
-              sizes="533px"
-              priority
-              style={{ objectFit: "cover", objectPosition: "center top" }}
-            />
-          </LeftImageInner>
-        </LeftImageFrame>
+
+        <CompareRow>
+          <ComparePanel>
+            {isGenerating ? (
+              <PanelLoading>
+                <Spinner />
+                <LoadingText>AI 피팅 중...</LoadingText>
+              </PanelLoading>
+            ) : fittingSrc ? (
+              <PanelImg src={fittingSrc} alt="AI 피팅 결과" />
+            ) : (
+              <PanelPlaceholder />
+            )}
+          </ComparePanel>
+        </CompareRow>
       </LeftPane>
 
       <RightPane>
         <RightInner>
           <SectionTitle>이건 어떠세요?</SectionTitle>
           <PickGrid>
-            {FITTING_PICKS.map((p) => (
-              <PickCard key={p.src}>
+            {picks.map((p) => (
+              <PickCard key={p.id}>
                 <PickImageWrap>
-                  <Image
-                    src={p.src}
-                    alt={p.alt}
-                    fill
-                    sizes="362px"
-                    style={{ objectFit: "cover" }}
-                  />
+                  <PickImg src={p.image_url} alt="추천 드레스" />
                 </PickImageWrap>
-                <FitingLink
-                  href="/randering?intent=fitting"
-                  aria-label="AI 피팅 로딩으로"
-                >
+                <FitingBtn type="button" onClick={() => handlePickDress(p.image_url)}>
                   AI 피팅하기
-                </FitingLink>
+                </FitingBtn>
               </PickCard>
             ))}
           </PickGrid>
@@ -114,24 +174,23 @@ const Shell = styled.main`
 
 const LeftPane = styled.aside`
   box-sizing: border-box;
-  flex: 0 0 clamp(280px, 42vw, 604px);
-  width: clamp(280px, 42vw, 604px);
-  max-width: 604px;
+  flex: 0 0 clamp(320px, 48vw, 680px);
+  width: clamp(320px, 48vw, 680px);
   height: 100dvh;
   max-height: 100dvh;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   background: ${color.gray100};
-  padding: 47px clamp(20px, 3vw, 54px) 32px;
+  padding: 47px clamp(16px, 2.5vw, 40px) 32px;
 
   @media (max-width: 900px) {
     width: 100%;
     max-width: none;
     height: auto;
-    max-height: min(48dvh, 440px);
+    max-height: none;
     flex: 0 0 auto;
-    padding: 24px 20px 20px;
+    padding: 24px 16px 20px;
   }
 `;
 
@@ -141,13 +200,8 @@ const LeftTopBar = styled.div`
   justify-content: space-between;
   flex-shrink: 0;
   width: 100%;
-  max-width: 515px;
-  margin: 0 auto 32px;
+  margin: 0 auto 20px;
   gap: 16px;
-
-  @media (max-width: 900px) {
-    margin-bottom: 16px;
-  }
 `;
 
 const BackLink = styled(Link)`
@@ -182,43 +236,78 @@ const SaveButton = styled.button<{ $saved?: boolean }>`
   ${font["text-sm"]};
   transition: background 0.2s, border-color 0.2s;
 
-  &:hover {
-    background: ${color.gray200};
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
-  &:focus-visible {
-    outline: 2px solid ${color.primary};
-    outline-offset: 2px;
+  &:hover:not(:disabled) {
+    background: ${color.gray200};
   }
 `;
 
-const LeftImageFrame = styled.div`
+const CompareRow = styled.div`
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+`;
+
+const ComparePanel = styled.div`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const PanelImg = styled.img`
   flex: 1;
   min-height: 0;
   width: 100%;
-  max-width: 533px;
-  margin: 0 auto;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
+  object-fit: contain;
+  object-position: center top;
+  display: block;
+  background: ${color.gray100};
 `;
 
-const LeftImageInner = styled.div`
-  position: relative;
-  width: 100%;
-  max-width: 533px;
-  border-radius: 0;
-  background: ${color.gray200};
-  overflow: hidden;
+const PanelPlaceholder = styled.div`
   flex: 1;
-  min-height: 320px;
+  min-height: 0;
+  background: ${color.gray200};
+`;
 
-  @media (max-width: 900px) {
-    min-height: 220px;
-    max-height: 320px;
-    flex: 0 0 auto;
-    height: min(36dvh, 320px);
-  }
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+`;
+
+const PanelLoading = styled.div`
+  flex: 1;
+  min-height: 0;
+  background: ${color.gray200};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+`;
+
+const Spinner = styled.div`
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: ${color.gray700};
+  animation: ${spin} 0.8s linear infinite;
+`;
+
+const LoadingText = styled.p`
+  margin: 0;
+  ${font.caption};
+  color: ${color.gray500};
 `;
 
 const RightPane = styled.div`
@@ -255,7 +344,6 @@ const RightInner = styled.div`
 const SectionTitle = styled.h1`
   margin: 0;
   padding: 0;
-  max-width: 165px;
   color: ${color.black};
   ${font["title-sm"]};
 `;
@@ -275,7 +363,6 @@ const PickCard = styled.article`
   min-width: 0;
   aspect-ratio: 362 / 489;
   overflow: hidden;
-  border-radius: 0;
   background: ${color.gray200};
 `;
 
@@ -284,7 +371,14 @@ const PickImageWrap = styled.div`
   inset: 0;
 `;
 
-const FitingLink = styled(Link)`
+const PickImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+`;
+
+const FitingBtn = styled.button`
   position: absolute;
   right: 16px;
   bottom: 16px;
@@ -301,15 +395,9 @@ const FitingLink = styled(Link)`
   background: transparent;
   color: ${color.white};
   cursor: pointer;
-  text-decoration: none;
   ${font["text-sm"]};
 
   &:hover {
-    background: rgba(255, 255, 255, 0.12);
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${color.white};
-    outline-offset: 2px;
+    background: rgba(255, 255, 255, 0.18);
   }
 `;

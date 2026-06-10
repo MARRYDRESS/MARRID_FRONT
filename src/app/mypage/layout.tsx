@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import styled from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
 import Header from "@/src/components/layout/header";
+import { useAuth } from "@/src/hooks/useAuth";
 
 const NAV_ITEMS = [
   { label: "대시보드", href: "/mypage/dashboard" },
@@ -27,6 +29,16 @@ function UserIcon() {
 
 export default function MypageLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login");
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) return null;
 
   return (
     <>

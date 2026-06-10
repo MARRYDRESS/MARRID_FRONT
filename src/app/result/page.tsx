@@ -1,13 +1,15 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
 import Header from "@/src/components/layout/header";
 
-const LEFT_HERO = "/mock/avatarResult.jpg";
+const LEFT_HERO = "/mock/avatar.png";
+const FINISH_SRC = "/mock/finish.png";
 
 const PICKS_ROW1 = [
   { src: "/mock/main1.png", alt: "추천 드레스 1" },
@@ -22,6 +24,23 @@ const PICKS_ROW2 = [
 ];
 
 export default function ResultPage() {
+  const [heroSrc, setHeroSrc] = useState(LEFT_HERO);
+  const [isFitting, setIsFitting] = useState(false);
+
+  useEffect(() => {
+    const resultUrl = sessionStorage.getItem("marrid_result_url");
+    if (resultUrl) setHeroSrc(resultUrl);
+  }, []);
+
+  const handleFit = () => {
+    if (isFitting || heroSrc === FINISH_SRC) return;
+    setIsFitting(true);
+    setTimeout(() => {
+      setHeroSrc(FINISH_SRC);
+      setIsFitting(false);
+    }, 1500);
+  };
+
   return (
     <Shell>
       <Header peekOnly />
@@ -34,14 +53,24 @@ export default function ResultPage() {
         </LeftTopBar>
         <LeftImageFrame>
           <LeftImageInner>
-            <Image
-              src={LEFT_HERO}
-              alt="선택한 아바타"
-              fill
-              sizes="552px"
-              priority
-              style={{ objectFit: "cover", objectPosition: "center top" }}
-            />
+            {heroSrc.startsWith("https://") ? (
+              <HeroImg src={heroSrc} alt="선택한 아바타" />
+            ) : (
+              <Image
+                src={heroSrc}
+                alt="선택한 아바타"
+                fill
+                sizes="552px"
+                priority
+                style={{ objectFit: "contain", objectPosition: "center" }}
+              />
+            )}
+            {isFitting && (
+              <FittingOverlay>
+                <Spinner />
+                <FittingLabel>AI 피팅 중...</FittingLabel>
+              </FittingOverlay>
+            )}
           </LeftImageInner>
         </LeftImageFrame>
       </LeftPane>
@@ -58,12 +87,9 @@ export default function ResultPage() {
                   <PickImageWrap>
                     <Image src={p.src} alt={p.alt} fill sizes="362px" style={{ objectFit: "cover" }} />
                   </PickImageWrap>
-                  <FitingLink
-                    href="/randering?intent=fitting"
-                    aria-label="AI 피팅 로딩으로"
-                  >
+                  <FitingButton type="button" onClick={handleFit} disabled={isFitting}>
                     AI 피팅하기
-                  </FitingLink>
+                  </FitingButton>
                 </PickCard>
               ))}
             </PickGrid>
@@ -79,12 +105,9 @@ export default function ResultPage() {
                   <PickImageWrap>
                     <Image src={p.src} alt={p.alt} fill sizes="362px" style={{ objectFit: "cover" }} />
                   </PickImageWrap>
-                  <FitingLink
-                    href="/randering?intent=fitting"
-                    aria-label="AI 피팅 로딩으로"
-                  >
+                  <FitingButton type="button" onClick={handleFit} disabled={isFitting}>
                     AI 피팅하기
-                  </FitingLink>
+                  </FitingButton>
                 </PickCard>
               ))}
             </PickGrid>
@@ -210,6 +233,15 @@ const LeftImageFrame = styled.div`
   justify-content: center;
 `;
 
+const HeroImg = styled.img`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+`;
+
 const LeftImageInner = styled.div`
   position: relative;
   width: 100%;
@@ -298,7 +330,7 @@ const PickImageWrap = styled.div`
   inset: 0;
 `;
 
-const FitingLink = styled(Link)`
+const FitingButton = styled.button`
   position: absolute;
   right: 16px;
   bottom: 16px;
@@ -315,17 +347,53 @@ const FitingLink = styled(Link)`
   background: transparent;
   color: ${color.white};
   cursor: pointer;
-  text-decoration: none;
   ${font["text-sm"]};
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.12);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   &:focus-visible {
     outline: 2px solid ${color.white};
     outline-offset: 2px;
   }
+`;
+
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+`;
+
+const FittingOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.45);
+`;
+
+const Spinner = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: ${color.white};
+  animation: ${spin} 0.8s linear infinite;
+`;
+
+const FittingLabel = styled.p`
+  margin: 0;
+  ${font["text-sm"]};
+  color: ${color.white};
 `;
 
 const MoreRow = styled.div`

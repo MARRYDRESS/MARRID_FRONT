@@ -149,7 +149,7 @@ function StyleSelectComponentInner({
                     return (
                       <Card
                         key={`${item.image}-${pageIndex}-${cardIndex}`}
-                        $overlayOpen={hoverShown}
+                        $overlayOpen={isPinned || hoverShown}
                         $useCssHoverOverlay={showHash && !keepOverlayUntilNext && !isPinned}
                         $hashInteractive={showHash}
                         role={showHash ? "button" : undefined}
@@ -196,7 +196,6 @@ function StyleSelectComponentInner({
                               </HashTagRow>
                             </HashTagOverlay>
                           )}
-                          {isPinned && <CardDimOverlay aria-hidden />}
                           {isPinned && <SelectRing aria-hidden />}
                         </CardImageWrap>
                         <CardLabel>{item.label}</CardLabel>

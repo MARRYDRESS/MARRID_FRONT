@@ -44,6 +44,24 @@ export default function AvatarSettingPage() {
     const urls = files.map((f) => URL.createObjectURL(f));
     prevUrlsRef.current = urls;
     setPreviews(urls);
+
+    // body 사진(index 1, 없으면 index 0)을 압축 후 sessionStorage에 저장
+    const bodyFile = files[1] ?? files[0];
+    if (bodyFile) {
+      const img = new Image();
+      const blobUrl = URL.createObjectURL(bodyFile);
+      img.onload = () => {
+        const MAX = 768;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(blobUrl);
+        sessionStorage.setItem("marrid_person_b64", canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.src = blobUrl;
+    }
   }, []);
 
   const onDragOver = useCallback((e: React.DragEvent) => {
@@ -116,7 +134,7 @@ export default function AvatarSettingPage() {
                 </PlusWrap>
                 <UploadTexts>
                   <UploadPrimary>
-                    얼굴 사진 1장과 전신사진 1장을 업로드해주세요
+                    얼굴이 잘 보이는 전신사진을 업로드해주세요
                   </UploadPrimary>
                   <UploadHint>
                     파일을 여기로 드래그하거나 클릭해 업로드
@@ -126,9 +144,7 @@ export default function AvatarSettingPage() {
             )}
           </UploadZone>
 
-          {previews.length > 0 && (
-            <ChangeHint>클릭해서 사진 변경</ChangeHint>
-          )}
+          <ChangeHint $visible={previews.length > 0}>클릭해서 사진 변경</ChangeHint>
 
           <Footnote>
             이런 사진이 좋아요!
@@ -253,13 +269,14 @@ const PreviewLabel = styled.p`
   color: ${color.gray500};
 `;
 
-const ChangeHint = styled.p`
+const ChangeHint = styled.p<{ $visible: boolean }>`
   margin: 6px 0 0;
   max-width: 469px;
   text-align: center;
   ${font.caption};
   color: ${color.gray400};
   flex-shrink: 0;
+  visibility: ${({ $visible }) => ($visible ? "visible" : "hidden")};
 `;
 
 const VisuallyHiddenInput = styled.input`

@@ -1,7 +1,12 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import styled from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
+import { supabase } from "@/src/lib/supabase";
 
 function GoogleIcon() {
   return (
@@ -15,8 +20,21 @@ function GoogleIcon() {
 }
 
 export default function LoginPage() {
-  const handleGoogleLogin = () => {
-    window.location.href = "/api/auth/google";
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) router.replace("/mypage/dashboard");
+    });
+  }, [router]);
+
+  const handleGoogleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
   };
   return (
     <Shell>
