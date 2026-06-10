@@ -7,21 +7,25 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const { person_b64 } = await req.json();
+    const { person_b64, product_url } = await req.json();
 
     if (!person_b64) {
       return NextResponse.json({ error: "person_b64 required" }, { status: 400 });
     }
 
-    const garmentPath = path.join(process.cwd(), "public", "images", "body_example.jpg");
-    if (!fs.existsSync(garmentPath)) {
-      console.error("[tryon] garment not found:", garmentPath);
-      return NextResponse.json({ error: "garment file not found" }, { status: 500 });
+    // 드레스 이미지: URL이 있으면 직접 사용, 없으면 body_example.jpg fallback
+    let productImage: string;
+    if (product_url) {
+      productImage = product_url;
+    } else {
+      const garmentPath = path.join(process.cwd(), "public", "images", "body_example.jpg");
+      if (!fs.existsSync(garmentPath)) {
+        return NextResponse.json({ error: "garment file not found" }, { status: 500 });
+      }
+      productImage =
+        "data:image/jpeg;base64," +
+        fs.readFileSync(garmentPath).toString("base64");
     }
-
-    const garmentB64 =
-      "data:image/jpeg;base64," +
-      fs.readFileSync(garmentPath).toString("base64");
 
     const fashnRes = await fetch("https://api.fashn.ai/v1/run", {
       method: "POST",
@@ -33,7 +37,7 @@ export async function POST(req: NextRequest) {
         model_name: "tryon-max",
         inputs: {
           model_image: person_b64,
-          product_image: garmentB64,
+          product_image: productImage,
         },
       }),
     });

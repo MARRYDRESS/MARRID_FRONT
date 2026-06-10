@@ -1,15 +1,21 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
 import Header from "@/src/components/layout/header";
 import type { Dress } from "./page";
 
-const TABS = ["전체보기", "실루엣별로 보기", "소재별로 보기"] as const;
+const TABS = [
+  "전체보기",
+  "가격별로 보기",
+  "브랜드 별로 보기",
+  "추구미별로 보기",
+  "소재별로 보기",
+] as const;
 type Tab = (typeof TABS)[number];
 
 function ChevronIcon({ $expanded }: { $expanded: boolean }) {
@@ -48,11 +54,25 @@ function LocationPin() {
 }
 
 export default function DressClient({ dresses }: { dresses: Dress[] }) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("전체보기");
+  const [selectedPrices, setSelectedPrices] = useState<number[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedSilhouettes, setSelectedSilhouettes] = useState<string[]>([]);
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
-  const [materialsExpanded, setMaterialsExpanded] = useState(false);
+  const [brandsExpanded, setBrandsExpanded] = useState(false);
 
+  const prices = useMemo(
+    () =>
+      [...new Set(dresses.map((d) => d.price_range).filter((p): p is number => p !== null))].sort(
+        (a, b) => a - b
+      ),
+    [dresses]
+  );
+  const brands = useMemo(
+    () => [...new Set(dresses.map((d) => d.shop_name).filter(Boolean))].sort(),
+    [dresses]
+  );
   const silhouettes = useMemo(
     () => [...new Set(dresses.map((d) => d.silhouette.trim()).filter(Boolean))].sort(),
     [dresses]
@@ -62,30 +82,52 @@ export default function DressClient({ dresses }: { dresses: Dress[] }) {
     [dresses]
   );
 
-  const showSilhouetteFilter = activeTab === "실루엣별로 보기";
-  const showMaterialFilter = activeTab === "소재별로 보기";
+  const resetFilters = () => {
+    setSelectedPrices([]);
+    setSelectedBrands([]);
+    setSelectedSilhouettes([]);
+    setSelectedMaterials([]);
+    setBrandsExpanded(false);
+  };
 
-  const toggleSilhouette = useCallback((v: string) => {
-    if (v === "전체") { setSelectedSilhouettes([]); return; }
-    setSelectedSilhouettes((prev) =>
-      prev.includes(v) ? prev.filter((s) => s !== v) : [...prev, v]
+  const togglePrice = useCallback((p: number) => {
+    setSelectedPrices((prev) =>
+      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
     );
   }, []);
 
-  const toggleMaterial = useCallback((v: string) => {
-    if (v === "전체") { setSelectedMaterials([]); return; }
+  const toggleBrand = useCallback((b: string) => {
+    if (b === "전체") { setSelectedBrands([]); return; }
+    setSelectedBrands((prev) =>
+      prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]
+    );
+  }, []);
+
+  const toggleSilhouette = useCallback((s: string) => {
+    if (s === "전체") { setSelectedSilhouettes([]); return; }
+    setSelectedSilhouettes((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
+    );
+  }, []);
+
+  const toggleMaterial = useCallback((m: string) => {
+    if (m === "전체") { setSelectedMaterials([]); return; }
     setSelectedMaterials((prev) =>
-      prev.includes(v) ? prev.filter((m) => m !== v) : [...prev, v]
+      prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]
     );
   }, []);
 
   const visibleItems = useMemo(() => {
-    if (showSilhouetteFilter && selectedSilhouettes.length > 0)
+    if (activeTab === "가격별로 보기" && selectedPrices.length > 0)
+      return dresses.filter((d) => d.price_range !== null && selectedPrices.includes(d.price_range));
+    if (activeTab === "브랜드 별로 보기" && selectedBrands.length > 0)
+      return dresses.filter((d) => selectedBrands.includes(d.shop_name));
+    if (activeTab === "추구미별로 보기" && selectedSilhouettes.length > 0)
       return dresses.filter((d) => selectedSilhouettes.includes(d.silhouette.trim()));
-    if (showMaterialFilter && selectedMaterials.length > 0)
+    if (activeTab === "소재별로 보기" && selectedMaterials.length > 0)
       return dresses.filter((d) => selectedMaterials.includes(d.material.trim()));
     return dresses;
-  }, [dresses, showSilhouetteFilter, showMaterialFilter, selectedSilhouettes, selectedMaterials]);
+  }, [activeTab, dresses, selectedPrices, selectedBrands, selectedSilhouettes, selectedMaterials]);
 
   return (
     <Shell>
@@ -105,12 +147,7 @@ export default function DressClient({ dresses }: { dresses: Dress[] }) {
               key={tab}
               type="button"
               $active={activeTab === tab}
-              onClick={() => {
-                setActiveTab(tab);
-                setSelectedSilhouettes([]);
-                setSelectedMaterials([]);
-                setMaterialsExpanded(false);
-              }}
+              onClick={() => { setActiveTab(tab); resetFilters(); }}
             >
               {tab}
             </TabBtn>
@@ -118,7 +155,62 @@ export default function DressClient({ dresses }: { dresses: Dress[] }) {
         </TabInner>
       </TabBar>
 
-      {showSilhouetteFilter && (
+      {activeTab === "가격별로 보기" && (
+        <FilterRow>
+          <FilterInner>
+            <FilterChip
+              type="button"
+              $active={selectedPrices.length === 0}
+              onClick={() => setSelectedPrices([])}
+            >
+              전체
+            </FilterChip>
+            {prices.map((p) => (
+              <FilterChip
+                key={p}
+                type="button"
+                $active={selectedPrices.includes(p)}
+                onClick={() => togglePrice(p)}
+              >
+                {p}만원대
+              </FilterChip>
+            ))}
+          </FilterInner>
+        </FilterRow>
+      )}
+
+      {activeTab === "브랜드 별로 보기" && (
+        <FilterRow $expanded={brandsExpanded}>
+          <FilterInner $wrap={brandsExpanded}>
+            <FilterChip
+              type="button"
+              $active={selectedBrands.length === 0}
+              onClick={() => toggleBrand("전체")}
+            >
+              전체
+            </FilterChip>
+            {brands.map((b) => (
+              <FilterChip
+                key={b}
+                type="button"
+                $active={selectedBrands.includes(b)}
+                onClick={() => toggleBrand(b)}
+              >
+                {b}
+              </FilterChip>
+            ))}
+          </FilterInner>
+          <ExpandBtn
+            type="button"
+            onClick={() => setBrandsExpanded((v) => !v)}
+            aria-label={brandsExpanded ? "접기" : "더 보기"}
+          >
+            <ChevronIcon $expanded={brandsExpanded} />
+          </ExpandBtn>
+        </FilterRow>
+      )}
+
+      {activeTab === "추구미별로 보기" && (
         <FilterRow>
           <FilterInner>
             <FilterChip
@@ -142,9 +234,9 @@ export default function DressClient({ dresses }: { dresses: Dress[] }) {
         </FilterRow>
       )}
 
-      {showMaterialFilter && (
-        <FilterRow $expanded={materialsExpanded}>
-          <FilterInner $wrap={materialsExpanded}>
+      {activeTab === "소재별로 보기" && (
+        <FilterRow>
+          <FilterInner>
             <FilterChip
               type="button"
               $active={selectedMaterials.length === 0}
@@ -163,13 +255,6 @@ export default function DressClient({ dresses }: { dresses: Dress[] }) {
               </FilterChip>
             ))}
           </FilterInner>
-          <ExpandBtn
-            type="button"
-            onClick={() => setMaterialsExpanded((v) => !v)}
-            aria-label={materialsExpanded ? "접기" : "더 보기"}
-          >
-            <ChevronIcon $expanded={materialsExpanded} />
-          </ExpandBtn>
         </FilterRow>
       )}
 
@@ -189,14 +274,22 @@ export default function DressClient({ dresses }: { dresses: Dress[] }) {
                     style={{ objectFit: "cover", objectPosition: "top" }}
                   />
                   <HoverOverlay className="dress-hover">
-                    <FittingPill href={`/fitting?dressId=${item.id}`}>AI 피팅하기</FittingPill>
+                    <FittingPill
+                      type="button"
+                      onClick={() => {
+                        sessionStorage.setItem("marrid_dress_url", item.image_url);
+                        router.push("/fitting");
+                      }}
+                    >
+                      AI 피팅하기
+                    </FittingPill>
                   </HoverOverlay>
                 </ImageArea>
                 <InfoBar>
                   <DressName>{item.silhouette.trim()} {item.material.trim()}</DressName>
                   <ShopRow>
                     <LocationPin />
-                    <ShopName>{item.silhouette.trim()}</ShopName>
+                    <ShopName>{item.shop_name}</ShopName>
                   </ShopRow>
                 </InfoBar>
               </DressCard>
@@ -258,6 +351,11 @@ const TabInner = styled.div`
   display: flex;
   align-items: stretch;
   gap: 56px;
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const TabBtn = styled.button<{ $active: boolean }>`
@@ -270,6 +368,7 @@ const TabBtn = styled.button<{ $active: boolean }>`
   color: ${({ $active }) => ($active ? color.gray900 : color.gray600)};
   font-weight: ${({ $active }) => ($active ? 700 : 400)};
   white-space: nowrap;
+  flex-shrink: 0;
   transition: color 0.15s;
 
   &::after {
@@ -401,7 +500,7 @@ const HoverOverlay = styled.div`
   padding-bottom: 28px;
 `;
 
-const FittingPill = styled(Link)`
+const FittingPill = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -412,7 +511,7 @@ const FittingPill = styled(Link)`
   background: transparent;
   color: ${color.white};
   ${font.caption};
-  text-decoration: none;
+  cursor: pointer;
   white-space: nowrap;
 
   &:hover {
