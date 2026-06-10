@@ -6,6 +6,7 @@ import styled from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
 import { useSavedDresses } from "@/src/store/savedDresses";
+import { useAuth } from "@/src/hooks/useAuth";
 
 const QUICK_LINKS = [
   {
@@ -30,6 +31,8 @@ const QUICK_LINKS = [
 
 export default function DashboardPage() {
   const { dresses } = useSavedDresses();
+  const { user } = useAuth();
+  const displayName = user?.user_metadata?.name ?? user?.email ?? "";
   const recentDresses = dresses.slice(-3).reverse();
 
   const stats = [
@@ -41,7 +44,7 @@ export default function DashboardPage() {
   return (
     <Wrap>
       <Welcome>
-        <WelcomeTitle>안녕하세요</WelcomeTitle>
+        <WelcomeTitle>안녕하세요{displayName ? `, ${displayName}님` : ""}</WelcomeTitle>
         <WelcomeSub>MERRID와 함께 나만의 드레스를 찾아보세요</WelcomeSub>
       </Welcome>
 
