@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styled, { keyframes } from "styled-components";
@@ -27,6 +27,11 @@ export default function ResultPage() {
   const [heroSrc, setHeroSrc] = useState(LEFT_HERO);
   const [isFitting, setIsFitting] = useState(false);
 
+  useEffect(() => {
+    const resultUrl = sessionStorage.getItem("marrid_result_url");
+    if (resultUrl) setHeroSrc(resultUrl);
+  }, []);
+
   const handleFit = () => {
     if (isFitting || heroSrc === FINISH_SRC) return;
     setIsFitting(true);
@@ -48,14 +53,18 @@ export default function ResultPage() {
         </LeftTopBar>
         <LeftImageFrame>
           <LeftImageInner>
-            <Image
-              src={heroSrc}
-              alt="선택한 아바타"
-              fill
-              sizes="552px"
-              priority
-              style={{ objectFit: "cover", objectPosition: "center top" }}
-            />
+            {heroSrc.startsWith("https://") ? (
+              <HeroImg src={heroSrc} alt="선택한 아바타" />
+            ) : (
+              <Image
+                src={heroSrc}
+                alt="선택한 아바타"
+                fill
+                sizes="552px"
+                priority
+                style={{ objectFit: "cover", objectPosition: "center top" }}
+              />
+            )}
             {isFitting && (
               <FittingOverlay>
                 <Spinner />
@@ -222,6 +231,15 @@ const LeftImageFrame = styled.div`
   display: flex;
   align-items: stretch;
   justify-content: center;
+`;
+
+const HeroImg = styled.img`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
 `;
 
 const LeftImageInner = styled.div`
