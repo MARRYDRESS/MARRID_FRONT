@@ -44,6 +44,24 @@ export default function AvatarSettingPage() {
     const urls = files.map((f) => URL.createObjectURL(f));
     prevUrlsRef.current = urls;
     setPreviews(urls);
+
+    // body 사진(index 1, 없으면 index 0)을 압축 후 sessionStorage에 저장
+    const bodyFile = files[1] ?? files[0];
+    if (bodyFile) {
+      const img = new Image();
+      const blobUrl = URL.createObjectURL(bodyFile);
+      img.onload = () => {
+        const MAX = 768;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(blobUrl);
+        sessionStorage.setItem("marrid_person_b64", canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.src = blobUrl;
+    }
   }, []);
 
   const onDragOver = useCallback((e: React.DragEvent) => {
