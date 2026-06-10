@@ -35,8 +35,7 @@ export default function Home() {
         <HeroOverlay />
         <HeroContent>
           <HeroTitle>
-            인생의 한 번뿐인<br />
-            내 드레스를 완벽하게
+            For a one-time wedding
           </HeroTitle>
           <HeroDesc>
             사진 한 장으로 나만의 아바타를 만들고,<br />
@@ -263,9 +262,11 @@ const HeroEyebrow = styled.p`
 `;
 const HeroTitle = styled.h1`
   ${font["title-lg"]};
+  font-family: "Restweek", serif;
+  font-size: clamp(64px, 10vw, 120px);
   color: ${color.white};
   margin: 0 0 24px;
-  line-height: 1.4;
+  line-height: 1.2;
   opacity: 0;
   animation: ${fadeUp} 0.9s 0.4s ease forwards;
 `;
