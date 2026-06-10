@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import styled, { keyframes } from "styled-components";
@@ -15,13 +15,66 @@ type RanderingClientProps = {
 
 export default function RanderingClient({ isFitting }: RanderingClientProps) {
   const router = useRouter();
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    const id = window.setTimeout(() => {
+    const personB64 = sessionStorage.getItem("marrid_person_b64");
+
+    // 사진 업로드 없이 직접 진입한 경우 바로 result로
+    if (!personB64) {
       router.replace("/result");
-    }, 3000);
-    return () => window.clearTimeout(id);
-  }, []);
+      return;
+    }
+
+    let cancelled = false;
+
+    fetch("/api/tryon", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ person_b64: personB64 }),
+    })
+      .then((r) => r.json())
+      .then(({ id, error }) => {
+        if (cancelled) return;
+
+        if (error || !id) {
+          console.error("[randering] run failed:", error);
+          router.replace("/result");
+          return;
+        }
+
+        pollRef.current = setInterval(async () => {
+          if (cancelled) return;
+
+          try {
+            const res = await fetch(`/api/tryon/status?id=${id}`);
+            const data = await res.json();
+
+            if (data.status === "completed" && data.output?.[0]) {
+              clearInterval(pollRef.current!);
+              sessionStorage.setItem("marrid_result_url", data.output[0]);
+              router.replace("/result");
+            } else if (data.status === "failed") {
+              clearInterval(pollRef.current!);
+              console.error("[randering] tryon failed:", data.error);
+              router.replace("/result");
+            }
+            // starting | in_queue | processing → 계속 대기
+          } catch {
+            clearInterval(pollRef.current!);
+            router.replace("/result");
+          }
+        }, 2000);
+      })
+      .catch(() => {
+        if (!cancelled) router.replace("/result");
+      });
+
+    return () => {
+      cancelled = true;
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [router]);
 
   const lead = isFitting ? "옷을 입고 있어요" : "아바타를 만들고 있어요";
   const heroAlt = isFitting
