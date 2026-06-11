@@ -25,10 +25,6 @@ export default function Header({
   const { user } = useAuth();
 
   const givenName = user?.user_metadata?.given_name ?? user?.user_metadata?.name?.split(" ")[0];
-  const authItem = user
-    ? { label: `${givenName} 님`, href: "/mypage/dashboard" }
-    : { label: "로그인", href: "/login" };
-  const NAV_ITEMS = [...BASE_NAV_ITEMS, authItem];
 
   useEffect(() => {
     if (forceScrolled) {
@@ -51,11 +47,16 @@ export default function Header({
               <img src="/icon/logo.svg" alt="MERRID" height={14} />
             </Logo>
             <NavLinks>
-              {NAV_ITEMS.map((item) => (
+              {BASE_NAV_ITEMS.map((item) => (
                 <NavLink key={item.label} href={item.href} $scrolled>
                   {item.label}
                 </NavLink>
               ))}
+              {user ? (
+                <NavText $scrolled>{givenName} 님</NavText>
+              ) : (
+                <NavLink href="/login" $scrolled>로그인</NavLink>
+              )}
             </NavLinks>
           </NavInner>
         </PeekNav>
@@ -70,11 +71,16 @@ export default function Header({
           <img src="/icon/logo.svg" alt="MERRID" height={14} />
         </Logo>
         <NavLinks>
-          {NAV_ITEMS.map((item) => (
+          {BASE_NAV_ITEMS.map((item) => (
             <NavLink key={item.label} href={item.href} $scrolled={scrolled}>
               {item.label}
             </NavLink>
           ))}
+          {user ? (
+            <NavText $scrolled={scrolled}>{givenName} 님</NavText>
+          ) : (
+            <NavLink href="/login" $scrolled={scrolled}>로그인</NavLink>
+          )}
         </NavLinks>
       </NavInner>
     </Nav>
@@ -158,4 +164,12 @@ const NavLink = styled(Link)<{ $scrolled: boolean }>`
   &:hover {
     opacity: 0.6;
   }
+`;
+
+const NavText = styled.span<{ $scrolled: boolean }>`
+  color: ${({ $scrolled }) => ($scrolled ? color.gray700 : "white")};
+  ${font["text-sm"]};
+  letter-spacing: 0.03em;
+  transition: color 0.3s;
+  cursor: default;
 `;
