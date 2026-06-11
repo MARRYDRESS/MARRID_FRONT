@@ -11,7 +11,7 @@ const BASE_NAV_ITEMS = [
   { label: "아바타 만들기", href: "/avatarSetting" },
   { label: "드레스 보기", href: "/dress" },
   { label: "샵 보기", href: "/shop" },
-  { label: "마이페이지", href: "/mypage/dashbod" },
+  { label: "마이페이지", href: "/mypage/dashboard" },
 ];
 
 export default function Header({
