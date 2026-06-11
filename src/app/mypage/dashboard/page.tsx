@@ -8,26 +8,6 @@ import font from "@/src/style/font";
 import { useSavedDresses } from "@/src/store/savedDresses";
 import { useAuth } from "@/src/hooks/useAuth";
 
-const QUICK_LINKS = [
-  {
-    label: "드레스 피팅",
-    desc: "AI로 드레스를 미리 입어보세요",
-    href: "/dress",
-    icon: "👗",
-  },
-  {
-    label: "샵 찾기",
-    desc: "예산에 맞는 드레스샵을 찾아보세요",
-    href: "/shop",
-    icon: "🏛",
-  },
-  {
-    label: "아바타 만들기",
-    desc: "나만의 아바타를 새로 설정하세요",
-    href: "/avatarSetting",
-    icon: "✦",
-  },
-] as const;
 
 export default function DashboardPage() {
   const { dresses } = useSavedDresses();
@@ -83,19 +63,6 @@ export default function DashboardPage() {
             ))}
           </DressRow>
         )}
-      </Section>
-
-      <Section>
-        <SectionTitle>빠른 이동</SectionTitle>
-        <QuickGrid>
-          {QUICK_LINKS.map((q) => (
-            <QuickCard key={q.href} href={q.href}>
-              <QuickIcon>{q.icon}</QuickIcon>
-              <QuickLabel>{q.label}</QuickLabel>
-              <QuickDesc>{q.desc}</QuickDesc>
-            </QuickCard>
-          ))}
-        </QuickGrid>
       </Section>
     </Wrap>
   );
@@ -210,41 +177,4 @@ const InlineLink = styled(Link)`
   &:hover {
     text-decoration: underline;
   }
-`;
-
-const QuickGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-`;
-
-const QuickCard = styled(Link)`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 24px 20px;
-  border: 1px solid ${color.gray200};
-  text-decoration: none;
-  transition: border-color 0.15s, background 0.15s;
-
-  &:hover {
-    border-color: ${color.primary};
-    background: rgba(178, 102, 102, 0.03);
-  }
-`;
-
-const QuickIcon = styled.span`
-  font-size: 22px;
-  line-height: 1;
-`;
-
-const QuickLabel = styled.span`
-  ${font["text-sm"]};
-  color: ${color.black};
-  font-weight: 500;
-`;
-
-const QuickDesc = styled.span`
-  ${font.caption};
-  color: ${color.gray500};
 `;
