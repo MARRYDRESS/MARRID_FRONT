@@ -29,11 +29,8 @@ type SelectSectionProps = {
   showPaginationDots?: boolean;
   titleVariant?: "md" | "sm";
   layout?: "default" | "hall";
-  /**
-   * true면 카드 딤(호버·선택)이 문서 바깥 클릭으로 풀리지 않고,
-   * 마지막으로 포인터가 올라간 카드 딤이 Next로 페이지 이탈할 때까지 유지됩니다. (홀 선택 등)
-   */
   keepDimUntilNext?: boolean;
+  onSelect?: (item: SelectMockItem | null) => void;
 };
 
 export default function SelectComponent(props: SelectSectionProps) {
@@ -54,6 +51,7 @@ function SelectComponentInner({
   titleVariant = "md",
   layout = "default",
   keepDimUntilNext = false,
+  onSelect,
 }: SelectSectionProps) {
   const {
     pages,
@@ -118,12 +116,16 @@ function SelectComponentInner({
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  setSelectedCardKey((prev) => (prev === itemKey ? null : itemKey));
+                  const next = selectedCardKey === itemKey ? null : itemKey;
+                  setSelectedCardKey(next);
+                  onSelect?.(next === null ? null : item);
                 }
               }}
-              onClick={() =>
-                setSelectedCardKey((prev) => (prev === itemKey ? null : itemKey))
-              }
+              onClick={() => {
+                const next = selectedCardKey === itemKey ? null : itemKey;
+                setSelectedCardKey(next);
+                onSelect?.(next === null ? null : item);
+              }}
             >
               <CardImageWrap $layout={pageLayout} $selected={selectedCardKey === itemKey}>
                 <CardImage

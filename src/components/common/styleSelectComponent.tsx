@@ -29,6 +29,7 @@ type StyleSelectSectionProps = {
   items: StyleSelectItem[];
   showPaginationDots?: boolean;
   keepOverlayUntilNext?: boolean;
+  onSelect?: (item: StyleSelectItem | null) => void;
 };
 
 export default function StyleSelectComponent(props: StyleSelectSectionProps) {
@@ -47,6 +48,7 @@ function StyleSelectComponentInner({
   items,
   showPaginationDots = false,
   keepOverlayUntilNext = false,
+  onSelect,
 }: StyleSelectSectionProps) {
   const {
     pages,
@@ -67,12 +69,14 @@ function StyleSelectComponentInner({
     setPersistHoverKey(null);
   };
 
-  const toggleOverlay = (cardKey: string) => {
+  const toggleOverlay = (cardKey: string, item: StyleSelectItem) => {
     if (styleOverlayPinnedKey === cardKey) {
       clearOverlayState();
+      onSelect?.(null);
       return;
     }
     setStyleOverlayPinnedKey(cardKey);
+    onSelect?.(item);
   };
 
   useEffect(() => {
@@ -171,14 +175,14 @@ function StyleSelectComponentInner({
                             ? (e) => {
                                 if (e.key === "Enter" || e.key === " ") {
                                   e.preventDefault();
-                                  toggleOverlay(cardKey);
+                                  toggleOverlay(cardKey, item);
                                 }
                               }
                             : undefined
                         }
                         onClick={
                           showHash
-                            ? () => toggleOverlay(cardKey)
+                            ? () => toggleOverlay(cardKey, item)
                             : undefined
                         }
                       >
