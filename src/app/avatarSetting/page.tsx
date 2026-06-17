@@ -157,7 +157,7 @@ export default function AvatarSettingPage() {
         </RightInner>
       </RightPane>
 
-      <AvatarFlowNextLink href="/avatarSetting/selectHall" aria-label="다음 단계">
+      <AvatarFlowNextLink href="/avatarSetting/selectSilhouette" aria-label="다음 단계">
         <IconImg src="/icon/blackFront.svg" alt="" width={17} height={32} />
       </AvatarFlowNextLink>
     </Shell>
