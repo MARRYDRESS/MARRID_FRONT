@@ -18,14 +18,59 @@ const ZONES: { id: ZoneId; label: string; desc: string }[] = [
 ];
 
 // ─── 색상 ─────────────────────────────────────────────────────
-const GOLD      = "#C4A07A"; // 선택된 카드의 강조색
-const GOLD_SOFT = "#DDD1C2"; // 미선택 카드의 프리뷰 색
-const STROKE    = "#CABFB4"; // 실루엣 외곽선
+const GOLD      = "#C4A07A";
+const GOLD_SOFT = "#DDD1C2";
+const STROKE    = "#C8BCAF";
 
-// ─── 체형 SVG 경로 ────────────────────────────────────────────
-// 토르소: 어깨(넓음) → 가슴 → 허리(좁음) → 골반(넓음)
-const TORSO =
-  "M 17,27 C 14,34 20,54 22,66 C 22,74 16,86 18,100 L 18,104 L 42,104 L 42,100 C 44,86 38,74 38,66 C 40,54 46,34 43,27 Z";
+// ─── 단일 연속 실루엣 경로 ────────────────────────────────────
+// 오른쪽 목 → 오른쪽 어깨 → 오른팔 외측(하행) → 손목 → 오른팔 내측(상행) →
+// 오른쪽 겨드랑이 → 오른쪽 몸통(하행) → 오른쪽 골반 → 오른쪽 다리 외측(하행) →
+// 발 → 오른쪽 다리 내측(상행) → 사타구니 → 왼쪽 다리 내측(하행) →
+// 발 → 왼쪽 다리 외측(상행) → 왼쪽 골반 → 왼쪽 몸통(상행) →
+// 왼쪽 겨드랑이 → 왼팔 내측(하행) → 손목 → 왼팔 외측(상행) → 왼쪽 어깨 → 목
+const BODY =
+  "M 43,26" +
+  " C 50,28 62,36 65,50" +        // 오른쪽 어깨
+  " C 68,58 68,70 68,86" +        // 오른팔 외측 상단
+  " C 68,102 67,114 65,122" +     // 오른팔 외측 하단
+  " C 63,126 60,128 57,126" +     // 오른쪽 손목 외측
+  " C 54,124 53,120 54,114" +     // 오른쪽 손목 내측
+  " C 55,102 56,90 56,78" +       // 오른팔 내측 상행
+  " C 56,68 55,62 52,58" +        // 오른쪽 겨드랑이
+  " C 54,68 54,80 52,94" +        // 오른쪽 가슴·몸통
+  " C 50,104 48,114 50,124" +     // 오른쪽 허리
+  " C 52,132 54,140 54,150" +     // 오른쪽 골반
+  " L 54,158" +                   // 오른쪽 허벅지 상단
+  " L 52,220" +                   // 오른쪽 다리 외측
+  " C 52,224 50,226 48,226" +     // 오른쪽 발목 외측
+  " L 44,226" +                   // 발 바닥
+  " C 42,226 40,224 40,220" +     // 오른쪽 발목 내측
+  " L 43,158" +                   // 오른쪽 다리 내측 상행
+  " L 37,158" +                   // 사타구니
+  " L 40,220" +                   // 왼쪽 다리 내측 하행
+  " C 40,224 38,226 36,226" +     // 왼쪽 발목 내측
+  " L 32,226" +                   // 왼쪽 발 바닥
+  " C 30,226 28,224 28,220" +     // 왼쪽 발목 외측
+  " L 26,158" +                   // 왼쪽 다리 외측 상행
+  " L 26,150" +                   // 왼쪽 허벅지 상단
+  " C 26,140 28,132 30,124" +     // 왼쪽 골반
+  " C 32,114 30,104 28,94" +      // 왼쪽 허리
+  " C 26,80 26,68 28,58" +        // 왼쪽 몸통 상행 → 겨드랑이
+  " C 25,62 24,68 24,78" +        // 왼팔 내측 하행
+  " C 23,90 23,102 23,114" +      // 왼팔 내측 하단
+  " C 23,120 22,124 19,126" +     // 왼쪽 손목 내측
+  " C 16,128 13,126 11,122" +     // 왼쪽 손목 외측
+  " C 13,114 12,102 12,86" +      // 왼팔 외측 하단
+  " C 12,70 12,58 15,50" +        // 왼팔 외측 상단
+  " C 18,36 30,28 37,26" +        // 왼쪽 어깨
+  " Z";
+
+// ─── 존별 강조 영역 정의 (clipPath 안 rect) ────────────────────
+// 어깨: 목 하단~겨드랑이 높이
+// 팔:   양 측면 띠 (마지막에 그려 토르소 존 위에 덮음)
+// 가슴: 겨드랑이~허리 상단
+// 복부: 허리
+// 하체: 골반 + 다리
 
 function BodySvg({ zone, selected }: { zone: ZoneId; selected: boolean }) {
   const hi = selected ? GOLD : GOLD_SOFT;
@@ -33,57 +78,34 @@ function BodySvg({ zone, selected }: { zone: ZoneId; selected: boolean }) {
   const id = `bc-${zone}`;
 
   return (
-    <svg viewBox="0 0 60 184" fill="none" aria-hidden>
+    <svg viewBox="0 0 80 228" fill="none" aria-hidden>
       <defs>
         <clipPath id={id}>
-          {/* 머리 */}
-          <ellipse cx="30" cy="9"  rx="8"   ry="9"  />
-          {/* 목 */}
-          <rect x="27" y="17" width="6"  height="12" rx="2" />
-          {/* 토르소 */}
-          <path d={TORSO} />
-          {/* 왼팔 */}
-          <rect x="4"  y="28" width="11" height="68" rx="5.5" />
-          {/* 오른팔 */}
-          <rect x="45" y="28" width="11" height="68" rx="5.5" />
-          {/* 왼다리 */}
-          <rect x="16" y="100" width="12" height="82" rx="6" />
-          {/* 오른다리 */}
-          <rect x="32" y="100" width="12" height="82" rx="6" />
+          <circle cx="40" cy="14" r="13" />
+          <path d={BODY} />
         </clipPath>
       </defs>
 
-      {/* ── 클립 안 존 색상 레이어 ── */}
+      {/* 존 색상 레이어 (clip 안) */}
       <g clipPath={`url(#${id})`}>
-        {/* overall: 헤드까지 전체 */}
-        {zone === "overall" && (
-          <rect x="0" y="0" width="60" height="184" fill={hi} />
-        )}
-        {zone !== "overall" && (
+        {zone === "overall" ? (
+          <rect x="0" y="0" width="80" height="228" fill={hi} />
+        ) : (
           <>
-            {/* 어깨 */}
-            <rect x="0" y="22" width="60" height="30" fill={z("shoulder")} />
-            {/* 가슴 */}
-            <rect x="0" y="52" width="60" height="20" fill={z("chest")} />
-            {/* 복부 */}
-            <rect x="0" y="72" width="60" height="28" fill={z("abdomen")} />
-            {/* 하체 */}
-            <rect x="0" y="100" width="60" height="84" fill={z("lower")} />
-            {/* 팔 — 마지막에 그려서 토르소 존 위에 덮음 */}
-            <rect x="0"  y="22" width="20" height="82" fill={z("arm")} />
-            <rect x="40" y="22" width="20" height="82" fill={z("arm")} />
+            <rect x="0"  y="22"  width="80" height="36"  fill={z("shoulder")} />
+            <rect x="0"  y="58"  width="80" height="44"  fill={z("chest")}    />
+            <rect x="0"  y="102" width="80" height="26"  fill={z("abdomen")}  />
+            <rect x="0"  y="128" width="80" height="100" fill={z("lower")}    />
+            {/* 팔: 양측 띠, 마지막에 그려서 토르소 색 위에 덮음 */}
+            <rect x="0"  y="22"  width="26" height="108" fill={z("arm")}      />
+            <rect x="54" y="22"  width="26" height="108" fill={z("arm")}      />
           </>
         )}
       </g>
 
-      {/* ── 실루엣 외곽선 (항상 위에) ── */}
-      <ellipse cx="30" cy="9"  rx="8"   ry="9"   stroke={STROKE} strokeWidth="1.2" />
-      <rect    x="27" y="17" width="6"  height="12" rx="2"  stroke={STROKE} strokeWidth="1.2" />
-      <path    d={TORSO}                               stroke={STROKE} strokeWidth="1.2" />
-      <rect    x="4"  y="28" width="11" height="68" rx="5.5" stroke={STROKE} strokeWidth="1.2" />
-      <rect    x="45" y="28" width="11" height="68" rx="5.5" stroke={STROKE} strokeWidth="1.2" />
-      <rect    x="16" y="100" width="12" height="82" rx="6"  stroke={STROKE} strokeWidth="1.2" />
-      <rect    x="32" y="100" width="12" height="82" rx="6"  stroke={STROKE} strokeWidth="1.2" />
+      {/* 실루엣 외곽선 (항상 최상단) */}
+      <circle cx="40" cy="14" r="13" stroke={STROKE} strokeWidth="1.2" />
+      <path   d={BODY}               stroke={STROKE} strokeWidth="1.2" />
     </svg>
   );
 }
@@ -153,14 +175,13 @@ const Shell = styled.div`
   width: 100%;
   min-height: 100dvh;
   background: ${color.white};
-  color: ${color.black};
   overflow-x: hidden;
 `;
 
 const Inner = styled.div`
   max-width: 900px;
   margin: 0 auto;
-  padding: clamp(48px, 8vh, 96px) clamp(20px, 4vw, 48px) 120px;
+  padding: clamp(48px, 8vh, 100px) clamp(24px, 4vw, 56px) 120px;
 `;
 
 const TitleStack = styled.div`
@@ -169,7 +190,7 @@ const TitleStack = styled.div`
   align-items: center;
   gap: 6px;
   text-align: center;
-  margin-bottom: clamp(32px, 5vh, 56px);
+  margin-bottom: clamp(36px, 5vh, 60px);
 `;
 
 const TitleMain = styled.h1`
@@ -196,42 +217,41 @@ const Grid = styled.div`
 `;
 
 const ZoneCard = styled.div<{ $selected: boolean }>`
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 24px 16px 20px;
+  gap: 12px;
+  padding: 28px 16px 22px;
   border-radius: 16px;
   border: 1.5px solid
-    ${({ $selected }) => ($selected ? "#C4A07A" : color.gray200)};
+    ${({ $selected }) => ($selected ? GOLD : color.gray200)};
   background: ${color.white};
   cursor: pointer;
-  transition: border-color 0.18s, box-shadow 0.18s, transform 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
   user-select: none;
 
   &:hover {
-    border-color: ${({ $selected }) => ($selected ? "#C4A07A" : color.gray300)};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border-color: ${({ $selected }) => ($selected ? GOLD : color.gray300)};
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
   }
 
   &:focus-visible {
-    outline: 2px solid #C4A07A;
+    outline: 2px solid ${GOLD};
     outline-offset: 2px;
   }
 `;
 
 const SvgWrap = styled.div`
   width: 100%;
-  max-width: 72px;
+  max-width: 68px;
 `;
 
 const CardLabel = styled.p<{ $selected: boolean }>`
   margin: 0;
   ${font["text-md"]};
-  color: ${({ $selected }) => ($selected ? "#C4A07A" : color.black)};
-  transition: color 0.18s;
+  color: ${({ $selected }) => ($selected ? GOLD : color.black)};
+  transition: color 0.2s;
 `;
 
 const CardDesc = styled.p`

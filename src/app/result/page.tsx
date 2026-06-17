@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import styled, { keyframes } from "styled-components";
 import color from "@/src/style/color";
@@ -15,8 +14,9 @@ const FINISH_SRC = "/mock/finish.png";
 export default function ResultPage() {
   const [heroSrc, setHeroSrc] = useState(LEFT_HERO);
   const [isFitting, setIsFitting] = useState(false);
+  const [fittingDressId, setFittingDressId] = useState<string | null>(null);
   const [blocks, setBlocks] = useState<RecommendBlock[]>([]);
-  const [isLoadingRec, setIsLoadingRec] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const resultUrl = sessionStorage.getItem("marrid_result_url");
@@ -24,93 +24,121 @@ export default function ResultPage() {
   }, []);
 
   useEffect(() => {
-    const hall = sessionStorage.getItem("marrid_selected_hall") ?? "";
-    const rawStyle = sessionStorage.getItem("marrid_selected_style");
-    const styleData = rawStyle ? JSON.parse(rawStyle) : { label: "", hashtags: [] };
+    // 캐시된 추천 있으면 재사용
+    const cached = sessionStorage.getItem("marrid_recommend");
+    if (cached) {
+      try {
+        const { blocks: b } = JSON.parse(cached);
+        if (b?.length) { setBlocks(b); setIsLoading(false); return; }
+      } catch { /* ignore */ }
+    }
+
+    const hall            = sessionStorage.getItem("marrid_selected_hall") ?? "";
+    const rawStyle        = sessionStorage.getItem("marrid_selected_style");
+    const rawSilhouette   = sessionStorage.getItem("marrid_silhouette");
+    const styleData       = rawStyle      ? JSON.parse(rawStyle)      : { label: "", hashtags: [] };
+    const silhouetteZones = rawSilhouette ? JSON.parse(rawSilhouette) : [];
 
     fetch("/api/recommend", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ hall, style: styleData.label, hashtags: styleData.hashtags }),
+      body: JSON.stringify({ hall, style: styleData.label, hashtags: styleData.hashtags, silhouetteZones }),
     })
       .then((r) => r.json())
-      .then((data) => { if (data.blocks) setBlocks(data.blocks); })
+      .then((data) => {
+        if (data.blocks) {
+          setBlocks(data.blocks);
+          sessionStorage.setItem("marrid_recommend", JSON.stringify({ blocks: data.blocks }));
+        }
+      })
       .catch(() => {})
-      .finally(() => setIsLoadingRec(false));
+      .finally(() => setIsLoading(false));
   }, []);
 
-  const handleFit = () => {
-    if (isFitting || heroSrc === FINISH_SRC) return;
+  const handleFit = (dressId: string, imageUrl: string) => {
+    if (isFitting) return;
     setIsFitting(true);
+    setFittingDressId(dressId);
     setTimeout(() => {
-      setHeroSrc(FINISH_SRC);
+      setHeroSrc(imageUrl);
       setIsFitting(false);
+      setFittingDressId(null);
     }, 1500);
   };
 
   return (
     <Shell>
       <Header peekOnly />
+
       <LeftPane>
         <LeftTopBar>
           <BackLink href="/" aria-label="홈으로">
-            <BackIcon src="/icon/whiteBack.svg" alt="" width={14} height={26} />
+            <img src="/icon/whiteBack.svg" alt="" width={14} height={26} style={{ filter: "brightness(0)" }} />
           </BackLink>
           <SaveButton type="button">저장하기</SaveButton>
         </LeftTopBar>
-        <LeftImageFrame>
-          <LeftImageInner>
-            {heroSrc.startsWith("https://") ? (
-              <HeroImg src={heroSrc} alt="선택한 아바타" />
-            ) : (
-              <Image
-                src={heroSrc}
-                alt="선택한 아바타"
-                fill
-                sizes="552px"
-                priority
-                style={{ objectFit: "contain", objectPosition: "center" }}
-              />
-            )}
-            {isFitting && (
-              <FittingOverlay>
-                <Spinner />
-                <FittingLabel>AI 피팅 중...</FittingLabel>
-              </FittingOverlay>
-            )}
-          </LeftImageInner>
-        </LeftImageFrame>
+        <AvatarFrame>
+          {heroSrc.startsWith("https://") ? (
+            <AvatarImg src={heroSrc} alt="아바타" />
+          ) : (
+            <AvatarImgLocal src={heroSrc} alt="아바타" />
+          )}
+          {isFitting && (
+            <FittingOverlay>
+              <Spinner />
+              <FittingLabel>AI 피팅 중...</FittingLabel>
+            </FittingOverlay>
+          )}
+        </AvatarFrame>
       </LeftPane>
 
       <RightPane>
         <RightInner>
-          {isLoadingRec ? (
+          {isLoading ? (
             <LoadingBox>
-              <Spinner />
-              <LoadingLabel>AI가 어울리는 드레스를 찾는 중이에요...</LoadingLabel>
+              <Spinner $dark />
+              <LoadingText>어울리는 드레스를 찾고 있어요...</LoadingText>
             </LoadingBox>
-          ) : blocks.length > 0 ? (
+          ) : blocks.length === 0 ? (
+            <LoadingBox>
+              <LoadingText>추천 드레스를 불러올 수 없어요</LoadingText>
+            </LoadingBox>
+          ) : (
             blocks.map((block, bi) => (
-              <RecommendBlock key={bi}>
-                <SectionTitle $tight={bi > 0}>{block.title}</SectionTitle>
-                <PickGrid>
-                  {block.dresses.map((d) => (
-                    <PickCard key={d.id}>
-                      <PickImageWrap>
-                        <Image src={d.image} alt={d.label} fill sizes="362px" style={{ objectFit: "cover" }} />
-                      </PickImageWrap>
-                      <FitingButton type="button" onClick={handleFit} disabled={isFitting}>
-                        AI 피팅하기
-                      </FitingButton>
-                    </PickCard>
+              <Section key={bi}>
+                <SectionTitle>{block.title}</SectionTitle>
+                <DressGrid $count={block.dresses.length}>
+                  {block.dresses.map((dress) => (
+                    <DressCard key={dress.id}>
+                      <DressImageWrap>
+                        {dress.image_url ? (
+                          <DressImg src={dress.image_url} alt={dress.silhouette} />
+                        ) : (
+                          <DressImgPlaceholder />
+                        )}
+                        <CardOverlay>
+                          <ShopRow>
+                          <img src="/icon/place.svg" alt="" width={14} height={14} style={{ flexShrink: 0, filter: "brightness(0) invert(1)" }} />
+                          <ShopName>{dress.shop_name}</ShopName>
+                        </ShopRow>
+                          <FitButton
+                            type="button"
+                            onClick={() => handleFit(dress.id, dress.image_url)}
+                            disabled={isFitting}
+                            $active={fittingDressId === dress.id}
+                          >
+                            {fittingDressId === dress.id ? "피팅 중..." : "AI 피팅하기"}
+                          </FitButton>
+                        </CardOverlay>
+                      </DressImageWrap>
+                    </DressCard>
                   ))}
-                </PickGrid>
-              </RecommendBlock>
+                </DressGrid>
+              </Section>
             ))
-          ) : null}
-
+          )}
           <MoreRow>
-            <MoreLink href="/dress">더 많은 드레스 보러가기</MoreLink>
+            <MoreLink href="/dress">더 많은 드레스 보러가기 →</MoreLink>
           </MoreRow>
         </RightInner>
       </RightPane>
@@ -118,45 +146,34 @@ export default function ResultPage() {
   );
 }
 
+// ── 레이아웃 ──────────────────────────────────────────────────────────────────
+
 const Shell = styled.main`
   display: flex;
-  box-sizing: border-box;
   width: 100%;
   height: 100dvh;
-  max-height: 100dvh;
-  margin: 0;
   overflow: hidden;
   background: ${color.white};
-  color: ${color.black};
 
   @media (max-width: 900px) {
     flex-direction: column;
     height: auto;
-    max-height: none;
-    min-height: 100dvh;
     overflow: visible;
   }
 `;
 
 const LeftPane = styled.aside`
-  box-sizing: border-box;
-  flex: 0 0 clamp(280px, 42vw, 604px);
-  width: clamp(280px, 42vw, 604px);
-  max-width: 604px;
+  flex: 0 0 clamp(280px, 40vw, 560px);
   height: 100dvh;
-  max-height: 100dvh;
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   background: ${color.gray100};
-  padding: 47px clamp(20px, 3vw, 54px) 32px;
+  padding: 48px clamp(20px, 3vw, 52px) 32px;
 
   @media (max-width: 900px) {
-    width: 100%;
-    max-width: none;
+    flex: none;
     height: auto;
-    max-height: min(48dvh, 440px);
-    flex: 0 0 auto;
+    max-height: 44dvh;
     padding: 24px 20px 20px;
   }
 `;
@@ -166,198 +183,181 @@ const LeftTopBar = styled.div`
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
-  width: 100%;
-  max-width: 515px;
-  margin: 0 auto 32px;
-  gap: 16px;
-
-  @media (max-width: 900px) {
-    margin-bottom: 16px;
-  }
+  margin-bottom: 28px;
 `;
 
 const BackLink = styled(Link)`
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
   padding: 4px;
   text-decoration: none;
-  color: inherit;
-  filter: brightness(0);
-
-  &:focus-visible {
-    outline: 2px solid ${color.primary};
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-`;
-
-const BackIcon = styled.img`
-  display: block;
 `;
 
 const SaveButton = styled.button`
-  box-sizing: border-box;
-  margin: 0;
-  padding: 9px 25px;
-  border-radius: 16px;
+  padding: 8px 22px;
   border: 1px solid ${color.gray700};
+  border-radius: 16px;
   background: ${color.white};
   color: ${color.black};
-  cursor: pointer;
   ${font["text-sm"]};
-
-  &:hover {
-    background: ${color.gray100};
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${color.primary};
-    outline-offset: 2px;
-  }
+  cursor: pointer;
+  &:hover { background: ${color.gray200}; }
 `;
 
-const LeftImageFrame = styled.div`
+const AvatarFrame = styled.div`
+  position: relative;
   flex: 1;
   min-height: 0;
-  width: 100%;
-  max-width: 552px;
-  margin: 0 auto;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
+  border-radius: 8px;
+  background: ${color.gray200};
+  overflow: hidden;
 `;
 
-const HeroImg = styled.img`
+const AvatarImg = styled.img`
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  object-position: center;
 `;
 
-const LeftImageInner = styled.div`
-  position: relative;
+const AvatarImgLocal = styled.img`
+  position: absolute;
+  inset: 0;
   width: 100%;
-  max-width: 552px;
-  border-radius: 8px;
-  background: ${color.gray200};
-  overflow: hidden;
-  flex: 1;
-  min-height: 320px;
-
-  @media (max-width: 900px) {
-    min-height: 220px;
-    max-height: 320px;
-    flex: 0 0 auto;
-    height: min(36dvh, 320px);
-  }
+  height: 100%;
+  object-fit: contain;
 `;
 
 const RightPane = styled.div`
-  box-sizing: border-box;
   flex: 1;
   min-width: 0;
   height: 100dvh;
-  max-height: 100dvh;
   overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
   background: ${color.white};
 
   @media (max-width: 900px) {
     height: auto;
-    max-height: none;
     overflow: visible;
-    flex: 1 1 auto;
   }
 `;
 
 const RightInner = styled.div`
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 800px;
+  max-width: 780px;
   margin: 0 auto;
-  padding: clamp(72px, 8vw, 100px) clamp(20px, 3vw, 48px) 80px;
+  padding: clamp(60px, 7vw, 96px) clamp(20px, 3vw, 48px) 80px;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 40px;
+  gap: 48px;
 `;
 
-const RecommendBlock = styled.div`
+// ── 추천 섹션 ─────────────────────────────────────────────────────────────────
+
+const Section = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 16px;
+  gap: 20px;
 `;
 
-const SectionTitle = styled.h1<{ $tight?: boolean }>`
+const SectionTitle = styled.h2`
   margin: 0;
-  padding: 0;
-  max-width: ${({ $tight }) => ($tight ? "523px" : "576px")};
-  color: ${color.black};
   ${font["text-lg"]};
+  color: ${color.black};
+  max-width: 540px;
 `;
 
-const PickGrid = styled.div`
+const DressGrid = styled.div<{ $count: number }>`
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px 28px;
-  width: 100%;
-  max-width: 752px;
-  align-items: start;
+  grid-template-columns: repeat(${({ $count }) => Math.min($count, 2)}, 1fr);
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 `;
 
-const PickCard = styled.article`
+const DressCard = styled.article`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const DressImageWrap = styled.div`
   position: relative;
   width: 100%;
-  min-width: 0;
-  aspect-ratio: 362 / 489;
+  aspect-ratio: 3 / 4;
+  background: ${color.gray100};
   overflow: hidden;
-  border-radius: 0;
+  border-radius: 4px;
+`;
+
+const DressImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+`;
+
+const DressImgPlaceholder = styled.div`
+  width: 100%;
+  height: 100%;
   background: ${color.gray200};
 `;
 
-const PickImageWrap = styled.div`
+const CardOverlay = styled.div`
   position: absolute;
   inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  gap: 8px;
 `;
 
-const FitingButton = styled.button`
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  z-index: 1;
-  box-sizing: border-box;
-  display: inline-flex;
+const ShopRow = styled.div`
+  display: flex;
   align-items: center;
-  justify-content: center;
-  height: 32px;
-  min-width: 97px;
-  padding: 0 12px;
-  border-radius: 16px;
-  border: 1px solid ${color.white};
-  background: transparent;
-  color: ${color.white};
-  cursor: pointer;
+  gap: 4px;
+`;
+
+const ShopName = styled.p`
+  margin: 0;
   ${font["text-sm"]};
+  color: ${color.white};
+`;
 
-  &:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.12);
-  }
+const FitButton = styled.button<{ $active: boolean }>`
+  align-self: flex-start;
+  padding: 6px 14px;
+  border: 1px solid ${color.white};
+  border-radius: 20px;
+  background: ${({ $active }) => ($active ? "rgba(255,255,255,0.25)" : "transparent")};
+  color: ${color.white};
+  ${font["text-sm"]};
+  cursor: pointer;
+  white-space: nowrap;
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  &:hover:not(:disabled) { background: rgba(255,255,255,0.15); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+`;
 
-  &:focus-visible {
-    outline: 2px solid ${color.white};
-    outline-offset: 2px;
-  }
+
+// ── 로딩 ──────────────────────────────────────────────────────────────────────
+
+const LoadingBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 100px 0;
+`;
+
+const LoadingText = styled.p`
+  margin: 0;
+  ${font["text-sm"]};
+  color: ${color.gray500};
 `;
 
 const spin = keyframes`
@@ -365,25 +365,25 @@ const spin = keyframes`
   to   { transform: rotate(360deg); }
 `;
 
+const Spinner = styled.div<{ $dark?: boolean }>`
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid ${({ $dark }) => ($dark ? color.gray300 : "rgba(255,255,255,0.3)")};
+  border-top-color: ${({ $dark }) => ($dark ? color.gray700 : color.white)};
+  animation: ${spin} 0.8s linear infinite;
+`;
+
 const FittingOverlay = styled.div`
   position: absolute;
   inset: 0;
-  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  background: rgba(0, 0, 0, 0.45);
-`;
-
-const Spinner = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-top-color: ${color.white};
-  animation: ${spin} 0.8s linear infinite;
+  gap: 12px;
+  background: rgba(0,0,0,0.4);
+  z-index: 2;
 `;
 
 const FittingLabel = styled.p`
@@ -392,45 +392,16 @@ const FittingLabel = styled.p`
   color: ${color.white};
 `;
 
-const LoadingBox = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 80px 0;
-`;
-
-const LoadingLabel = styled.p`
-  margin: 0;
-  ${font["text-sm"]};
-  color: ${color.gray500};
-`;
+// ── 하단 ──────────────────────────────────────────────────────────────────────
 
 const MoreRow = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: flex-end;
-  gap: 16px;
-  width: 100%;
-  padding-top: 8px;
 `;
 
 const MoreLink = styled(Link)`
-  ${font["text-lg"]};
-  color: ${color.black};
+  ${font["text-sm"]};
+  color: ${color.gray600};
   text-decoration: none;
-  white-space: nowrap;
-
-  &:hover {
-    text-decoration: underline;
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${color.primary};
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
+  &:hover { color: ${color.black}; }
 `;
-
