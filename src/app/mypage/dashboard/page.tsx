@@ -6,11 +6,13 @@ import styled from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
 import { useSavedDresses } from "@/src/store/savedDresses";
+import { useAvatars } from "@/src/store/avatars";
 import { useAuth } from "@/src/hooks/useAuth";
 
 
 export default function DashboardPage() {
   const { dresses } = useSavedDresses();
+  const { avatars } = useAvatars();
   const { user } = useAuth();
   const displayName = user?.user_metadata?.name ?? user?.email ?? "";
   const recentDresses = dresses.slice(-3).reverse();
@@ -18,7 +20,7 @@ export default function DashboardPage() {
   const stats = [
     { label: "저장된 드레스", value: dresses.length },
     { label: "저장된 샵", value: 0 },
-    { label: "내 아바타", value: 1 },
+    { label: "내 아바타", value: avatars.length },
   ];
 
   return (

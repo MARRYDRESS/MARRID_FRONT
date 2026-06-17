@@ -1,70 +1,87 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import styled from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
+import { useAvatars, type StoredAvatar } from "@/src/store/avatars";
 
-type AvatarItem = {
-  id: string;
-  imageSrc: string;
-  title: string;
-  description: string;
-  tags: string[];
-};
+function formatDate(ts: number) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+}
 
-const CURRENT_AVATAR: AvatarItem = {
-  id: "current",
-  imageSrc: "/mock/avatar_result.jpg",
-  title: "당신의 드레스",
-  description: "가장 잘 어울리는 드레스는 오간자 실크 & A라인 이예요",
-  tags: ["#채플", "#페미닌", "#러블리"],
-};
-
-const MY_AVATARS: AvatarItem[] = [
-  {
-    id: "a1",
-    imageSrc: "/mock/avatar_result.jpg",
-    title: "당신의 드레스",
-    description: "가장 잘 어울리는 드레스는 오간자 실크 & A라인 이예요",
-    tags: ["#채플", "#페미닌", "#러블리"],
-  },
-  {
-    id: "a2",
-    imageSrc: "/mock/avatar_result.jpg",
-    title: "당신의 드레스",
-    description: "가장 잘 어울리는 드레스는 오간자 실크 & A라인 이예요",
-    tags: ["#채플", "#페미닌", "#러블리"],
-  },
-];
-
-function AvatarCard({ item }: { item: AvatarItem }) {
+function CurrentAvatarCard({ avatar }: { avatar: StoredAvatar }) {
   return (
     <Card>
       <Thumbnail>
-        <Image
-          src={item.imageSrc}
-          alt={item.title}
-          fill
-          sizes="156px"
-          style={{ objectFit: "cover", objectPosition: "top" }}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={avatar.imageSrc}
+          alt="현재 아바타"
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
         />
       </Thumbnail>
       <CardInfo>
-        <CardTitle>{item.title}</CardTitle>
-        <CardDesc>{item.description}</CardDesc>
-        <TagList>
-          {item.tags.map((tag) => (
-            <Tag key={tag}>{tag}</Tag>
-          ))}
-        </TagList>
+        <CardTitle>내 아바타</CardTitle>
+        <CardDesc>{formatDate(avatar.createdAt)} 생성</CardDesc>
+      </CardInfo>
+    </Card>
+  );
+}
+
+function AvatarListCard({
+  avatar,
+  index,
+  isCurrent,
+  onSetCurrent,
+  onDelete,
+}: {
+  avatar: StoredAvatar;
+  index: number;
+  isCurrent: boolean;
+  onSetCurrent: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <Card>
+      <Thumbnail>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={avatar.imageSrc}
+          alt={`아바타 ${index + 1}`}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
+        />
+      </Thumbnail>
+      <CardInfo>
+        <CardTitle>아바타 {index + 1}</CardTitle>
+        <CardDesc>{formatDate(avatar.createdAt)} 생성</CardDesc>
+        <ButtonRow>
+          {isCurrent ? (
+            <CurrentBadge>현재 설정됨</CurrentBadge>
+          ) : (
+            <SetButton type="button" onClick={() => onSetCurrent(avatar.id)}>
+              이 아바타로 설정하기
+            </SetButton>
+          )}
+          <DeleteButton
+            type="button"
+            onClick={() => {
+              if (window.confirm("이 아바타를 삭제할까요?")) onDelete(avatar.id);
+            }}
+            aria-label="아바타 삭제"
+          >
+            삭제
+          </DeleteButton>
+        </ButtonRow>
       </CardInfo>
     </Card>
   );
 }
 
 export default function MyAvatarPage() {
+  const { avatars, currentAvatar, currentAvatarId, setCurrentAvatar, deleteAvatar } = useAvatars();
+
   return (
     <Wrap>
       <PageTitle>내 아바타</PageTitle>
@@ -78,15 +95,31 @@ export default function MyAvatarPage() {
             <Arrow>→</Arrow>
           </NewAvatarLink>
         </SectionHeader>
-        <AvatarCard item={CURRENT_AVATAR} />
+        {currentAvatar ? (
+          <CurrentAvatarCard avatar={currentAvatar} />
+        ) : (
+          <EmptyState>
+            <EmptyText>아직 아바타가 없어요.</EmptyText>
+            <NewAvatarLink href="/avatarSetting">새 아바타 만들기 →</NewAvatarLink>
+          </EmptyState>
+        )}
       </Section>
 
-      <Section>
-        <SectionTitle>내 아바타</SectionTitle>
-        {MY_AVATARS.map((avatar) => (
-          <AvatarCard key={avatar.id} item={avatar} />
-        ))}
-      </Section>
+      {avatars.length > 0 && (
+        <Section>
+          <SectionTitle>내 아바타</SectionTitle>
+          {avatars.map((avatar, i) => (
+            <AvatarListCard
+              key={avatar.id}
+              avatar={avatar}
+              index={i}
+              isCurrent={avatar.id === currentAvatarId}
+              onSetCurrent={setCurrentAvatar}
+              onDelete={deleteAvatar}
+            />
+          ))}
+        </Section>
+      )}
     </Wrap>
   );
 }
@@ -151,11 +184,11 @@ const Card = styled.div`
 `;
 
 const Thumbnail = styled.div`
-  position: relative;
   flex-shrink: 0;
   width: 156px;
   height: 190px;
   background: ${color.gray100};
+  overflow: hidden;
 `;
 
 const CardInfo = styled.div`
@@ -173,24 +206,83 @@ const CardTitle = styled.p`
 
 const CardDesc = styled.p`
   margin: 0;
-  ${font["text-md"]};
-  color: ${color.black};
+  ${font["text-sm"]};
+  color: ${color.gray600};
 `;
 
-const TagList = styled.div`
+const ButtonRow = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 8px;
+  flex-wrap: wrap;
 `;
 
-const Tag = styled.span`
+const SetButton = styled.button`
+  margin-top: 8px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid ${color.primary};
+  background: transparent;
+  color: ${color.primary};
+  cursor: pointer;
+  ${font["text-sm"]};
+  align-self: flex-start;
+
+  &:hover {
+    background: ${color.primary};
+    color: ${color.white};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${color.primary};
+    outline-offset: 2px;
+  }
+`;
+
+const DeleteButton = styled.button`
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid ${color.gray300};
+  background: transparent;
+  color: ${color.gray600};
+  cursor: pointer;
+  ${font["text-sm"]};
+
+  &:hover {
+    border-color: ${color.red};
+    color: ${color.red};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${color.red};
+    outline-offset: 2px;
+  }
+`;
+
+const CurrentBadge = styled.span`
+  margin-top: 8px;
   display: inline-flex;
   align-items: center;
-  padding: 0 10px;
-  height: 24px;
+  padding: 4px 10px;
   border-radius: 8px;
   background: ${color.second};
   ${font.caption};
   color: ${color.white};
+  align-self: flex-start;
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 32px 24px;
+  border: 1px dashed ${color.gray200};
+`;
+
+const EmptyText = styled.p`
+  margin: 0;
+  ${font["text-md"]};
+  color: ${color.gray600};
 `;
