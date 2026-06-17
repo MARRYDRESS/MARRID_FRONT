@@ -17,6 +17,11 @@ export default function AvatarSettingPage() {
   const prevUrlsRef = useRef<string[]>([]);
 
   useEffect(() => {
+    // 새 사전조사 시작 시 이전 추천 캐시 초기화
+    sessionStorage.removeItem("marrid_recommend");
+  }, []);
+
+  useEffect(() => {
     const html = document.documentElement;
     const body = document.body;
     const prevHtmlOverflow = html.style.overflow;
