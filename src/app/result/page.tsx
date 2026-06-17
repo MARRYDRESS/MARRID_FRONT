@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styled, { keyframes } from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
@@ -12,9 +13,8 @@ const LEFT_HERO = "/mock/avatar.png";
 const FINISH_SRC = "/mock/finish.png";
 
 export default function ResultPage() {
+  const router = useRouter();
   const [heroSrc, setHeroSrc] = useState(LEFT_HERO);
-  const [isFitting, setIsFitting] = useState(false);
-  const [fittingDressId, setFittingDressId] = useState<string | null>(null);
   const [blocks, setBlocks] = useState<RecommendBlock[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,15 +55,9 @@ export default function ResultPage() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const handleFit = (dressId: string, imageUrl: string) => {
-    if (isFitting) return;
-    setIsFitting(true);
-    setFittingDressId(dressId);
-    setTimeout(() => {
-      setHeroSrc(imageUrl);
-      setIsFitting(false);
-      setFittingDressId(null);
-    }, 1500);
+  const handleFit = (imageUrl: string) => {
+    sessionStorage.setItem("marrid_dress_url", imageUrl);
+    router.push("/fitting");
   };
 
   return (
@@ -82,12 +76,6 @@ export default function ResultPage() {
             <AvatarImg src={heroSrc} alt="아바타" />
           ) : (
             <AvatarImgLocal src={heroSrc} alt="아바타" />
-          )}
-          {isFitting && (
-            <FittingOverlay>
-              <Spinner />
-              <FittingLabel>AI 피팅 중...</FittingLabel>
-            </FittingOverlay>
           )}
         </AvatarFrame>
       </LeftPane>
@@ -123,11 +111,9 @@ export default function ResultPage() {
                         </ShopRow>
                           <FitButton
                             type="button"
-                            onClick={() => handleFit(dress.id, dress.image_url)}
-                            disabled={isFitting}
-                            $active={fittingDressId === dress.id}
+                            onClick={() => handleFit(dress.image_url)}
                           >
-                            {fittingDressId === dress.id ? "피팅 중..." : "AI 피팅하기"}
+                            AI 피팅하기
                           </FitButton>
                         </CardOverlay>
                       </DressImageWrap>
@@ -328,19 +314,18 @@ const ShopName = styled.p`
   color: ${color.white};
 `;
 
-const FitButton = styled.button<{ $active: boolean }>`
+const FitButton = styled.button`
   align-self: flex-start;
   padding: 6px 14px;
   border: 1px solid ${color.white};
   border-radius: 20px;
-  background: ${({ $active }) => ($active ? "rgba(255,255,255,0.25)" : "transparent")};
+  background: transparent;
   color: ${color.white};
   ${font["text-sm"]};
   cursor: pointer;
   white-space: nowrap;
 
-  &:hover:not(:disabled) { background: rgba(255,255,255,0.15); }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:hover { background: rgba(255,255,255,0.15); }
 `;
 
 
