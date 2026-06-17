@@ -15,6 +15,9 @@ export type RecommendBlock = {
   dresses: SupaDress[];
 };
 
+// 이 홀을 선택하면 비즈 드레스를 우선 추천
+const BEADS_HALLS = new Set(["어두운 홀", "밝은 홀", "야외 웨딩", "채플 웨딩"]);
+
 const ZONE_LABEL: Record<string, string> = {
   shoulder: "어깨 라인",
   arm:      "팔 라인",
@@ -40,7 +43,6 @@ async function attachShops(rows: { id: string; image_url: string; silhouette: st
 }
 
 async function fetchBySilhouette(silhouettes: string[], limit: number): Promise<SupaDress[]> {
-  // 1) 정확히 일치하는 실루엣으로 조회
   const { data: exact } = await supabase
     .from("dresses")
     .select("id, image_url, silhouette, material, shop_id")
@@ -49,7 +51,6 @@ async function fetchBySilhouette(silhouettes: string[], limit: number): Promise<
 
   if (exact && exact.length > 0) return attachShops(exact);
 
-  // 2) 없으면 silhouette 컬럼에 키워드 포함 여부로 폴백
   const keyword = silhouettes[0] ?? "";
   const { data: like } = await supabase
     .from("dresses")
@@ -59,13 +60,30 @@ async function fetchBySilhouette(silhouettes: string[], limit: number): Promise<
 
   if (like && like.length > 0) return attachShops(like);
 
-  // 3) 그래도 없으면 그냥 최신 드레스
-  const { data: any } = await supabase
+  const { data: fallback } = await supabase
     .from("dresses")
     .select("id, image_url, silhouette, material, shop_id")
     .limit(limit);
 
-  return attachShops(any ?? []);
+  return attachShops(fallback ?? []);
+}
+
+async function fetchBeadedDresses(limit: number): Promise<SupaDress[]> {
+  const { data: exact } = await supabase
+    .from("dresses")
+    .select("id, image_url, silhouette, material, shop_id")
+    .eq("material", "비즈")
+    .limit(limit);
+
+  if (exact && exact.length > 0) return attachShops(exact);
+
+  // DB에 비즈 데이터가 없으면 비즈 키워드를 label에서 탐색하거나 전체 폴백
+  const { data: fallback } = await supabase
+    .from("dresses")
+    .select("id, image_url, silhouette, material, shop_id")
+    .limit(limit);
+
+  return attachShops(fallback ?? []);
 }
 
 export async function POST(req: Request) {
@@ -86,13 +104,18 @@ export async function POST(req: Request) {
     ? silhouetteZones.map((z: string) => ZONE_LABEL[z] ?? z).join(", ")
     : "없음";
 
+  const wantsBeads = BEADS_HALLS.has(hall);
+  const beadsNote  = wantsBeads
+    ? `\n- 소재 우선순위: 비즈 장식이 포함된 드레스를 첫 번째 블록에 반드시 추천할 것`
+    : "";
+
   const prompt = `당신은 웨딩 드레스 전문가입니다. 신부의 취향과 체형 고민을 바탕으로 최적의 드레스를 추천해주세요.
 
 [신부 정보]
 - 웨딩홀 분위기: ${hall || "미정"}
 - 선호 스타일: ${style || "미정"}
 - 스타일 키워드: ${Array.isArray(hashtags) && hashtags.length ? hashtags.join(", ") : "미정"}
-- 보완하고 싶은 부위: ${zoneText}
+- 보완하고 싶은 부위: ${zoneText}${beadsNote}
 
 [DB에 존재하는 실루엣 종류 - 반드시 이 목록에서만 선택]
 ${silhouetteList}
@@ -103,11 +126,13 @@ ${silhouetteList}
   "blocks": [
     {
       "title": "추천 이유를 담은 자연스러운 한국어 문장",
-      "silhouettes": ["위 목록의 실루엣값"]
+      "silhouettes": ["위 목록의 실루엣값"],
+      "material": "비즈 또는 null"
     },
     {
       "title": "두 번째 추천 문장",
-      "silhouettes": ["위 목록의 실루엣값"]
+      "silhouettes": ["위 목록의 실루엣값"],
+      "material": null
     }
   ]
 }`;
@@ -136,10 +161,14 @@ ${silhouetteList}
 
     const blocks: RecommendBlock[] = await Promise.all(
       parsed.blocks.slice(0, 2).map(async (
-        block: { title: string; silhouettes: string[] },
+        block: { title: string; silhouettes: string[]; material?: string | null },
         i: number
       ) => {
-        const dresses = await fetchBySilhouette(block.silhouettes, i === 0 ? 2 : 4);
+        const limit = i === 0 ? 2 : 4;
+        const useBeads = wantsBeads && i === 0 && block.material === "비즈";
+        const dresses = useBeads
+          ? await fetchBeadedDresses(limit)
+          : await fetchBySilhouette(block.silhouettes, limit);
         return { title: block.title, dresses };
       })
     );
@@ -161,17 +190,30 @@ ${silhouetteList}
     const primary = HALL_SILHOUETTE[hall] ?? "A라인";
     const fromZone = (silhouetteZones ?? []).map((z: string) => ZONE_SIL[z]).filter(Boolean)[0];
     const best = fromZone ?? primary;
-    const alt = dbSilhouettes.find((s) => s !== best) ?? "볼가운";
+    const alt  = dbSilhouettes.find((s) => s !== best) ?? "볼가운";
 
+    // 비즈 홀 → 첫 번째 블록은 비즈 드레스로
     const [block1, block2] = await Promise.all([
-      fetchBySilhouette([best], 2),
+      wantsBeads ? fetchBeadedDresses(2) : fetchBySilhouette([best], 2),
       fetchBySilhouette([alt], 4),
     ]);
+
+    const beadsTitle: Record<string, string> = {
+      "어두운 홀": "어두운 홀에서 빛나는 비즈 드레스를 추천해요",
+      "밝은 홀":   "밝은 홀 조명 아래 반짝이는 비즈 드레스를 추천해요",
+      "야외 웨딩": "자연광 아래 빛나는 비즈 드레스를 추천해요",
+      "채플 웨딩": "채플의 고즈넉한 빛과 어울리는 비즈 드레스를 추천해요",
+    };
 
     return NextResponse.json({
       source: "fallback",
       blocks: [
-        { title: `${hall || "웨딩"} 분위기에 어울리는 ${best} 라인을 추천해요`, dresses: block1 },
+        {
+          title: wantsBeads
+            ? (beadsTitle[hall] ?? "비즈 장식이 빛나는 드레스를 추천해요")
+            : `${hall || "웨딩"} 분위기에 어울리는 ${best} 라인을 추천해요`,
+          dresses: block1,
+        },
         { title: `다른 느낌으로는 ${alt} 라인도 잘 어울려요`, dresses: block2 },
       ],
     });
