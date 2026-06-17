@@ -30,6 +30,9 @@ export default function SelectStylePage() {
         items={styleSelectItems}
         showPaginationDots
         keepOverlayUntilNext
+        onSelect={(item) => {
+          if (item) sessionStorage.setItem("marrid_selected_style", JSON.stringify({ label: item.label, hashtags: item.hashtags }));
+        }}
       />
       <AvatarFlowNextLink href="/randering?intent=avatar" aria-label="다음 단계">
         <NextIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />

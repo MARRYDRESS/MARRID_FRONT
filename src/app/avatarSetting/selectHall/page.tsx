@@ -32,6 +32,9 @@ export default function SelectHallPage() {
         items={hallSelectItems}
         showPaginationDots
         keepDimUntilNext
+        onSelect={(item) => {
+          if (item) sessionStorage.setItem("marrid_selected_hall", item.label);
+        }}
       />
       <AvatarFlowNextLink
         href="/avatarSetting/selectHall/selectStyle"
