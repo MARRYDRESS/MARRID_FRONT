@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import styled, { keyframes } from "styled-components";
 import font from "@/src/style/font";
 import color from "@/src/style/color";
+import { useAvatars } from "@/src/store/avatars";
 
 const HERO_SRC = "/images/rander.jpg";
 
@@ -16,6 +17,7 @@ type RanderingClientProps = {
 export default function RanderingClient({ isFitting }: RanderingClientProps) {
   const router = useRouter();
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { addAvatar, setCurrentAvatar } = useAvatars();
 
   useEffect(() => {
     const personB64 = sessionStorage.getItem("marrid_person_b64");
@@ -53,6 +55,10 @@ export default function RanderingClient({ isFitting }: RanderingClientProps) {
             if (data.status === "completed" && data.output?.[0]) {
               clearInterval(pollRef.current!);
               sessionStorage.setItem("marrid_result_url", data.output[0]);
+              if (!isFitting) {
+                const avatarId = await addAvatar(data.output[0]);
+                setCurrentAvatar(avatarId);
+              }
               router.replace("/result");
             } else if (data.status === "failed") {
               clearInterval(pollRef.current!);
@@ -74,7 +80,7 @@ export default function RanderingClient({ isFitting }: RanderingClientProps) {
       cancelled = true;
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [router]);
+  }, [router, isFitting, addAvatar, setCurrentAvatar]);
 
   const lead = isFitting ? "옷을 입고 있어요" : "아바타를 만들고 있어요";
   const heroAlt = isFitting
