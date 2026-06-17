@@ -7,29 +7,36 @@ import styled, { keyframes } from "styled-components";
 import color from "@/src/style/color";
 import font from "@/src/style/font";
 import Header from "@/src/components/layout/header";
+import type { RecommendBlock } from "@/src/app/api/recommend/route";
 
 const LEFT_HERO = "/mock/avatar.png";
 const FINISH_SRC = "/mock/finish.png";
 
-const PICKS_ROW1 = [
-  { src: "/mock/main1.png", alt: "추천 드레스 1" },
-  { src: "/mock/main2.png", alt: "추천 드레스 2" },
-];
-
-const PICKS_ROW2 = [
-  { src: "/mock/main3.png", alt: "추천 드레스 3" },
-  { src: "/mock/main4.png", alt: "추천 드레스 4" },
-  { src: "/mock/main5.jpg", alt: "추천 드레스 5" },
-  { src: "/mock/main6.jpg", alt: "추천 드레스 6" },
-];
-
 export default function ResultPage() {
   const [heroSrc, setHeroSrc] = useState(LEFT_HERO);
   const [isFitting, setIsFitting] = useState(false);
+  const [blocks, setBlocks] = useState<RecommendBlock[]>([]);
+  const [isLoadingRec, setIsLoadingRec] = useState(true);
 
   useEffect(() => {
     const resultUrl = sessionStorage.getItem("marrid_result_url");
     if (resultUrl) setHeroSrc(resultUrl);
+  }, []);
+
+  useEffect(() => {
+    const hall = sessionStorage.getItem("marrid_selected_hall") ?? "";
+    const rawStyle = sessionStorage.getItem("marrid_selected_style");
+    const styleData = rawStyle ? JSON.parse(rawStyle) : { label: "", hashtags: [] };
+
+    fetch("/api/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hall, style: styleData.label, hashtags: styleData.hashtags }),
+    })
+      .then((r) => r.json())
+      .then((data) => { if (data.blocks) setBlocks(data.blocks); })
+      .catch(() => {})
+      .finally(() => setIsLoadingRec(false));
   }, []);
 
   const handleFit = () => {
@@ -77,41 +84,30 @@ export default function ResultPage() {
 
       <RightPane>
         <RightInner>
-          <RecommendBlock>
-            <SectionTitle>
-              가장 잘 어울리는 드레스는 오간자 실크 &amp; A라인 이예요
-            </SectionTitle>
-            <PickGrid>
-              {PICKS_ROW1.map((p) => (
-                <PickCard key={p.src}>
-                  <PickImageWrap>
-                    <Image src={p.src} alt={p.alt} fill sizes="362px" style={{ objectFit: "cover" }} />
-                  </PickImageWrap>
-                  <FitingButton type="button" onClick={handleFit} disabled={isFitting}>
-                    AI 피팅하기
-                  </FitingButton>
-                </PickCard>
-              ))}
-            </PickGrid>
-          </RecommendBlock>
-
-          <RecommendBlock>
-            <SectionTitle $tight>
-              머메이드를 입고 싶다면 세미 머메이드를 추천해요
-            </SectionTitle>
-            <PickGrid>
-              {PICKS_ROW2.map((p) => (
-                <PickCard key={p.src}>
-                  <PickImageWrap>
-                    <Image src={p.src} alt={p.alt} fill sizes="362px" style={{ objectFit: "cover" }} />
-                  </PickImageWrap>
-                  <FitingButton type="button" onClick={handleFit} disabled={isFitting}>
-                    AI 피팅하기
-                  </FitingButton>
-                </PickCard>
-              ))}
-            </PickGrid>
-          </RecommendBlock>
+          {isLoadingRec ? (
+            <LoadingBox>
+              <Spinner />
+              <LoadingLabel>AI가 어울리는 드레스를 찾는 중이에요...</LoadingLabel>
+            </LoadingBox>
+          ) : blocks.length > 0 ? (
+            blocks.map((block, bi) => (
+              <RecommendBlock key={bi}>
+                <SectionTitle $tight={bi > 0}>{block.title}</SectionTitle>
+                <PickGrid>
+                  {block.dresses.map((d) => (
+                    <PickCard key={d.id}>
+                      <PickImageWrap>
+                        <Image src={d.image} alt={d.label} fill sizes="362px" style={{ objectFit: "cover" }} />
+                      </PickImageWrap>
+                      <FitingButton type="button" onClick={handleFit} disabled={isFitting}>
+                        AI 피팅하기
+                      </FitingButton>
+                    </PickCard>
+                  ))}
+                </PickGrid>
+              </RecommendBlock>
+            ))
+          ) : null}
 
           <MoreRow>
             <MoreLink href="/dress">더 많은 드레스 보러가기</MoreLink>
@@ -394,6 +390,21 @@ const FittingLabel = styled.p`
   margin: 0;
   ${font["text-sm"]};
   color: ${color.white};
+`;
+
+const LoadingBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 0;
+`;
+
+const LoadingLabel = styled.p`
+  margin: 0;
+  ${font["text-sm"]};
+  color: ${color.gray500};
 `;
 
 const MoreRow = styled.div`
