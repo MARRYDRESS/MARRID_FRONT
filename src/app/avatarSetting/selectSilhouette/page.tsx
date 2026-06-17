@@ -122,7 +122,7 @@ export default function SelectSilhouettePage() {
         </Grid>
       </Inner>
 
-      <AvatarFlowNextLink href="/avatarSetting/selectHall" aria-label="다음 단계">
+      <AvatarFlowNextLink href="/randering" aria-label="다음 단계">
         <NextIcon src="/icon/blackFront.svg" alt="" width={17} height={32} />
       </AvatarFlowNextLink>
     </Shell>
