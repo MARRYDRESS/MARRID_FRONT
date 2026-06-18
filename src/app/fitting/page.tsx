@@ -146,6 +146,9 @@ export default function FittingPage() {
               </PickCard>
             ))}
           </PickGrid>
+          <MoreRow>
+            <MoreLink href="/dress">더 많은 드레스 보러가기 →</MoreLink>
+          </MoreRow>
         </RightInner>
       </RightPane>
     </Shell>
@@ -376,6 +379,19 @@ const PickImg = styled.img`
   height: 100%;
   object-fit: cover;
   object-position: top;
+`;
+
+const MoreRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+`;
+
+const MoreLink = styled(Link)`
+  ${font["text-sm"]};
+  color: ${color.gray600};
+  text-decoration: none;
+  &:hover { color: ${color.black}; }
 `;
 
 const FitingBtn = styled.button`

@@ -19,10 +19,16 @@ export default function LoginPage() {
   }, [router]);
 
   const handleGoogleLogin = async () => {
+    // NEXT_PUBLIC_SITE_URL이 있으면 그걸 쓰고, 없으면 현재 origin 사용
+    // → 로컬: http://localhost:3000, 배포: Vercel 대시보드에서 설정한 값
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+      window.location.origin;
+
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${siteUrl}/auth/callback`,
       },
     });
   };
