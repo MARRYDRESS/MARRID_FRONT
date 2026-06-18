@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import Link from "next/link";
 import styled from "styled-components";
 import color from "@/src/style/color";
@@ -82,6 +83,29 @@ function AvatarListCard({
 export default function MyAvatarPage() {
   const { avatars, currentAvatar, currentAvatarId, setCurrentAvatar, deleteAvatar } = useAvatars();
 
+  const handleSetCurrent = useCallback((id: string) => {
+    setCurrentAvatar(id);
+    const avatar = avatars.find((a) => a.id === id);
+    if (!avatar?.imageSrc) return;
+    // 아바타 이미지를 base64로 변환해 sessionStorage에 저장 (피팅 시 사용)
+    if (avatar.imageSrc.startsWith("data:")) {
+      sessionStorage.setItem("marrid_person_b64", avatar.imageSrc);
+      return;
+    }
+    fetch(avatar.imageSrc)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === "string") {
+            sessionStorage.setItem("marrid_person_b64", reader.result);
+          }
+        };
+        reader.readAsDataURL(blob);
+      })
+      .catch(() => {});
+  }, [avatars, setCurrentAvatar]);
+
   return (
     <Wrap>
       <PageTitle>내 아바타</PageTitle>
@@ -114,7 +138,7 @@ export default function MyAvatarPage() {
               avatar={avatar}
               index={i}
               isCurrent={avatar.id === currentAvatarId}
-              onSetCurrent={setCurrentAvatar}
+              onSetCurrent={handleSetCurrent}
               onDelete={deleteAvatar}
             />
           ))}
